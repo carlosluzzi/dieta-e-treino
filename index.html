@@ -17,7 +17,7 @@
       global: {
         fetch: fetchWithToken(async function(){
           var s = await client.getSession();
-          return (s && s.data && s.data.session && s.data.session.access_token) || null;
+          return (s && s.data && s.data.session && s.data.session.token) || null;
         })
       }
     }
