@@ -461,7 +461,6 @@
   .tr-detalhes h5{font-size:11.5px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.02em;margin:14px 0 4px}
   .tr-detalhes h5:first-child{margin-top:10px}
   .tr-detalhes ul{margin:0 0 0 18px;padding:0;font-size:13px;color:var(--ink2);line-height:1.5}
-  #tr-carregar-seed{margin-top:12px}
   .tr-registro{margin-top:14px;padding-top:14px;border-top:1px solid var(--hair)}
   .tr-registro-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px}
   .tr-registro-tit{font-size:11.5px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.02em}
@@ -519,6 +518,8 @@
           <input type="email" id="cad-email" autocomplete="email" required></div>
         <div class="campo"><label for="cad-senha">Senha</label>
           <input type="password" id="cad-senha" autocomplete="new-password" minlength="8" required></div>
+        <div class="campo"><label for="cad-senha2">Confirmar senha</label>
+          <input type="password" id="cad-senha2" autocomplete="new-password" minlength="8" required></div>
         <button class="btn-pill primario" type="submit" id="btn-cadastro">Criar conta</button>
       </form>
       <button class="link-trocar" id="ir-login">Já tem conta? Entrar</button>
@@ -647,7 +648,6 @@
   <div id="plano-vazio" class="hoje-cartao" style="margin-top:16px" hidden>
     <div class="hoje-cartao-head"><span class="hoje-cartao-tit">Plano</span></div>
     <p class="hoje-cartao-nota" id="plano-vazio-texto">Carregando...</p>
-    <button class="btn-pill primario" id="plano-carregar-seed" hidden>Carregar dieta inicial do Pedro</button>
   </div>
 
   <main id="refeicoes"></main>
@@ -678,7 +678,6 @@
     <div id="tr-vazio" class="hoje-cartao" style="margin-top:16px">
       <div class="hoje-cartao-head"><span class="hoje-cartao-tit">Treino</span></div>
       <p class="hoje-cartao-nota" id="tr-vazio-texto">Carregando...</p>
-      <button class="btn-pill primario" id="tr-carregar-seed" hidden>Carregar periodização inicial do Pedro</button>
     </div>
 
     <div id="tr-conteudo" hidden>
@@ -928,6 +927,8 @@ document.getElementById('form-cadastro').onsubmit = async function(ev){
     var nome = document.getElementById('cad-nome').value.trim();
     var email = document.getElementById('cad-email').value.trim();
     var senha = document.getElementById('cad-senha').value;
+    var senha2 = document.getElementById('cad-senha2').value;
+    if(senha !== senha2){ mostrarErroAuth('erro-cadastro', 'As senhas não são iguais.'); return; }
     var r = await neon.signUp.email({ email: email, password: senha, name: nome });
     if(r.error){ mostrarErroAuth('erro-cadastro', r.error.message || 'Não foi possível criar a conta.'); return; }
     sessaoAtual = r.data;
@@ -1427,7 +1428,6 @@ function fatorDe(nome){
    ========================================================= */
 let PLANO = {semana:[], fds:[]};
 
-const SEED_DIETA = {"i":{"semana":[{"id":"postreino","nome":"Pós-treino líquido","curto":"Pós-treino","hora":"06:30","nota":"Só na dieta da Isabella. Misturar o whey com água.","versoes":[{"nome":"Plano","itens":[{"n":"Proteína bovina True Beef Protein","v":30,"g":"whey"},{"n":"Creatina (Creapure)","v":"1 dose","sub":"Inspire, Vitafor ou Essential"}]}]},{"id":"cafe","nome":"Café da manhã","hora":"08:00","nota":"Os ovos podem ser cozidos ou mexidos.","versoes":[{"nome":"Plano","itens":[{"n":"Pão de queijo","v":50,"g":"pao","opts":[{"n":"Pão francês","t":"1 un"},{"n":"Pão de forma","t":"2 fatias"}]},{"n":"Ovos mexidos (2 un)","v":100},{"n":"Iogurte desnatado sem lactose","v":null,"g":"iogurte"},{"n":"Mamão","v":100,"g":"fruta","sub":"ou kiwi, ou frutas vermelhas"},{"n":"Ameixa preta seca","v":"1 un"},{"n":"Castanha-do-pará sem sal","v":"2 un"},{"n":"Psyllium (fibras solúveis)","v":null},{"n":"Proteína bovina True Beef Protein","v":null,"g":"whey","sub":"ou whey isolado zero lactose"}]}]},{"id":"almoco","nome":"Almoço","hora":"12:30","versoes":[{"nome":"Plano","itens":[{"n":"Carne magra","v":150,"g":"frango"},{"n":"Legumes variados","v":200,"livre":"legumes"},{"n":"Arroz branco ou macarrão de arroz","v":null,"sub":"o plano do Carlos já traz esta troca quantificada","opts":[{"n":"Batata inglesa","t":null}]},{"n":"Fruta","v":null,"g":"fruta","sub":"menos banana e abacate"}]}]},{"id":"lanche","nome":"Lanche da tarde","curto":"Lanche","hora":"16:00","versoes":[{"nome":"Plano","itens":[{"n":"Iogurte desnatado sem lactose","v":140,"g":"iogurte"},{"n":"Proteína bovina True Beef Protein","v":30,"g":"whey","sub":"Carlos pode usar whey isolado"},{"n":"Fruta","v":120,"g":"fruta","sub":"menos banana e abacate"}]},{"nome":"Panqueca","nota":"Misture tudo e faça na frigideira, ou um bolinho no micro-ondas.","itens":[{"n":"Banana","v":70},{"n":"Ovo de galinha","v":"1 un"},{"n":"Proteína bovina True Beef Protein","v":30},{"n":"Cacau em pó 100% puro","v":2},{"n":"Canela em pó","v":1},{"n":"Farelo de aveia (Oat Bran)","v":10}]},{"nome":"Pipoca","itens":[{"n":"Milho para pipoca","v":30},{"n":"Proteína bovina True Beef Protein","v":40,"sub":"na dieta da Isabella, sabor double chocolate"}]}]},{"id":"jantar","nome":"Jantar","hora":"19:30","versoes":[{"nome":"Plano","itens":[{"n":"Carne magra","v":120,"g":"frango"},{"n":"Legumes variados","v":100,"livre":"legumes"},{"n":"Salada ou verdura crua","v":"2 pegadores","livre":"salada"},{"n":"Arroz branco cozido","v":120,"g":"arroz"},{"n":"Ovo de galinha","v":null}]},{"nome":"Sanduíche de filé","itens":[{"n":"Pão francês","v":"1 un (50 g)"},{"n":"Filé mignon grelhado","v":120},{"n":"Queijo muçarela","v":20}]},{"nome":"Filé com batata","itens":[{"n":"Filé mignon grelhado","v":150},{"n":"Salada ou verdura crua","v":"meio prato cheio","livre":"salada"},{"n":"Batata inglesa na air fryer","v":100}]},{"nome":"Japonês","itens":[{"n":"Makimono ou niguiri","v":"10 un","sub":"salmão, atum ou peixe branco"},{"n":"Sashimi de atum","v":10},{"n":"Sashimi de salmão","v":"10 un"}]},{"nome":"Hambúrguer","itens":[{"n":"Pão de hambúrguer","v":"1 un"},{"n":"Patinho cru","v":100},{"n":"Queijo muçarela","v":20},{"n":"Ketchup","v":"1 colher de sopa","sub":"ou mostarda, ou maionese light"}]}]},{"id":"sobremesa","nome":"Sobremesa","hora":"21:00","versoes":[{"nome":"Plano","itens":[{"n":"Chocolate amargo 70% cacau","v":15,"opts":[{"n":"Doce de leite","t":30},{"n":"Bombom","t":"1 Ferrero Rocher"},{"n":"Goiabada","t":40},{"n":"Fruta + leite condensado","t":"75 g + 15 g"},{"n":"Paçoca","t":null}]}]}]}],"fds":[{"id":"cafe-f","nome":"Café da manhã","hora":"08:00","versoes":[{"nome":"Plano","itens":[{"n":"Pão francês","v":"1 un (50 g)","opts":[{"n":"Pão de forma","t":"2 fatias"},{"n":"Cuscuz","t":"125 g"},{"n":"Tapioca (goma seca)","t":"40 g"},{"n":"Biscoito de arroz grande","t":"4 un"},{"n":"Magic Toast","t":"2 pacotes"},{"n":"Farelo de aveia","t":"30 g"}]},{"n":"Ovo de galinha inteiro","v":"1 un"},{"n":"Queijo prato","v":"1 fatia"},{"n":"Proteína bovina True Beef Protein","v":15,"sub":"na dieta da Isabella, sabor double chocolate"},{"n":"Mamão","v":100,"g":"fruta","sub":"ou frutas vermelhas, ou kiwi"},{"n":"Iogurte desnatado sem lactose Lacfree","v":100,"g":"iogurte"}]}]},{"id":"almoco-f","nome":"Almoço","hora":"12:00","nota":"Se não for comer o feijão, some 20 g ao arroz.","versoes":[{"nome":"Plano","itens":[{"n":"Filé de frango grelhado","v":120,"g":"frango"},{"n":"Legumes variados","v":100,"livre":"legumes"},{"n":"Arroz branco cozido","v":75,"g":"arroz"},{"n":"Feijão (1 concha)","v":70,"g":"feijao"}]}]},{"id":"lanche-f","nome":"Lanche da tarde","curto":"Lanche","hora":"16:00","versoes":[{"nome":"Plano","itens":[{"n":"Proteína bovina True Beef Protein","v":30,"g":"whey"},{"n":"Iogurte desnatado sem lactose Lacfree","v":100,"g":"iogurte"},{"n":"Fruta","v":100,"g":"fruta","sub":"menos banana e abacate"}]}]},{"id":"jantar-f","nome":"Jantar","hora":"21:00","versoes":[{"nome":"Plano","itens":[{"n":"Salmão grelhado","v":150,"opts":[{"n":"Contrafilé grelhado","t":"180 g"},{"n":"Filé de peixe grelhado","t":"220 g"}]},{"n":"Legumes variados","v":100,"livre":"legumes"},{"n":"Arroz tipo 1 cozido","v":150,"g":"arroz"},{"n":"Chocolate amargo 60% cacau","v":20}]},{"nome":"Hambúrguer","itens":[{"n":"Pão de hambúrguer","v":"1 un"},{"n":"Hambúrguer cru","v":160,"sub":"média de diferentes carnes"},{"n":"Queijo muçarela","v":40},{"n":"Chocolate amargo 70% cacau","v":20},{"n":"Ketchup","v":"1 colher de sopa","sub":"ou mostarda, ou maionese light"}]},{"nome":"Pipoca e frango","itens":[{"n":"Pipoca salgada","v":100},{"n":"Chocolate amargo 70% cacau","v":20},{"n":"Salada ou verdura crua","v":"meio prato cheio","livre":"salada"},{"n":"Filé de frango grelhado","v":180}]},{"nome":"Japonês","itens":[{"n":"Sashimi de atum","v":"8 un","sub":"15 g cada"},{"n":"Sushi","v":"6 un"},{"n":"Sashimi de salmão","v":"8 un"}]},{"nome":"Contrafilé","itens":[{"n":"Contrafilé, entrecote, coração da alcatra, ancho ou filé mignon","v":250},{"n":"Salada ou verdura crua","v":"meio prato cheio","livre":"salada"},{"n":"Batata inglesa na air fryer","v":200}]}]},{"id":"palatavel","nome":"Refeição palatável","curto":"Palatável","hora":"1x no fim de semana","nota":"Uma por fim de semana, de preferência à noite, no sábado ou no domingo. Exemplos do plano: 1 hambúrguer + 1 sobremesa; 4 fatias de pizza salgada + 1 fatia de pizza doce; 1 combo de 30 peças de japonês; 1 refeição à la carte sem pesar + 1 pedaço de sobremesa; 1 açaí grande. Fica fora da lista de compras.","versoes":[{"nome":"Plano","itens":[]}]}]},"c":{"semana":[{"id":"postreino","nome":"Pós-treino líquido","curto":"Pós-treino","hora":null,"nota":"Só na dieta da Isabella. Misturar o whey com água.","versoes":[{"nome":"Plano","itens":[{"n":"Proteína bovina True Beef Protein","v":null,"g":"whey"},{"n":"Creatina (Creapure)","v":null,"sub":"Inspire, Vitafor ou Essential"}]}]},{"id":"cafe","nome":"Café da manhã","hora":"10:00","nota":"Os ovos podem ser cozidos ou mexidos.","versoes":[{"nome":"Plano","itens":[{"n":"Pão de queijo","v":null,"g":"pao","opts":[{"n":"Pão francês","t":null},{"n":"Pão de forma","t":null}]},{"n":"Ovos mexidos (2 un)","v":100},{"n":"Iogurte desnatado sem lactose","v":140,"g":"iogurte"},{"n":"Mamão","v":150,"g":"fruta","sub":"ou kiwi, ou frutas vermelhas"},{"n":"Ameixa preta seca","v":"1 un"},{"n":"Castanha-do-pará sem sal","v":"2 un"},{"n":"Psyllium (fibras solúveis)","v":5},{"n":"Proteína bovina True Beef Protein","v":40,"g":"whey","sub":"ou whey isolado zero lactose"}]}]},{"id":"almoco","nome":"Almoço","hora":"13:30","versoes":[{"nome":"Plano","itens":[{"n":"Carne magra","v":150,"g":"frango"},{"n":"Legumes variados","v":150,"livre":"legumes"},{"n":"Arroz branco ou macarrão de arroz","v":75,"sub":"o plano do Carlos já traz esta troca quantificada","opts":[{"n":"Batata inglesa","t":150}]},{"n":"Fruta","v":100,"g":"fruta","sub":"menos banana e abacate"}]}]},{"id":"lanche","nome":"Lanche da tarde","curto":"Lanche","hora":"17:00","versoes":[{"nome":"Plano","itens":[{"n":"Iogurte desnatado sem lactose","v":140,"g":"iogurte"},{"n":"Proteína bovina True Beef Protein","v":40,"g":"whey","sub":"Carlos pode usar whey isolado"},{"n":"Fruta","v":150,"g":"fruta","sub":"menos banana e abacate"}]},{"nome":"Panqueca","nota":"Misture tudo e faça na frigideira, ou um bolinho no micro-ondas.","itens":[{"n":"Banana","v":70},{"n":"Ovo de galinha","v":"1 un"},{"n":"Proteína bovina True Beef Protein","v":40},{"n":"Cacau em pó 100% puro","v":2},{"n":"Canela em pó","v":1},{"n":"Farelo de aveia (Oat Bran)","v":null}]},{"nome":"Pipoca","itens":[{"n":"Milho para pipoca","v":30},{"n":"Proteína bovina True Beef Protein","v":40,"sub":"na dieta da Isabella, sabor double chocolate"}]}]},{"id":"jantar","nome":"Jantar","hora":"19:30","versoes":[{"nome":"Plano","itens":[{"n":"Carne magra","v":175,"g":"frango"},{"n":"Legumes variados","v":100,"livre":"legumes"},{"n":"Salada ou verdura crua","v":"2 pegadores","livre":"salada"},{"n":"Arroz branco cozido","v":120,"g":"arroz"},{"n":"Ovo de galinha","v":"1 un"}]},{"nome":"Sanduíche de filé","itens":[{"n":"Pão francês","v":"1 un (50 g)"},{"n":"Filé mignon grelhado","v":120},{"n":"Queijo muçarela","v":20}]},{"nome":"Filé com batata","itens":[{"n":"Filé mignon grelhado","v":150},{"n":"Salada ou verdura crua","v":"meio prato cheio","livre":"salada"},{"n":"Batata inglesa na air fryer","v":100}]},{"nome":"Japonês","itens":[{"n":"Makimono ou niguiri","v":"10 un","sub":"salmão, atum ou peixe branco"},{"n":"Sashimi de atum","v":10},{"n":"Sashimi de salmão","v":"10 un"}]},{"nome":"Hambúrguer","itens":[{"n":"Pão de hambúrguer","v":"1 un"},{"n":"Patinho cru","v":100},{"n":"Queijo muçarela","v":20},{"n":"Ketchup","v":"1 colher de sopa","sub":"ou mostarda, ou maionese light"}]}]},{"id":"sobremesa","nome":"Sobremesa","hora":"21:00","versoes":[{"nome":"Plano","itens":[{"n":"Chocolate amargo 70% cacau","v":20,"opts":[{"n":"Doce de leite","t":35},{"n":"Bombom","t":"1 trufa Lindt"},{"n":"Goiabada","t":50},{"n":"Fruta + leite condensado","t":"100 g + 20 g"},{"n":"Paçoca","t":"1 un"}]}]}]}],"fds":[{"id":"cafe-f","nome":"Café da manhã","hora":"08:00","versoes":[{"nome":"Plano","itens":[{"n":"Pão francês","v":"1 un (50 g)","opts":[{"n":"Pão de forma","t":"2 fatias"},{"n":"Cuscuz","t":"125 g"},{"n":"Tapioca (goma seca)","t":"40 g"},{"n":"Biscoito de arroz grande","t":"4 un"},{"n":"Magic Toast","t":"2 pacotes"},{"n":"Farelo de aveia","t":"30 g"}]},{"n":"Ovo de galinha inteiro","v":"2 un"},{"n":"Queijo prato","v":"1 fatia"},{"n":"Proteína bovina True Beef Protein","v":30,"sub":"na dieta da Isabella, sabor double chocolate"},{"n":"Mamão","v":75,"g":"fruta","sub":"ou frutas vermelhas, ou kiwi"},{"n":"Iogurte desnatado sem lactose Lacfree","v":100,"g":"iogurte"}]}]},{"id":"almoco-f","nome":"Almoço","hora":"12:00","nota":"Se não for comer o feijão, some 20 g ao arroz.","versoes":[{"nome":"Plano","itens":[{"n":"Filé de frango grelhado","v":200,"g":"frango"},{"n":"Legumes variados","v":100,"livre":"legumes"},{"n":"Arroz branco cozido","v":75,"g":"arroz"},{"n":"Feijão (1 concha)","v":70,"g":"feijao"}]}]},{"id":"lanche-f","nome":"Lanche da tarde","curto":"Lanche","hora":"16:00","versoes":[{"nome":"Plano","itens":[{"n":"Proteína bovina True Beef Protein","v":45,"g":"whey"},{"n":"Iogurte desnatado sem lactose Lacfree","v":150,"g":"iogurte"},{"n":"Fruta","v":100,"g":"fruta","sub":"menos banana e abacate"}]}]},{"id":"jantar-f","nome":"Jantar","hora":"21:00","versoes":[{"nome":"Plano","itens":[{"n":"Salmão grelhado","v":150,"opts":[{"n":"Contrafilé grelhado","t":"180 g"},{"n":"Filé de peixe grelhado","t":"220 g"}]},{"n":"Legumes variados","v":100,"livre":"legumes"},{"n":"Arroz tipo 1 cozido","v":150,"g":"arroz"},{"n":"Chocolate amargo 60% cacau","v":20}]},{"nome":"Hambúrguer","itens":[{"n":"Pão de hambúrguer","v":"1 un"},{"n":"Hambúrguer cru","v":160,"sub":"média de diferentes carnes"},{"n":"Queijo muçarela","v":40},{"n":"Chocolate amargo 70% cacau","v":20},{"n":"Ketchup","v":"1 colher de sopa","sub":"ou mostarda, ou maionese light"}]},{"nome":"Pipoca e frango","itens":[{"n":"Pipoca salgada","v":100},{"n":"Chocolate amargo 70% cacau","v":20},{"n":"Salada ou verdura crua","v":"meio prato cheio","livre":"salada"},{"n":"Filé de frango grelhado","v":180}]},{"nome":"Japonês","itens":[{"n":"Sashimi de atum","v":"8 un","sub":"15 g cada"},{"n":"Sushi","v":"6 un"},{"n":"Sashimi de salmão","v":"8 un"}]},{"nome":"Contrafilé","itens":[{"n":"Contrafilé, entrecote, coração da alcatra, ancho ou filé mignon","v":250},{"n":"Salada ou verdura crua","v":"meio prato cheio","livre":"salada"},{"n":"Batata inglesa na air fryer","v":200}]}]},{"id":"palatavel","nome":"Refeição palatável","curto":"Palatável","hora":"1x no fim de semana","nota":"Uma por fim de semana, de preferência à noite, no sábado ou no domingo. Exemplos do plano: 1 hambúrguer + 1 sobremesa; 4 fatias de pizza salgada + 1 fatia de pizza doce; 1 combo de 30 peças de japonês; 1 refeição à la carte sem pesar + 1 pedaço de sobremesa; 1 açaí grande. Fica fora da lista de compras.","versoes":[{"nome":"Plano","itens":[]}]}]}};
 
 /* =========================================================
    4. ESTADO
@@ -1543,12 +1543,10 @@ async function buscarPlanoDe(uid){
 async function carregarPlanoAtivo(){
   const vazio = document.getElementById('plano-vazio');
   const vazioTxt = document.getElementById('plano-vazio-texto');
-  const btnSeed = document.getElementById('plano-carregar-seed');
   if(!db || !orgAtiva || !sessaoAtual){
     PLANO = {semana:[], fds:[]};
     if(vazio) vazio.hidden = false;
     if(vazioTxt) vazioTxt.textContent = 'Entre na conta pra ver o plano.';
-    if(btnSeed) btnSeed.hidden = true;
     return;
   }
   const uidI = uidDoSlot('i'), uidC = uidDoSlot('c');
@@ -1559,9 +1557,8 @@ async function carregarPlanoAtivo(){
   if(!temAlgo){
     const ehAdmin = papelAtual === 'owner' || papelAtual === 'admin';
     if(vazioTxt) vazioTxt.textContent = ehAdmin
-      ? 'Ainda não tem dieta cadastrada.'
-      : 'Ainda não tem dieta cadastrada. Peça pro admin carregar.';
-    if(btnSeed) btnSeed.hidden = !(ehAdmin && (uidI || uidC));
+      ? 'Ainda não tem dieta cadastrada. Cadastre uma em "Gerenciar versões de plano".'
+      : 'Ainda não tem dieta cadastrada. Peça pro admin cadastrar.';
   }
 }
 
@@ -3281,251 +3278,6 @@ document.getElementById('pg-salvar').onclick = async function(){
   }finally{ btn.disabled = false; }
 };
 
-/* =========================================================
-   TREINO — periodizacao do Pedro (biblioteca prescritiva)
-   ========================================================= */
-const SEED_TREINO = {
-c: {
-  atualizacao: 'Atualização 1',
-  data_avaliacao: '2026-08-28',
-  periodo_semanas: 4,
-  anamnese: [
-    '36 anos; 1,80 m; 96 kg; percentual de gordura estimado: 13%; musculação 5x/semana.',
-    'Pisada pronada; joelhos em varo de característica estrutural; sem alterações anatômicas relevantes nos pés, quadril e colunas lombar, torácica e cervical.',
-    'Rotação interna dos ombros; escápulas em rotação medial e posição de alamento; mobilidade de ombros comprometida.',
-    'Encurtamento de peitoral maior/menor; hiperativação do redondo maior; retratores da escápula em hipoatividade.',
-    'Ritmo escapulo-umeral preservado; mobilidade de tornozelos, quadril e coluna torácica em padrão ótimo.'
-  ],
-  diagnostico: [
-    'Síndrome cruzada superior.',
-    'Prioridade para mobilidade de ombros e controle escapular.',
-    'Alongar peitoral maior/menor, grande dorsal, trapézio superior e redondo maior.',
-    'Fortalecer romboides e serrátil anterior.',
-    'Manter as demais mobilidades no padrão atual.'
-  ],
-  objetivo_fase: [
-    'Corrigir desequilíbrios associados à síndrome cruzada superior sem perder estímulo de hipertrofia.',
-    'Melhorar posicionamento, retração, protração e rotação controlada das escápulas.',
-    'Fortalecer serrátil anterior, romboides, core e estabilizadores escapulares.',
-    'Manter elevado estímulo para dorsais; desenvolver peitoral, ombros, força e hipertrofia com boa mecânica.',
-    'Melhorar condicionamento cardiovascular e preparar progressão de carga/volume nas próximas fases.'
-  ],
-  estrategia_inicial: [],
-  alongamentos: [
-    ['Peitoral maior','2x30–40 s'], ['Peitoral menor','2x30–40 s'], ['Grande dorsal','2x30–40 s'],
-    ['Trapézio superior','2x30–40 s'], ['Redondo maior','2x30–40 s'], ['Isquiotibiais','1–2x30 s'],
-    ['Glúteo máximo','1–2x30 s'], ['Adutores','1–2x30 s'], ['Panturrilhas','1–2x30 s']
-  ],
-  mobilidade: [
-    ['Relógio na parede','10–12 reps'], ['Flexão de ombros na parede','10–12 reps'],
-    ['Rotação externa com bastão','10–12 reps'], ['Wall Slide','10–12 reps'],
-    ['Gato-camelo','manutenção'], ['Rotação torácica em quatro apoios','manutenção'],
-    ['Avanço de quadril','manutenção'], ['Deslocamento lateral de quadril','manutenção']
-  ],
-  ativacao: [
-    ['Wall Slide + serrátil anterior','2x15 nos Treinos A'],
-    ['Retração escapular na remada apoiada','2x15 nos Treinos A']
-  ],
-  nota_ativacao: 'Carga baixa; controle motor; sem falha.',
-  divisao: {
-    ordem: ['A','B','OFF','C','A2','D','OFF'],
-    nota: 'Descanso obrigatório após o 2º ou, no máximo, o 3º dia consecutivo.'
-  },
-  treinos: {
-    A: { nome:'Membros Superiores Puxar', ex:[
-      ['Wall Slide + serrátil anterior (ativação)','2x15','—','—','45–60 s'],
-      ['Retração escapular na remada apoiada (ativação)','2x15','—','—','45–60 s'],
-      ['Retração escapular pré-remada','—','—','3x10 fixo','60 s'],
-      ['Remada máquina apoiada, pegada neutra','2x15','1x10–12','3x8–10','90–120 s'],
-      ['Puxada aberta, pegada neutra','—','1x10–12','3x8–10','90–120 s'],
-      ['Remada serrote com halteres','—','1x10–12','2x8–10','90–120 s'],
-      ['Elevação lateral com halteres','2x15','1x10–12','3x8–10','90 s'],
-      ['Elevação lateral na polia média','—','1x10–12','3x8–10','90 s'],
-      ['Prancha abdominal','—','—','3x30–40 s','60 s'],
-      ['Abdominal supra máquina','—','—','3x15','60 s']
-    ]},
-    A2: { nome:'Membros Superiores Puxar (2º do bloco)', ex:[
-      ['Wall Slide + serrátil anterior (ativação)','2x15','—','—','45–60 s'],
-      ['Retração escapular na remada apoiada (ativação)','2x15','—','—','45–60 s'],
-      ['Retração escapular pré-remada','—','—','3x10 fixo','60 s'],
-      ['Remada máquina apoiada, pegada neutra','2x15','1x10–12','3x8–10','90–120 s'],
-      ['Puxada aberta, pegada neutra','—','1x10–12','3x8–10','90–120 s'],
-      ['Remada serrote com halteres','—','1x10–12','2x8–10','90–120 s'],
-      ['Elevação lateral com halteres','2x15','1x10–12','3x8–10','90 s'],
-      ['Elevação lateral na polia média','—','1x10–12','3x8–10','90 s'],
-      ['Prancha abdominal com carga','—','—','3x30 s','60 s'],
-      ['Abdominal supra máquina','—','—','3x15','60 s']
-    ]},
-    B: { nome:'Membros Superiores Empurrar', ex:[
-      ['Supino 30° com halteres','2x15','1x10–12','3x8–10','120 s'],
-      ['Hammer 45°','—','1x10–12','3x8–10','90–120 s'],
-      ['Crucifixo máquina','—','1x10–12','2x8–10','90 s'],
-      ['Desenvolvimento com halteres','2x15','1x10–12','3x8–10','120 s'],
-      ['Remada alta com barra W','—','1x10–12','3x8–10','90 s'],
-      ['Pallof Press isométrico','—','—','3x20–30 s/lado','60 s'],
-      ['Abdominal supra no solo com carga','—','—','3x15','60 s']
-    ]},
-    C: { nome:'Membros Inferiores Global', ex:[
-      ['Leg Press 45°','2x15','1x10–12','3x8–10','120 s'],
-      ['Agachamento no Smith','—','1x10–12','3x8–10','120 s'],
-      ['Cadeira extensora','—','1x10–12','2x8–10','90 s'],
-      ['Cadeira flexora','2x15','1x10–12','3x8–10','90 s'],
-      ['Cadeira abdutora','2x15','1x10–12','3x8–10','90 s'],
-      ['Prancha lateral','—','—','3x30 s/lado','60 s'],
-      ['Abdominal remador','—','—','3x12–15','60 s']
-    ]},
-    D: { nome:'Braços', ex:[
-      ['Rosca direta unilateral com halteres','2x15','1x10–12','3x8–10','90 s'],
-      ['Spider Curl com halteres','—','1x10–12','3x8–10','90 s'],
-      ['Tríceps corda','2x15','1x10–12','3x8–10','90 s'],
-      ['Tríceps francês unilateral na polia média','—','1x10–12','3x8–10','90 s'],
-      ['Tríceps testa com halteres','—','1x10–12','2x8–10','90 s'],
-      ['Abdominal canoa isométrica','—','—','3x30 s','60 s'],
-      ['Abdominal supra no solo com carga','—','—','3x15','60 s']
-    ]}
-  },
-  core_por_treino: null,
-  semanas: [
-    {n:1, reps:'8–10 repetições', rir:'~3 RIR', intervalo:'90–120 s'},
-    {n:2, reps:'8–10 repetições', rir:'~2 RIR', intervalo:'90–120 s'},
-    {n:3, reps:'8–10 repetições', rir:'~1 RIR', intervalo:'90–120 s'},
-    {n:4, reps:'8–10 repetições', rir:'~1 RIR', intervalo:'90–120 s'}
-  ],
-  aerobico: [
-    {modalidade:'HIIT — bicicleta ergométrica', frequencia:'3x/semana', duracao:'12–15 min',
-     protocolo:'30 s intensidade elevada + 30 s recuperação ativa', momento:'Após musculação ou separado por algumas horas; nunca antes da força'},
-    {modalidade:'Caminhada leve na praia', frequencia:'2x/semana', duracao:'30–45 min',
-     protocolo:'Intensidade leve e confortável', momento:'Sessão separada ou conforme rotina semanal'}
-  ],
-  observacao_aerobico: ''
-},
-i: {
-  atualizacao: 'Atualização 1',
-  data_avaliacao: '2026-08-31',
-  periodo_semanas: 4,
-  anamnese: [
-    'Sem alterações anatômicas nos pés.',
-    'Tendão do calcâneo preservado.',
-    'Hiperextensão dos joelhos caracterizando genu recurvato.',
-    'Sem alterações anatômicas no quadril nos eixos antero-posterior e latero-lateral.',
-    'Sem alterações visíveis nas colunas lombar, torácica e cervical.',
-    'Escápulas em rotação medial e em elevação.',
-    'Ritmo escapulo-umeral preservado.',
-    'Trapézio direito em leve encurtamento.',
-    'Leve instabilidade dos joelhos ao agachar.',
-    'Mobilidade de quadril em padrão ótimo.',
-    'Mobilidade de coluna torácica levemente comprometida.',
-    'Nenhum encurtamento muscular significativo detectado.'
-  ],
-  diagnostico: [
-    'Trabalhar mobilidade de coluna em todos os planos de movimento.',
-    'Fortalecer core e complexo do glúteo.',
-    'Alongar linha lateral do lado direito e trapézio direito.',
-    'Fortalecer musculatura retratora da escápula.'
-  ],
-  objetivo_fase: [
-    'Adaptação progressiva à nova rotina de treinamento e identificação das cargas adequadas.',
-    'Melhorar estabilidade dos joelhos e controle da hiperextensão.',
-    'Fortalecer complexo do glúteo e core, com ênfase em estabilidade lombopélvica.',
-    'Melhorar mobilidade da coluna nos três planos de movimento.',
-    'Melhorar estabilidade e controle escapular, fortalecendo romboides, trapézio médio e inferior.',
-    'Desenvolver força, resistência muscular e hipertrofia de forma progressiva.',
-    'Melhorar condicionamento cardiovascular e preparar para progressões no próximo bloco.'
-  ],
-  estrategia_inicial: [
-    'Periodização inicial de 4 semanas, com 4 sessões obrigatórias e Treino E Full Body opcional.',
-    'Semanas 1–2: 8–10 repetições, ~3 RIR; semanas 3–4: 8–10 repetições, ~2 RIR.',
-    'RIR = Número de Repetições de Reserva ou Repetições Antes da Falha.',
-    'Intervalos de 90–120 s nas séries de trabalho.',
-    'Inclusão de core em todos os treinos, controle escapular específico e atenção ao genu recurvato.',
-    '3 sessões semanais de HIIT + 2 caminhadas contínuas.'
-  ],
-  alongamentos: [
-    ['Linha lateral do lado direito','2×30–40 s'], ['Trapézio superior direito','2×30–40 s'],
-    ['Peitoral maior e menor','2×30–40 s'], ['Grande dorsal','2×30–40 s'],
-    ['Isquiotibiais','2×30–40 s'], ['Glúteo máximo','2×30–40 s']
-  ],
-  liberacao_nota: 'Não há protocolo específico de liberação prescrito nesta fase.',
-  mobilidade: [
-    ['Gato-camelo (flexão/extensão da coluna)','10 movimentos'],
-    ['Mobilidade torácica em quatro apoios (rotação)','10 movimentos'],
-    ['Flexão lateral da coluna','10 movimentos'],
-    ['Saudação','10 movimentos']
-  ],
-  ativacao: [
-    ['Retração escapular','2×15, carga leve e controle técnico'],
-    ['Depressão escapular','2×15, carga leve e controle técnico']
-  ],
-  nota_ativacao: 'Priorizar romboides, trapézio médio, trapézio inferior e depressão escapular.',
-  divisao: {
-    ordem: ['A','B','OFF','C','D','OFF','OFF'],
-    nota: 'Treino E: sessão bônus Full Body, opcional, sem substituir os quatro treinos principais — só com boa recuperação.'
-  },
-  treinos: {
-    A: { nome:'Inferiores / Dominância de joelhos', ex:[
-      ['Leg Press horizontal','2×15–20','1×10–12','2×8–10','90–120 s'],
-      ['Hack Machine linear','—','1×10–12','2×8–10','90–120 s'],
-      ['Cadeira extensora','—','1×10–12','2×8–10','90–120 s'],
-      ['Mesa flexora','2×15–20','1×10–12','2×8–10','90–120 s'],
-      ['Flexora vertical máquina unilateral','—','1×10–12','3×8–10','90–120 s']
-    ]},
-    B: { nome:'Superiores / Puxar', ex:[
-      ['Ativação: retração escapular','—','—','2×15 (controle)','45–60 s'],
-      ['Ativação: depressão escapular','—','—','2×15 (controle)','45–60 s'],
-      ['Puxada supinada','2×15–20','1×10–12','2×8–10','90–120 s'],
-      ['Remada máquina apoiada pegada neutra (La Pierre)','—','1×10–12','3×8–10','90–120 s'],
-      ['High Row máquina','—','1×10–12','2×8–10','90–120 s'],
-      ['Crucifixo invertido máquina','—','1×10–12','3×8–10','90–120 s'],
-      ['Tríceps Pulley','2×15–20','1×10–12','4×8–10','90–120 s']
-    ]},
-    C: { nome:'Inferiores / Dominância de quadril', ex:[
-      ['Ativação: elevação pélvica no solo + band','—','—','2×20 (ativação)','45–60 s'],
-      ['Ativação: pose de ostra + band','—','—','2×15/lado','45–60 s'],
-      ['Cadeira abdutora','2×15–20','1×10–12','2×8–10','90–120 s'],
-      ['Elevação pélvica máquina','—','1×10–12','3×8–10','90–120 s'],
-      ['Stiff com barra','2×15–20','1×10–12','2×8–10','90–120 s'],
-      ['Extensão de quadril na polia média sobre o Step','—','1×10–12','3×8–10','90–120 s'],
-      ['Panturrilhas máquina em pé','2×15–20','1×10–12','4×8–10','90–120 s']
-    ]},
-    D: { nome:'Superiores / Empurrar', ex:[
-      ['Supino máquina deitada','2×15–20','1×10–12','2×8–10','90–120 s'],
-      ['Desenvolvimento máquina pegada aberta','2×15–20','1×10–12','3×8–10','90–120 s'],
-      ['Elevação lateral com halteres','—','1×10–12','3×8–10','90–120 s'],
-      ['Retração escapular','—','—','3×10 (controle)','45–60 s'],
-      ['Remada máquina apoiada pegada neutra','—','1×10–12','3×8–10','90–120 s'],
-      ['Rosca direta unilateral com halteres','2×15–20','1×10–12','4×8–10','90–120 s']
-    ]},
-    E: { nome:'Full Body', ex:[
-      ['Leg Press horizontal','2×15–20','1×10–12','2×8–10','90–120 s'],
-      ['Cadeira extensora','—','1×10–12','2×8–10','90–120 s'],
-      ['Mesa flexora','2×15–20','1×10–12','2×8–10','90–120 s'],
-      ['Cadeira abdutora','—','1×10–12','3×8–10','90–120 s'],
-      ['Elevação pélvica máquina','—','1×10–12','3×8–10','90–120 s']
-    ]}
-  },
-  core_por_treino: {
-    A: [['Prancha abdominal','3×30–40 s'], ['Prancha lateral','3×20–30 s/lado'], ['Abdominal supra máquina','3×15 ao final']],
-    B: [['Abdominal canoa isométrica','3×30 s'], ['Pallof Press isométrico','3×20 s/lado'], ['Abdominal supra no solo com carga','3×15 ao final']],
-    C: [['Prancha abdominal com carga','3×30 s'], ['Ponte unilateral isométrica','3×30 s/lado'], ['Abdominal supra máquina','3×15 ao final']],
-    D: [['Prancha lateral','3×30 s/lado'], ['Pallof Press isométrico','3×20 s/lado'], ['Abdominal supra no solo com carga','3×15 ao final']],
-    E: [['Abdominal canoa isométrica','3×30 s'], ['Prancha abdominal','3×40 s'], ['Abdominal supra máquina','3×15 ao final']]
-  },
-  semanas: [
-    {n:1, reps:'8–10 repetições', rir:'≈3 RIR', intervalo:'90–120 s'},
-    {n:2, reps:'8–10 repetições', rir:'≈3 RIR', intervalo:'90–120 s'},
-    {n:3, reps:'8–10 repetições', rir:'≈2 RIR', intervalo:'90–120 s'},
-    {n:4, reps:'8–10 repetições', rir:'≈2 RIR', intervalo:'90–120 s'}
-  ],
-  aerobico: [
-    {modalidade:'HIIT — bicicleta ergométrica ou AirBike', frequencia:'3x/semana', duracao:'12–15 min',
-     protocolo:'30 s alta intensidade + 30 s recuperação ativa', momento:'Após musculação ou outro período'},
-    {modalidade:'Caminhada no calçadão', frequencia:'2x/semana', duracao:'30–40 min',
-     protocolo:'Leve a moderada; ritmo contínuo e confortável', momento:'Preferencialmente separada do HIIT'}
-  ],
-  observacao_aerobico: 'Não realizar HIIT antes da musculação; não utilizar cardio como substituição da musculação.'
-}
-};
-
 let treinoSemana = 1;
 
 function membrosDaOrg(){
@@ -3565,19 +3317,17 @@ function montarSwitchesPerfil(){
   });
 }
 
-/* chaveIC traduz um user_id real pra 'i'/'c' por detecção de nome — é o helper
-   genérico usado em duas situações que continuam guardando conteúdo com essas duas
-   chaves fixas (SEED_TREINO e SEED_DIETA, ambos conteúdo literal do Carlos/Isabela):
-   o botão de carga inicial do Treino e do Plano, e a leitura de item.i/item.c do
-   Plano a partir de um perfil selecionado (que desde a rodada 7 é um user_id, não
-   mais 'i'/'c'). uidDoSlot faz o caminho inverso (chave -> user_id real), usado só
-   pelos botões de carga inicial. Nenhuma dessas funções é usada fora desses casos. */
+/* chaveIC traduz um user_id real pra 'i'/'c' por detecção de nome — usado só pela
+   leitura de item.i/item.c do Plano a partir de um perfil selecionado (limitação
+   conhecida: a aba Plano hoje só funde corretamente os planos de até duas pessoas
+   por essas duas chaves; ver "layout da aba Plano para N pessoas" no roadmap).
+   uidDoSlot faz o caminho inverso (chave -> user_id real), usado por
+   carregarPlanoAtivo pra buscar os dois documentos que alimentam esse merge. */
 function chaveIC(uid){
   const m = membrosDaOrg().find(function(x){ return x.uid===uid; });
   if(!m) return null;
   return m.nome.toLowerCase().indexOf('isabel') !== -1 ? 'i' : 'c';
 }
-function chaveSeedTreino(uid){ return chaveIC(uid); }
 function uidDoSlot(chave){
   const m = membrosDaOrg().find(function(x){ return chaveIC(x.uid)===chave; });
   return m ? m.uid : null;
@@ -3590,19 +3340,13 @@ function nomeDoPerfil(uid){
 /* =========================================================
    HABITOS E SUPLEMENTACAO (rodada 9) — rotina matinal, higiene do sono
    e suplementacao diaria prescritas pelo Pedro. Mesmo padrao de "plano
-   como dado versionado" do Treino/Dieta (planos_habitos/planos_suplementacao,
-   ja existiam desde antes), mas sem pareamento i/c: cada plano e uma lista
-   de secoes com itens marcaveis por dia, guardada em habitos_registros/
-   suplementacao_registros por (organization_id, user_id, dia) -- ja nasce
-   por user_id, escalando pra N pessoas sem precisar da rodada 7. O SEED_*
-   abaixo e hoje so o que o Pedro prescreveu pro Carlos, entao o botao de
-   carga inicial so aparece quando o perfil selecionado resolve pra 'c' via
-   chaveIC -- nunca inventa rotina/suplementacao pra outro integrante. Quem
-   precisar de conteudo proprio usa "Gerenciar versoes de plano", que ja
-   lista as duas tabelas desde a rodada 6. */
-const SEED_HABITOS = {"atualizacao": "Atualização 1", "data_avaliacao": "2026-08-31", "secoes": [{"titulo": "Ao acordar", "itens": [{"id": "agua", "texto": "Beber 500ml de água"}, {"id": "sol", "texto": "Olhar em direção ao sol por 10min"}, {"id": "banho", "texto": "Banho — parte final fria, 3–5min"}, {"id": "cafe30", "texto": "Só tomar café 30min depois de acordar"}, {"id": "jejum", "texto": "Treinar em jejum"}, {"id": "janela", "texto": "Primeira refeição só após 12h de jejum (janela 10h–21h)"}]}, {"titulo": "Higiene do sono", "nota": "Vale todos os dias, inclusive fim de semana. Outras recomendações do Pedro: cochilo de 10–20min até as 14h (nunca depois das 15h), evitar estimulantes à tarde, reduzir líquidos 2h antes de dormir e cortar de vez 1h antes, respirar sempre pelo nariz.", "itens": [{"id": "horario", "texto": "Dormir e acordar sempre no mesmo horário (meta 6–7h)"}, {"id": "luzindireta", "texto": "A partir das 19h, só luz indireta em casa"}, {"id": "semtela", "texto": "Sem tela 1h30 antes de dormir"}, {"id": "escurofrio", "texto": "Quarto escuro (blackout) e frio (~22°C)"}, {"id": "banhoquente", "texto": "Banho quente 30min–1h antes de dormir"}, {"id": "respiracao", "texto": "Respiração 4-6-6-2 deitado, antes de dormir"}]}]};
-const SEED_SUPLEMENTACAO = {"atualizacao": "Atualização 1", "data_avaliacao": "2026-08-31", "secoes": [{"titulo": "Manhã", "itens": [{"id": "vitmin_manha", "texto": "Fórmula Vitaminas e Minerais — Manhã (Metil-Cobalamina 800mcg, 5-Metil Folato 800mcg, Boro 6mg, Tirosina 1g, Iodo 1mg, Vitamina C 500mg, NAC 600mg, Cobre 1mg)"}, {"id": "vitd3k2", "texto": "Vitamina D3 5000UI + Vitamina K2 MK7 200mg"}, {"id": "creatina", "texto": "Creatina 15g"}, {"id": "whey", "texto": "Whey concentrado (True ou Inspire)"}, {"id": "omega3_manha", "texto": "Ômega 3 1g (na primeira refeição)"}]}, {"titulo": "Almoço", "itens": [{"id": "ansiedade_almoco", "texto": "Fórmula Ansiedade/Humor (Ashwagandha 300mg, Rhodiola 100mg, 5-HTP 100mg, Picolinato de Cromo 150mg, Berberina 300mg)"}]}, {"titulo": "Última refeição", "itens": [{"id": "omega3_noite", "texto": "Ômega 3 1g (na última refeição)"}, {"id": "ansiedade_jantar", "texto": "Fórmula Ansiedade/Humor"}]}, {"titulo": "Noite — 1h antes de dormir", "itens": [{"id": "vitmin_noite", "texto": "Fórmula Vitaminas e Minerais — Noite (Magnésio Complexo 900mg, Glicina 5g, Taurina 1g, GABA 1g, L-Teanina 300mg, Inositol 2g, Melatonina 0,21mg, NAC 600mg)"}]}]};
-
+   como dado versionado" do Treino/Dieta (planos_habitos/planos_suplementacao),
+   mas sem pareamento i/c: cada plano e uma lista de secoes com itens
+   marcaveis por dia, guardada em habitos_registros/suplementacao_registros
+   por (organization_id, user_id, dia) -- ja nasce por user_id, escalando
+   pra N pessoas sem precisar da rodada 7. Conteudo cadastrado via
+   "Gerenciar versoes de plano", que ja lista as duas tabelas desde a
+   rodada 6 -- nada fica hardcoded no HTML. */
 function contarItensPlano(conteudo){
   if(!conteudo || !conteudo.secoes) return 0;
   var n = 0;
@@ -3665,8 +3409,6 @@ async function abrirHabitosDlg(){
     return;
   }
   const hojeIso = iso(new Date());
-  const ehAdmin = papelAtual === 'owner' || papelAtual === 'admin';
-  const podeSeed = ehAdmin && chaveIC(uid) === 'c';
   const r = await Promise.all([
     buscarPlanoGenerico('planos_habitos', uid),
     buscarPlanoGenerico('planos_suplementacao', uid),
@@ -3680,12 +3422,11 @@ async function abrirHabitosDlg(){
   };
   function blocoHtml(tipo, titulo, plano){
     if(!plano){
-      const btnTxt = 'Carregar '+titulo.toLowerCase()+' do Pedro';
-      const btn = podeSeed ? '<button type="button" class="btn-pill secundario hb-seed" data-tipo="'+tipo+'">'+btnTxt+'</button>' : '';
-      const msg = podeSeed
-        ? 'Ainda não tem '+titulo.toLowerCase()+' cadastrada.'
-        : 'Ainda não tem '+titulo.toLowerCase()+' cadastrada. Peça pro admin carregar.';
-      return '<div class="hb-bloco"><h4 class="hb-bloco-tit">'+titulo+'</h4><p class="hb-vazio-bloco">'+msg+'</p>'+btn+'</div>';
+      const ehAdmin = papelAtual === 'owner' || papelAtual === 'admin';
+      const msg = ehAdmin
+        ? 'Ainda não tem '+titulo.toLowerCase()+' cadastrada. Cadastre uma em "Gerenciar versões de plano".'
+        : 'Ainda não tem '+titulo.toLowerCase()+' cadastrada. Peça pro admin cadastrar.';
+      return '<div class="hb-bloco"><h4 class="hb-bloco-tit">'+titulo+'</h4><p class="hb-vazio-bloco">'+msg+'</p></div>';
     }
     const marcados = estado[tipo].marcados;
     const sub = (plano.versao_label||'') + (plano.vigente_a_partir ? ' · vigente desde '+brData(plano.vigente_a_partir) : '');
@@ -3723,37 +3464,15 @@ async function abrirHabitosDlg(){
       atualizarCardHabitos();
     };
   });
-  Array.prototype.forEach.call(body.querySelectorAll('.hb-seed'), function(btn){
-    btn.onclick = async function(){
-      const tipo = btn.getAttribute('data-tipo');
-      btn.disabled = true; btn.textContent = 'Carregando...';
-      try{
-        const tabela = tipo==='habitos' ? 'planos_habitos' : 'planos_suplementacao';
-        const seed = tipo==='habitos' ? SEED_HABITOS : SEED_SUPLEMENTACAO;
-        await db.from(tabela).insert({
-          organization_id: orgAtiva.id, user_id: uid, conteudo: seed,
-          vigente_a_partir: seed.data_avaliacao || hojeIso,
-          versao_label: seed.atualizacao || 'Atualização 1',
-          criado_por: sessaoAtual.user.id
-        });
-        abrirHabitosDlg();
-      }catch(err){
-        alert('Não deu pra carregar agora.');
-        btn.disabled = false; btn.textContent = 'Carregar '+(tipo==='habitos'?'rotina':'suplementação')+' do Pedro';
-      }
-    };
-  });
 }
 
 async function renderTreino(){
   const p = diario.perfil;
   const vazio = document.getElementById('tr-vazio');
   const vazioTxt = document.getElementById('tr-vazio-texto');
-  const btnSeed = document.getElementById('tr-carregar-seed');
   const conteudoBox = document.getElementById('tr-conteudo');
   conteudoBox.hidden = true;
   vazio.hidden = false;
-  btnSeed.hidden = true;
   vazioTxt.textContent = 'Carregando...';
 
   if(!db || !orgAtiva || !sessaoAtual || !p){
@@ -3770,12 +3489,9 @@ async function renderTreino(){
     const linha = (r && r.data && r.data[0]) || null;
     if(!linha){
       const ehAdmin = papelAtual === 'owner' || papelAtual === 'admin';
-      const seedKey = chaveSeedTreino(p);
-      const temSeed = !!(seedKey && SEED_TREINO[seedKey]);
       vazioTxt.textContent = ehAdmin
-        ? 'Ainda não tem periodização cadastrada pra essa pessoa.'
-        : 'Ainda não tem periodização cadastrada pra essa pessoa. Peça pro admin carregar.';
-      btnSeed.hidden = !(ehAdmin && temSeed);
+        ? 'Ainda não tem periodização cadastrada pra essa pessoa. Cadastre uma em "Gerenciar versões de plano".'
+        : 'Ainda não tem periodização cadastrada pra essa pessoa. Peça pro admin cadastrar.';
       return;
     }
     let registros = [];
@@ -3918,30 +3634,6 @@ async function salvarRegistroTreino(chave, c, box, btn){
   }
 }
 
-document.getElementById('tr-carregar-seed').onclick = async function(){
-  const btn = this; btn.disabled = true; btn.textContent = 'Carregando...';
-  try{
-    const p = diario.perfil;
-    const uid = p;
-    const seedKey = chaveSeedTreino(p);
-    const seed = seedKey ? SEED_TREINO[seedKey] : null;
-    if(!uid || !seed) return;
-    await db.from('planos_treino').insert({
-      organization_id: orgAtiva.id,
-      user_id: uid,
-      conteudo: seed,
-      vigente_a_partir: seed.data_avaliacao || iso(new Date()),
-      versao_label: seed.atualizacao || 'Atualização 1',
-      criado_por: sessaoAtual.user.id
-    });
-    renderTreino();
-  }catch(e){
-    alert('Não deu pra carregar a periodização agora.');
-  }finally{
-    btn.disabled = false; btn.textContent = 'Carregar periodização inicial do Pedro';
-  }
-};
-
 /* --- abas e controles principais --- */
 const ABAS = [
   {key:'hoje', btn:'aba-hoje', vista:'vista-hoje', ir:function(){ renderHoje(); }},
@@ -4000,31 +3692,6 @@ document.getElementById('mes-hoje').onclick = function(){
 });
 document.getElementById('copiar-relatorio').onclick = abrirRelatorio;
 document.getElementById('backup').onclick = abrirBackup;
-
-document.getElementById('plano-carregar-seed').onclick = async function(){
-  const btn = this; btn.disabled = true; btn.textContent = 'Carregando...';
-  try{
-    const uidI = uidDoSlot('i'), uidC = uidDoSlot('c');
-    const linhas = [];
-    if(uidI) linhas.push({
-      organization_id: orgAtiva.id, user_id: uidI, conteudo: SEED_DIETA.i,
-      vigente_a_partir: iso(new Date()), versao_label: 'Atualização 1',
-      criado_por: sessaoAtual.user.id
-    });
-    if(uidC) linhas.push({
-      organization_id: orgAtiva.id, user_id: uidC, conteudo: SEED_DIETA.c,
-      vigente_a_partir: iso(new Date()), versao_label: 'Atualização 1',
-      criado_por: sessaoAtual.user.id
-    });
-    if(linhas.length) await db.from('planos_dieta').insert(linhas);
-    await carregarPlanoAtivo();
-    render();
-  }catch(e){
-    alert('Não deu pra carregar a dieta inicial agora.');
-  }finally{
-    btn.disabled = false; btn.textContent = 'Carregar dieta inicial do Pedro';
-  }
-};
 
 async function iniciarApp(){
   try{
