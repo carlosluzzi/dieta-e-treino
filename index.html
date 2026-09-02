@@ -1325,11 +1325,17 @@ var ParserPDF = (function(){
   function normalizarLinhaDieta(l){ return l.replace(/\s{2,}/g,' ').trim(); }
   function ehCabecalhoRefeicao(l){ return /^(\d{1,2}:\d{2})\s*-\s*(.+)$/.exec(l); }
   function ehSubstituicao(l){ return /^Substitui[çc][ãa]o\s+(\d+)$/i.exec(l); }
-  function ehNotaOuIgnoravelDieta(l){
-    return /^[-*]\s/.test(l) || /^\*?Substitui[çc][õo]es\s*:/i.test(l) ||
-      /^Orienta[çc][õo]es\s*:?$/i.test(l) || /^Este documento é de uso exclusivo/i.test(l) ||
+  // linhas de rodapé/cabeçalho do documento (aviso legal, PEDRO BARROS, CRN,
+  // Nome, Data, e-mail) - descartadas por completo, nunca viram nota de refeição
+  function ehDescartavelDieta(l){
+    return /^Orienta[çc][õo]es\s*:?$/i.test(l) || /^Este documento é de uso exclusivo/i.test(l) ||
       /^distribui[çc][ãa]o é estritamente proibido/i.test(l) ||
       /^(PEDRO|CRN:|Nome:|Data:)/i.test(l) || /@/.test(l);
+  }
+  // linhas que são de fato uma observação da refeição/versão (marcador "-"/"*",
+  // ou "Substituições: Veja documento...") - viram nota
+  function ehNotaDieta(l){
+    return /^[-*]\s/.test(l) || /^\*?Substitui[çc][õo]es\s*:/i.test(l);
   }
   function extrairQuantidadeDieta(linha){
     var m = linha.match(/^(.*?)\s*\(([A-Za-zÀ-úçÇ ]+?)\s*:\s*([\d.,]+)\)\s*$/);
@@ -1368,9 +1374,10 @@ var ParserPDF = (function(){
         return;
       }
       if(!mealAtual) return;
+      if(ehDescartavelDieta(l)) return;
       var mSub = ehSubstituicao(l);
       if(mSub){ fecharVersao(); versaoAtual = { nome: 'Substituição ' + mSub[1], itens: [] }; return; }
-      if(ehNotaOuIgnoravelDieta(l)){
+      if(ehNotaDieta(l)){
         var notaTxt = l.replace(/^[-*]\s*/, '');
         versaoAtual.nota = versaoAtual.nota ? versaoAtual.nota + ' ' + notaTxt : notaTxt;
         return;
