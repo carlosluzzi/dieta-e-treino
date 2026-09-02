@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Dieta e treino — Isabella &amp; Carlos</title>
+<title>Dieta e treino</title>
 <script>
   window.neonReadyPromise = new Promise(function(resolve){ window.__resolveNeon = resolve; });
 </script>
@@ -515,7 +515,7 @@
 
     <div id="auth-login">
       <h1>Entrar</h1>
-      <p class="sub">Dieta e treino — Isabella &amp; Carlos</p>
+      <p class="sub">Dieta e treino</p>
       <div class="erro-auth" id="erro-login"></div>
       <form id="form-login">
         <div class="campo"><label for="login-email">E-mail</label>
@@ -566,7 +566,7 @@
 <div id="app-shell" hidden>
 <header class="top">
   <div class="top-inner">
-    <div class="marca">Dieta e treino<small>Isabella &amp; Carlos — plano do Pedro Barros</small></div>
+    <div class="marca">Dieta e treino<small id="marca-sub"></small></div>
     <div class="switch" role="group" aria-label="Dia">
       <button id="btn-semana" aria-pressed="true">Segunda a sexta</button>
       <button id="btn-fds" aria-pressed="false">Fim de semana</button>
@@ -995,8 +995,9 @@ async function entrarNoApp(){
   var lista = await neon.organization.list();
   var orgs = (lista && lista.data) || [];
   if(orgs.length === 0){
-    var slug = 'casal-' + Math.random().toString(36).slice(2,8);
-    await neon.organization.create({ name: 'Dieta e treino', slug: slug });
+    var nomeUser = (sessaoAtual && sessaoAtual.user && sessaoAtual.user.name) || 'Minha organização';
+    var slug = 'org-' + Math.random().toString(36).slice(2,8);
+    await neon.organization.create({ name: nomeUser, slug: slug });
     lista = await neon.organization.list();
     orgs = (lista && lista.data) || [];
   }
@@ -1014,7 +1015,37 @@ async function entrarNoApp(){
   document.getElementById('app-shell').hidden = false;
 
   montarContaUsuario();
+  atualizarMarca();
   iniciarApp();
+}
+
+/* Cabeçalho e <title> nunca citam nomes fixos (Isabella/Carlos) nem nutricionista
+   fixo (Pedro Barros) — sempre montados a partir de quem está na organização
+   ativa, pra funcionar igual pra qualquer pessoa/casal/família que usar o app
+   (ver PRINCÍPIO DE ARQUITETURA). */
+function primeiroNome(nome){
+  return (nome || '').trim().split(/\s+/)[0] || (nome || 'Integrante');
+}
+function textoIntegrantes(){
+  var membros = membrosDaOrg();
+  var proprio = sessaoAtual && sessaoAtual.user && sessaoAtual.user.id;
+  var outros = membros.filter(function(m){ return m.uid !== proprio; }).map(function(m){ return primeiroNome(m.nome); });
+  if(!outros.length) return 'Só você';
+  if(outros.length === 1) return 'Você e ' + outros[0];
+  return 'Você, ' + outros[0] + ' e mais ' + (outros.length - 1);
+}
+function nomesParaExportar(){
+  var nomes = membrosDaOrg().map(function(m){ return primeiroNome(m.nome); });
+  if(!nomes.length) return '';
+  if(nomes.length === 1) return nomes[0];
+  if(nomes.length === 2) return nomes[0] + ' e ' + nomes[1];
+  return nomes.slice(0, -1).join(', ') + ' e ' + nomes[nomes.length - 1];
+}
+function atualizarMarca(){
+  var texto = textoIntegrantes();
+  var el = document.getElementById('marca-sub');
+  if(el) el.textContent = texto;
+  document.title = 'Dieta e treino — ' + texto;
 }
 
 /* =========================================================
@@ -2502,7 +2533,7 @@ function textoCompleto(){
   const L = [];
   const dias = diasAtuais();
   L.push('CARDÁPIO — '+(estado.modo==='semana'?'segunda a sexta':'fim de semana')+', '+dias+(dias>1?' dias':' dia'));
-  L.push('Isabella e Carlos, plano do Pedro Barros');
+  L.push(nomesParaExportar());
   L.push('');
   PLANO[estado.modo].forEach(function(meal){
     const a = alocacao(meal);
