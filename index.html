@@ -331,6 +331,11 @@
 
   /* ---------- telas cheias: instalar / autenticação ---------- */
   .tela-cheia[hidden]{display:none}
+  /* mesmo bug da rodada 10 (display:block do autor vence o [hidden] do
+     navegador quando os dois tem a mesma origem/especificidade) - agora
+     tambem acontece com .btn-pill, desde que passou a ser escondido
+     dinamicamente (btn-pular-instalar no mobile/tablet) */
+  .btn-pill[hidden]{display:none}
   .tela-cheia{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;
     align-items:center;justify-content:center;padding:24px 16px;overflow-y:auto}
   .tela-cheia .cartao{width:100%;max-width:400px;background:var(--card);border-radius:16px;
@@ -351,19 +356,19 @@
     letter-spacing:normal;margin-top:20px}
   .campo{margin-bottom:12px;text-align:left}
   .campo label{display:block;font-size:13px;font-weight:500;color:var(--ink2);margin:0 0 6px}
-  .campo input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--hair);
-    background:var(--fill2);font-size:16px;color:var(--ink)}
+  .campo input{width:100%;padding:6px 10px;border-radius:6px;border:0.5px solid var(--hair);
+    background:#fff;font-size:16px;color:var(--ink);box-sizing:border-box}
   .campo input:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:transparent}
-  .btn-pill{display:block;width:100%;padding:13px 20px;border-radius:12px;border:0;
-    font-size:16px;font-weight:600;cursor:pointer;letter-spacing:-.01em;margin-top:4px}
+  .btn-pill{display:block;width:100%;padding:10px;border-radius:8px;border:0;
+    font-size:16px;font-weight:500;cursor:pointer;margin-top:4px;box-sizing:border-box}
   .btn-pill.primario{background:var(--azul);color:#fff}
   .btn-pill.primario:active{opacity:.85}
   .btn-pill.secundario{background:var(--fill);color:var(--ink)}
   .btn-pill:disabled{opacity:.5;cursor:default}
   .link-trocar{display:block;width:100%;margin-top:16px;font-size:14px;color:var(--azul);
     background:none;border:0;cursor:pointer;text-decoration:none;padding:4px}
-  .erro-auth{font-size:13px;color:var(--nao);background:var(--isa-soft);border-radius:10px;
-    padding:10px 12px;margin-bottom:12px;text-align:left;display:none}
+  .erro-auth{font-size:13px;color:var(--nao);font-weight:700;text-align:center;
+    margin-bottom:12px;display:none}
   .erro-auth.mostra{display:block}
   .badge-convite{display:inline-block;font-size:12px;font-weight:600;color:var(--azul);
     background:var(--car-soft);border-radius:12px;padding:5px 12px;margin-bottom:14px}
@@ -504,7 +509,6 @@
     <h1>Instale o Dieta e treino</h1>
     <p id="instrucao-instalar">Carregando instruções pro seu aparelho...</p>
     <p style="color:#888;font-size:14px;margin-top:16px">Adicione à tela de início para abrir como um app, em tela cheia e sem a barra do navegador.</p>
-    <button class="btn-pill primario" id="btn-instalar-agora" hidden>Instalar agora</button>
     <button class="btn-pill secundario" id="btn-pular-instalar">Continuar no navegador mesmo assim</button>
   </div>
 </div>
@@ -666,7 +670,7 @@
   </div>
 
   <div id="plano-vazio" class="hoje-cartao" style="margin-top:16px" hidden>
-    <div class="hoje-cartao-head"><span class="hoje-cartao-tit">Plano</span></div>
+    <div class="hoje-cartao-head"><span class="hoje-cartao-tit">Dieta</span></div>
     <p class="hoje-cartao-nota" id="plano-vazio-texto">Carregando...</p>
   </div>
 
@@ -763,7 +767,7 @@
   </button>
   <button id="aba-plano" aria-pressed="false" class="tabbar-item">
     <svg class="tabbar-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="5" width="10" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="9" y="3" width="6" height="3" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 11h5M9.5 14h5M9.5 17h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-    <span>Plano</span>
+    <span>Dieta</span>
   </button>
   <button id="aba-treino" aria-pressed="false" class="tabbar-item">
     <svg class="tabbar-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="3" y="9.5" width="2.5" height="5" rx="1" fill="currentColor"/><rect x="18.5" y="9.5" width="2.5" height="5" rx="1" fill="currentColor"/><rect x="5.5" y="8" width="2" height="8" rx="1" fill="currentColor"/><rect x="16.5" y="8" width="2" height="8" rx="1" fill="currentColor"/></svg>
@@ -816,14 +820,6 @@ if(!window.storage){
 /* =========================================================
    0.1 INSTALAR COMO APP (tela inicial)
    ========================================================= */
-var __promptInstalar = null;
-window.addEventListener('beforeinstallprompt', function(e){
-  e.preventDefault();
-  __promptInstalar = e;
-  var b = document.getElementById('btn-instalar-agora');
-  if(b) b.hidden = false;
-});
-
 function estaStandalone(){
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
@@ -833,6 +829,10 @@ function ehIpad(){
   // confiavel de detectar e combinar "parece Mac" + "tem suporte a toque"
   // (um Mac de verdade nunca tem maxTouchPoints > 1)
   return /iPad/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function ehMobileOuTablet(){
+  return /iPhone|iPad|iPod|Android/.test(navigator.userAgent) || ehIpad();
 }
 
 function montarInstrucaoInstalar(){
@@ -854,19 +854,14 @@ function montarInstrucaoInstalar(){
 function mostrarTelaInstalar(){
   montarInstrucaoInstalar();
   document.getElementById('tela-instalar').hidden = false;
+  // no celular/tablet nao tem escape: so sai daqui instalando de verdade
+  // (mesmo mecanismo do pilotquest). So no computador existe a opcao de
+  // seguir mesmo assim, e mesmo la pergunta de novo a cada carregamento
+  // (nao guarda escolha permanente).
+  document.getElementById('btn-pular-instalar').hidden = ehMobileOuTablet();
 }
 
 document.getElementById('btn-pular-instalar').onclick = function(){
-  localStorage.setItem('dt_instalar_ok','1');
-  document.getElementById('tela-instalar').hidden = true;
-  iniciarFluxoAuth();
-};
-document.getElementById('btn-instalar-agora').onclick = async function(){
-  if(!__promptInstalar) return;
-  __promptInstalar.prompt();
-  await __promptInstalar.userChoice;
-  __promptInstalar = null;
-  localStorage.setItem('dt_instalar_ok','1');
   document.getElementById('tela-instalar').hidden = true;
   iniciarFluxoAuth();
 };
@@ -1688,7 +1683,7 @@ async function salvarNovaVersaoPlano(){
 /* =========================================================
    0.4 PONTO DE PARTIDA
    ========================================================= */
-if(estaStandalone() || localStorage.getItem('dt_instalar_ok') === '1'){
+if(estaStandalone()){
   iniciarFluxoAuth();
 } else {
   mostrarTelaInstalar();
