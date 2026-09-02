@@ -58,19 +58,19 @@
   .marca small{display:block;font-size:13px;font-weight:400;color:var(--ink2);letter-spacing:0;margin-top:1px}
 
   /* ---------- segmented control ---------- */
-  .switch{display:inline-flex;background:var(--fill);border-radius:999px;padding:2px;gap:2px}
+  .switch{display:inline-flex;background:var(--fill);border-radius:12px;padding:2px;gap:2px}
   .estados{padding:1px;gap:1px}
   .switch button{font-size:14px;font-weight:500;letter-spacing:-.01em;color:var(--ink2);
-    background:none;border:0;padding:7px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;
+    background:none;border:0;padding:7px 14px;border-radius:12px;cursor:pointer;white-space:nowrap;
     transition:background .15s ease,color .15s ease}
   .switch button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--sh-min)}
   .switch button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
   .switch-wrap{flex-wrap:wrap}
 
   /* ---------- abas ---------- */
-  .abas{display:inline-flex;background:var(--fill);border-radius:999px;padding:2px;gap:2px;margin-top:16px}
+  .abas{display:inline-flex;background:var(--fill);border-radius:12px;padding:2px;gap:2px;margin-top:16px}
   .abas button{font-size:15px;font-weight:500;letter-spacing:-.01em;color:var(--ink2);background:none;
-    border:0;padding:8px 22px;border-radius:999px;cursor:pointer}
+    border:0;padding:8px 22px;border-radius:12px;cursor:pointer}
   .abas button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--sh-min)}
   .abas button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
 
@@ -80,9 +80,9 @@
   .planejador span.rot{font-size:15px;font-weight:500}
   .planejador span.exp{font-size:13px;color:var(--ink2);flex:1 1 100%;line-height:1.4}
 
-  .stepper{display:inline-flex;align-items:center;background:var(--fill);border-radius:999px;padding:2px}
+  .stepper{display:inline-flex;align-items:center;background:var(--fill);border-radius:12px;padding:2px}
   .stepper button{width:32px;height:32px;font-size:20px;font-weight:400;line-height:1;background:var(--card);
-    border:0;border-radius:999px;color:var(--azul);cursor:pointer;box-shadow:var(--sh-min)}
+    border:0;border-radius:12px;color:var(--azul);cursor:pointer;box-shadow:var(--sh-min)}
   .stepper button:disabled{color:var(--ink3);box-shadow:none;background:none}
   .stepper button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
   .stepper .n{min-width:38px;text-align:center;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
@@ -101,7 +101,7 @@
   .vnome{flex:1;text-align:left;font-size:15px;font-weight:400;color:var(--ink2);background:none;
     border:0;padding:6px 0;cursor:pointer;min-width:0}
   .vnome[aria-pressed="true"]{color:var(--ink);font-weight:600}
-  .vnome::before{content:'';display:inline-block;width:8px;height:8px;border-radius:999px;
+  .vnome::before{content:'';display:inline-block;width:8px;height:8px;border-radius:12px;
     background:var(--hair);margin-right:9px;vertical-align:1px}
   .vnome[aria-pressed="true"]::before{background:var(--azul)}
   .vnome:focus-visible{outline:2px solid var(--azul);outline-offset:2px;border-radius:6px}
@@ -122,7 +122,7 @@
   .val.i{color:var(--isa)} .val.c{color:var(--car)} .val.p{color:var(--ink)}
   .val.zero{color:var(--ink3);font-weight:400}
   .val.sep{font-size:12px;font-weight:500;color:var(--ink3)}
-  button.val{background:none;border:0;cursor:pointer;padding:3px 6px;margin:-3px -6px;border-radius:999px}
+  button.val{background:none;border:0;cursor:pointer;padding:3px 6px;margin:-3px -6px;border-radius:12px}
   button.val:focus-visible{outline:2px solid var(--azul);outline-offset:0}
   button.val.i[aria-expanded="true"]{background:var(--isa);color:#fff}
   button.val.c[aria-expanded="true"]{background:var(--car);color:#fff}
@@ -159,7 +159,7 @@
   .det{display:block;font-size:13px;color:var(--ink2);font-weight:400;margin-top:2px;line-height:1.4}
   .acoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
   .acoes button{font-size:15px;font-weight:500;letter-spacing:-.01em;background:var(--azul);color:#fff;
-    border:0;border-radius:999px;padding:11px 20px;cursor:pointer}
+    border:0;border-radius:12px;padding:11px 20px;cursor:pointer}
   .acoes button.sec{background:var(--fill);color:var(--ink)}
   .acoes button:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
   .aviso{font-size:13px;color:var(--ink2);margin-top:12px;line-height:1.5}
@@ -181,12 +181,12 @@
   th{font-size:12px;color:var(--ink2);font-weight:500;border-top:0}
   td.q{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
   .tags{display:flex;flex-wrap:wrap;gap:6px}
-  .tags span{background:var(--fill);border-radius:999px;padding:5px 11px;font-size:14px}
+  .tags span{background:var(--fill);border-radius:12px;padding:5px 11px;font-size:14px}
   .grupo-tit{font-size:13px;font-weight:600;color:var(--ink2);margin:16px 0 7px}
   .grupo-tit:first-child{margin-top:0}
 
   /* ---------- diálogo e balão ---------- */
-  dialog{border:0;border-radius:20px;padding:0;max-width:540px;width:calc(100% - 32px);
+  dialog{border:0;border-radius:14px;padding:0;max-width:540px;width:calc(100% - 32px);
     background:var(--card);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.22)}
   dialog::backdrop{background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
   .dlg-head{display:flex;justify-content:space-between;align-items:center;padding:15px 18px;
@@ -214,23 +214,23 @@
   .mes h2{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0;text-transform:capitalize}
   .mes .nav{display:flex;gap:6px;align-items:center}
   .mes .nav button{height:34px;min-width:34px;padding:0 12px;font-size:15px;font-weight:500;background:var(--card);
-    border:0;border-radius:999px;cursor:pointer;color:var(--azul);box-shadow:var(--sh-min)}
+    border:0;border-radius:12px;cursor:pointer;color:var(--azul);box-shadow:var(--sh-min)}
   .cal{background:var(--card);border-radius:var(--r);padding:10px;box-shadow:var(--sh)}
   .cal .sem{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
   .cal .cab span{font-size:12px;font-weight:500;color:var(--ink3);text-align:center;padding:4px 0}
   .cal button.d{position:relative;aspect-ratio:1;font-size:15px;font-weight:400;background:none;border:0;
-    border-radius:999px;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;
+    border-radius:12px;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:4px;padding:0;font-variant-numeric:tabular-nums}
   .cal button.d.fora{color:transparent;cursor:default}
   .cal button.d.hoje{font-weight:700;color:var(--azul)}
   .cal button.d[aria-pressed="true"]{background:var(--ink);color:#fff;font-weight:600}
-  .cal .barra{display:flex;width:60%;height:3px;border-radius:999px;overflow:hidden;background:var(--hair)}
+  .cal .barra{display:flex;width:60%;height:3px;border-radius:12px;overflow:hidden;background:var(--hair)}
   .cal button.d[aria-pressed="true"] .barra{background:rgba(255,255,255,.28)}
   .cal .barra i{display:block;height:100%}
   .b-ok{background:var(--ok)} .b-ad{background:var(--ad)} .b-nao{background:var(--nao)}
   .legenda{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin-top:12px;padding:0 4px}
   .legenda span{display:flex;align-items:center;gap:6px}
-  .legenda i{width:8px;height:8px;border-radius:999px;display:block}
+  .legenda i{width:8px;height:8px;border-radius:12px;display:block}
 
   .dia-box{background:var(--card);border-radius:var(--r);margin-top:16px;box-shadow:var(--sh);overflow:hidden}
   .dia-box h3{font-size:20px;font-weight:700;letter-spacing:-.019em;margin:0;padding:16px 16px 2px}
@@ -246,10 +246,10 @@
   .ref .nm-btn[aria-expanded="true"]::after{transform:rotate(-135deg);margin-top:3px}
   .ref .estados{flex:0 0 auto}
 
-  .estados{display:inline-flex;background:var(--fill);border-radius:999px;padding:2px;gap:2px}
+  .estados{display:inline-flex;background:var(--fill);border-radius:12px;padding:2px;gap:2px}
   .estados{flex-shrink:0}
   .estados button{font-size:13px;font-weight:500;background:none;border:0;padding:7px 10px;
-    border-radius:999px;cursor:pointer;color:var(--ink2);white-space:nowrap}
+    border-radius:12px;cursor:pointer;color:var(--ink2);white-space:nowrap}
   .estados button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--sh-min)}
   .estados button[aria-pressed="true"][data-e="ok"],.estados button[aria-pressed="true"][data-f="tudo"]{background:var(--ok);color:#fff}
   .estados button[aria-pressed="true"][data-e="ad"],.estados button[aria-pressed="true"][data-f="meia"]{background:var(--ad);color:#fff}
@@ -285,7 +285,7 @@
     border:0;padding:6px 0;cursor:pointer}
   .extra-linha{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 0;border-top:.5px solid var(--hair)}
   .extra-linha .tag{font-size:11px;font-weight:600;color:var(--azul);background:var(--car-soft);
-    border-radius:999px;padding:3px 9px}
+    border-radius:12px;padding:3px 9px}
   .rm{background:none;border:0;color:var(--nao);font-size:13px;cursor:pointer;padding:6px 8px;font-weight:500}
 
   .obs{padding:14px 16px;border-top:.5px solid var(--hair)}
@@ -315,7 +315,7 @@
   .calresumo b{font-size:22px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 
   .rodape{margin-top:26px;font-size:13px;color:var(--ink2);line-height:1.6}
-  .reset{font-size:15px;font-weight:500;background:var(--card);border:0;border-radius:999px;
+  .reset{font-size:15px;font-weight:500;background:var(--card);border:0;border-radius:12px;
     padding:11px 20px;cursor:pointer;color:var(--nao);box-shadow:var(--sh-min)}
   noscript{display:block;background:var(--card);border-radius:var(--r);padding:18px;margin-top:16px;box-shadow:var(--sh)}
 
@@ -333,24 +333,28 @@
   .tela-cheia[hidden]{display:none}
   .tela-cheia{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;
     align-items:center;justify-content:center;padding:24px 16px;overflow-y:auto}
-  .tela-cheia .cartao{width:100%;max-width:400px;background:var(--card);border-radius:20px;
+  .tela-cheia .cartao{width:100%;max-width:400px;background:var(--card);border-radius:16px;
     box-shadow:var(--sh);padding:28px 24px;text-align:center}
   .tela-cheia .logo-app{width:64px;height:64px;border-radius:16px;margin:0 auto 16px;
     background:linear-gradient(160deg,var(--car),var(--isa));display:flex;align-items:center;
     justify-content:center;font-size:26px;font-weight:700;color:#fff;letter-spacing:-.02em}
   .tela-cheia h1{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0 0 6px}
   .tela-cheia p.sub{font-size:15px;color:var(--ink2);margin:0 0 22px;line-height:1.45}
-  .passo-instalar{display:flex;align-items:flex-start;gap:12px;text-align:left;
-    background:var(--fill2);border-radius:var(--rc);padding:12px 14px;margin-bottom:10px}
-  .passo-instalar .num{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--azul);
-    color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
-  .passo-instalar span.txt{font-size:14px;line-height:1.4;color:var(--ink)}
+  /* #tela-instalar segue o pilotquest a risca (espacamento, tipografia, botao) -
+     so o logo continua sendo o da Dieta e treino, tudo o resto e igual.
+     #tela-auth (login/cadastro) continua com o cartao normal, do nosso jeito. */
+  #tela-instalar{background:#fff;
+    padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 24px) 24px}
+  #tela-instalar .cartao{background:none;box-shadow:none;border-radius:0;padding:0;max-width:432px}
+  #tela-instalar h1{all:revert}
+  #tela-instalar .btn-pill{padding:10px;border-radius:8px;font-size:16px;font-weight:500;
+    letter-spacing:normal;margin-top:20px}
   .campo{margin-bottom:12px;text-align:left}
   .campo label{display:block;font-size:13px;font-weight:500;color:var(--ink2);margin:0 0 6px}
   .campo input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--hair);
     background:var(--fill2);font-size:16px;color:var(--ink)}
   .campo input:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:transparent}
-  .btn-pill{display:block;width:100%;padding:13px 20px;border-radius:999px;border:0;
+  .btn-pill{display:block;width:100%;padding:13px 20px;border-radius:12px;border:0;
     font-size:16px;font-weight:600;cursor:pointer;letter-spacing:-.01em;margin-top:4px}
   .btn-pill.primario{background:var(--azul);color:#fff}
   .btn-pill.primario:active{opacity:.85}
@@ -362,13 +366,13 @@
     padding:10px 12px;margin-bottom:12px;text-align:left;display:none}
   .erro-auth.mostra{display:block}
   .badge-convite{display:inline-block;font-size:12px;font-weight:600;color:var(--azul);
-    background:var(--car-soft);border-radius:999px;padding:5px 12px;margin-bottom:14px}
+    background:var(--car-soft);border-radius:12px;padding:5px 12px;margin-bottom:14px}
 
   /* ---------- conta / convite ---------- */
   .conta-btn{width:34px;height:34px;border-radius:50%;border:0;background:var(--fill);
     color:var(--ink);font-size:14px;font-weight:700;cursor:pointer;display:flex;
     align-items:center;justify-content:center;flex:0 0 auto}
-  #dlg-conta{border:0;border-radius:20px;padding:0;max-width:340px;width:90vw;box-shadow:var(--sh)}
+  #dlg-conta{border:0;border-radius:14px;padding:0;max-width:340px;width:90vw;box-shadow:var(--sh)}
   #dlg-conta::backdrop{background:rgba(0,0,0,.28)}
   .conta-corpo{padding:22px}
   .conta-nome{font-size:17px;font-weight:700;letter-spacing:-.02em;margin:0 0 2px}
@@ -401,9 +405,9 @@
   .hoje-cartao-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
   .hoje-cartao-tit{font-size:16px;font-weight:600;letter-spacing:-.01em}
   .hoje-cartao-num{font-size:14px;color:var(--ink2);font-weight:500}
-  .hoje-cartao-barra{height:8px;border-radius:999px;background:var(--fill);overflow:hidden}
-  .hoje-cartao-barra-fill{height:100%;background:var(--ok);border-radius:999px;transition:width .3s ease}
-  .hoje-cartao-cta{margin-top:12px;width:100%;padding:10px 14px;border-radius:999px;border:0;
+  .hoje-cartao-barra{height:8px;border-radius:12px;background:var(--fill);overflow:hidden}
+  .hoje-cartao-barra-fill{height:100%;background:var(--ok);border-radius:12px;transition:width .3s ease}
+  .hoje-cartao-cta{margin-top:12px;width:100%;padding:10px 14px;border-radius:12px;border:0;
     background:var(--fill2);color:var(--azul);font-size:14px;font-weight:600;cursor:pointer}
   .hoje-cartao-nota{font-size:13px;color:var(--ink2);margin:0;line-height:1.4}
   .hb-bloco{margin-bottom:22px}
@@ -439,7 +443,7 @@
   .tr-sub{font-size:13px;color:var(--ink2);margin:0}
   .tr-nota{font-size:12.5px;color:var(--ink2);margin:8px 0 0;line-height:1.4}
   .tr-divisao{display:flex;gap:6px;flex-wrap:wrap}
-  .tr-chip{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:999px;background:var(--fill);color:var(--ink2)}
+  .tr-chip{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:12px;background:var(--fill);color:var(--ink2)}
   .tr-chip.off{background:transparent;color:var(--ink3);border:1px dashed var(--hair)}
   .tr-treino-card{background:var(--card);border-radius:var(--r);padding:16px;margin-top:12px;box-shadow:var(--sh)}
   .tr-treino-card h4{font-size:16px;font-weight:700;letter-spacing:-.01em;margin:0 0 12px}
@@ -474,6 +478,22 @@
   .tr-registro .btn-pill{margin-top:10px}
   .tr-registro .erro-auth{margin-top:8px}
   .pg-vazio{font-size:14px;color:var(--ink2);padding:8px 0}
+
+  /* ---------- layout desktop / iPad horizontal: menu na lateral ---------- */
+  @media(min-width:1100px){
+    #app-shell:not([hidden]){display:grid;grid-template-columns:250px 1fr;grid-template-rows:auto 1fr;min-height:100vh}
+    header.top{grid-column:1/-1;grid-row:1}
+    .top-inner{max-width:1100px}
+    .wrap{grid-column:2;grid-row:2;max-width:820px;padding:0 32px 48px;margin:0}
+    .tabbar{position:sticky;left:auto;right:auto;bottom:auto;top:0;grid-column:1;grid-row:2;
+      flex-direction:column;align-items:stretch;align-self:start;height:calc(100vh - 61px);
+      background:var(--card);border-top:0;border-right:.5px solid rgba(0,0,0,.08);
+      backdrop-filter:none;-webkit-backdrop-filter:none;padding:20px 14px;gap:6px}
+    .tabbar-item{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;
+      padding:11px 14px;border-radius:12px;width:100%}
+    .tabbar-item span{font-size:15px}
+    .tabbar-item[aria-pressed="true"]{background:var(--fill)}
+  }
 </style>
 </head>
 <body>
@@ -482,10 +502,10 @@
   <div class="cartao">
     <div class="logo-app">DT</div>
     <h1>Instale o Dieta e treino</h1>
-    <p class="sub">Adicione à tela de início para abrir como um app, em tela cheia e sem a barra do navegador.</p>
-    <div id="passos-instalar"></div>
+    <p id="instrucao-instalar">Carregando instruções pro seu aparelho...</p>
+    <p style="color:#888;font-size:14px;margin-top:16px">Adicione à tela de início para abrir como um app, em tela cheia e sem a barra do navegador.</p>
     <button class="btn-pill primario" id="btn-instalar-agora" hidden>Instalar agora</button>
-    <button class="btn-pill secundario" id="btn-pular-instalar">Continuar no navegador</button>
+    <button class="btn-pill secundario" id="btn-pular-instalar">Continuar no navegador mesmo assim</button>
   </div>
 </div>
 
@@ -808,31 +828,31 @@ function estaStandalone(){
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
 
-function montarPassosInstalar(){
-  var alvo = document.getElementById('passos-instalar');
+function ehIpad(){
+  // iPadOS finge ser um Mac de mesa no user agent, de proposito - a forma
+  // confiavel de detectar e combinar "parece Mac" + "tem suporte a toque"
+  // (um Mac de verdade nunca tem maxTouchPoints > 1)
+  return /iPad/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function montarInstrucaoInstalar(){
+  var el = document.getElementById('instrucao-instalar');
   var ua = navigator.userAgent || '';
-  var iOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
-  var passos;
-  if(iOS){
-    passos = [
-      'Toque no ícone de compartilhar (o quadrado com a seta) na barra do Safari.',
-      'Role e toque em "Adicionar à Tela de Início".',
-      'Toque em "Adicionar" no canto superior direito.'
-    ];
-  } else {
-    passos = [
-      'Toque no menu do navegador (⋮ ou •••).',
-      'Toque em "Instalar app" ou "Adicionar à tela inicial".',
-      'Confirme a instalação.'
-    ];
+  var SVG_COMPARTILHAR_IOS = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin:0 3px"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>';
+  var SVG_ADICIONAR_IOS = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin:0 3px"><rect x="3" y="3" width="18" height="18" rx="5"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
+  var SVG_TRES_PONTOS_ANDROID = '<svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" style="vertical-align:-4px;margin:0 3px"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>';
+  var SVG_INSTALAR_ANDROID = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin:0 3px"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 7v7"/><path d="M9 11l3 3 3-3"/></svg>';
+  if(/iPhone|iPad|iPod/.test(ua) || ehIpad()){
+    el.innerHTML = 'No Safari, toque no ícone de compartilhar'+SVG_COMPARTILHAR_IOS+'<br>e depois em '+SVG_ADICIONAR_IOS+'"Adicionar à Tela de Início".';
+  }else if(/Android/.test(ua)){
+    el.innerHTML = 'No Chrome, toque nos três pontinhos'+SVG_TRES_PONTOS_ANDROID+'<br>no canto e depois em '+SVG_INSTALAR_ANDROID+'"Instalar app" (ou "Adicionar à tela inicial").';
+  }else{
+    el.innerHTML = 'No seu navegador de computador, procure o ícone de<br>instalar na barra de endereço, ou o menu de opções.';
   }
-  alvo.innerHTML = passos.map(function(txt, i){
-    return '<div class="passo-instalar"><span class="num">'+(i+1)+'</span><span class="txt">'+txt+'</span></div>';
-  }).join('');
 }
 
 function mostrarTelaInstalar(){
-  montarPassosInstalar();
+  montarInstrucaoInstalar();
   document.getElementById('tela-instalar').hidden = false;
 }
 
