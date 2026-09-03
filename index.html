@@ -15,13 +15,18 @@
   // e "de outro site" pro navegador, e o Safari do iPhone bloqueia isso por
   // padrao (protecao contra rastreamento entre sites) mesmo o login tendo
   // dado certo do lado do servidor. Por isso funcionava no computador mas
-  // nao no celular. Agora aponta pro proprio dominio do app, que a funcao
-  // em api/auth/[...path].js repassa de verdade (nao so redireciona) pro
-  // neon.tech - assim o cookie vira "do mesmo site" e o Safari deixa de
-  // bloquear. (a primeira tentativa foi so um "rewrite" no vercel.json, mas
-  // esse jeito mantinha o endereco errado numa informacao tecnica do pedido
-  // e o servico de login recusava com "Invalid hostname header" - por isso
-  // agora e uma funcao de verdade que refaz o pedido do zero.)
+  // nao no celular. Agora aponta pro proprio dominio do app: o vercel.json
+  // manda tudo que e /api/auth/... pra api/auth-proxy.js, que repassa de
+  // verdade (nao so redireciona) pro neon.tech - assim o cookie vira "do
+  // mesmo site" e o Safari deixa de bloquear. (duas tentativas anteriores
+  // nao deram certo: um "rewrite" externo direto no vercel.json mantinha o
+  // endereco errado numa informacao tecnica do pedido, e o servico de login
+  // recusava com "Invalid hostname header"; e uma funcao com nome de
+  // arquivo "pega-tudo", api/auth/[...path].js, nao capturava de forma
+  // confiavel enderecos de mais de um pedaco nesse projeto, que nao e
+  // Next.js - por isso agora e uma funcao com nome simples que refaz o
+  // pedido do zero, combinada com um redirecionamento interno no
+  // vercel.json.)
   var client = createAuthClient('https://dieta-e-treino-sage.vercel.app/api/auth');
   var db = new NeonPostgrestClient({
     dataApiUrl: 'https://ep-soft-bread-ac808or4.apirest.sa-east-1.aws.neon.tech/dieta_treino/rest/v1',
@@ -38,6 +43,38 @@
   window.neonDb = db;
   window.__resolveNeon(client);
 </script>
+<script>
+  // Altura/topo reais da área visível da tela (sem a barra de endereço do
+  // Safari indo/vindo, sem o teclado aberto) - o CSS usa isso pra travar o
+  // tamanho do app-shell (--vh-real) e sua posição (--vv-top), em vez de
+  // 100vh puro, que no Safari do iPhone às vezes conta a área atrás da
+  // barra de endereço como se desse pra ver. window.visualViewport é a API
+  // que sempre reflete a área realmente visível. Sem ela (navegador antigo),
+  // cai no 100vh normal - já é o valor padrão definido no CSS. Mesma
+  // técnica do pilotquest, simplificada (sem os trechos de lá que só fazem
+  // sentido pro desenho/seleção de texto daquele app).
+  (function(){
+    var maiorAlturaVista = 0;
+    function ajustarViewportReal(){
+      var vv = window.visualViewport;
+      var altura = vv ? vv.height : window.innerHeight;
+      var topo = vv ? vv.offsetTop : 0;
+      if(altura > maiorAlturaVista) maiorAlturaVista = altura;
+      // um teclado de verdade nunca cobre mais de uns 55% da tela - abaixo
+      // disso é mais provável ser um disparo espúrio (zoom, rotação no meio
+      // do gesto) do que o teclado de verdade abrindo
+      if(maiorAlturaVista > 0 && altura < maiorAlturaVista * 0.55) return;
+      document.documentElement.style.setProperty('--vh-real', altura + 'px');
+      document.documentElement.style.setProperty('--vv-top', topo + 'px');
+    }
+    ajustarViewportReal();
+    window.addEventListener('resize', ajustarViewportReal);
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize', ajustarViewportReal);
+      window.visualViewport.addEventListener('scroll', ajustarViewportReal);
+    }
+  })();
+</script>
 <style>
   :root{
     --bg:#F5F5F7; --card:#FFFFFF; --ink:#1D1D1F; --ink2:#6E6E73; --ink3:#A1A1A6;
@@ -51,19 +88,32 @@
     --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.45;
-    -webkit-font-smoothing:antialiased;font-feature-settings:'tnum' 0}
+  html{margin:0;padding:0;height:100%;overflow:hidden;overscroll-behavior:none}
+  /* trava a página inteira (o "puxar pra baixo pra atualizar"/efeito de
+     borracha do Safari deixava de existir mexer no cabeçalho e no menu de
+     baixo junto com o resto - eles não faziam parte de nenhuma rolagem
+     "de verdade", só pareciam fixos por serem sticky/fixed dentro de um
+     body que rolava). Só a área de conteúdo de cada aba (.wrap) rola de
+     verdade agora; cabeçalho e menu ficam sempre no lugar. Em telas
+     grandes (menu lateral, @media(min-width:1100px) mais abaixo) isso é
+     desfeito - não existe esse gesto no computador, e ali a página inteira
+     volta a rolar do jeito de sempre. Mesma técnica do pilotquest. */
+  body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.45;
+    -webkit-font-smoothing:antialiased;font-feature-settings:'tnum' 0;
+    height:100%;position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavior:none}
   button,select,textarea,input{font-family:inherit}
   /* iOS aproxima a tela ao focar campo com menos de 16px. Todos os campos ficam
      em 16px e o tamanho aparente é ajustado pelo espaçamento. */
   select,textarea,input{font-size:16px}
-  .wrap{max-width:720px;margin:0 auto;padding:0 16px 104px}
+  #app-shell{position:fixed;top:var(--vv-top,0px);left:0;right:0;height:var(--vh-real,100vh);overflow:hidden;z-index:20}
+  #app-shell:not([hidden]){display:flex;flex-direction:column}
+  .wrap{flex:1;min-height:0;width:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:contain;max-width:720px;margin:0 auto;padding:0 16px 104px}
 
   /* ---------- topo ---------- */
-  header.top{position:sticky;top:0;z-index:30;background:rgba(245,245,247,.82);
+  header.top{flex-shrink:0;z-index:30;background:rgba(245,245,247,.82);
     -webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
-    border-bottom:.5px solid rgba(0,0,0,.08);padding:12px 0}
+    border-bottom:.5px solid rgba(0,0,0,.08);padding:calc(env(safe-area-inset-top,0px) + 12px) 0 12px}
   .top-inner{max-width:720px;margin:0 auto;padding:0 16px;display:flex;flex-wrap:wrap;
     gap:10px 16px;align-items:center;justify-content:space-between}
   .marca{font-size:22px;font-weight:700;letter-spacing:-.021em;line-height:1.18}
@@ -419,10 +469,11 @@
     backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid rgba(0,0,0,.08);
     padding:6px 4px calc(6px + env(safe-area-inset-bottom)) 4px}
   .tabbar-item{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:2px;
-    background:none;border:0;padding:6px 2px;color:var(--ink3);cursor:pointer;min-width:0}
+    background:none;border:0;border-radius:12px;padding:6px 2px;color:var(--ink3);cursor:pointer;min-width:0;
+    transition:background-color .15s ease}
   .tabbar-ico{width:24px;height:24px}
   .tabbar-item span{font-size:10.5px;font-weight:500;letter-spacing:-.005em;white-space:nowrap}
-  .tabbar-item[aria-pressed="true"]{color:var(--azul)}
+  .tabbar-item[aria-pressed="true"]{color:var(--azul);background:var(--fill)}
   .tabbar-item:focus-visible{outline:2px solid var(--azul);outline-offset:1px;border-radius:8px}
 
   /* ---------- aba Hoje ---------- */
@@ -510,6 +561,15 @@
 
   /* ---------- layout desktop / iPad horizontal: menu na lateral ---------- */
   @media(min-width:1100px){
+    /* desfaz a trava de rolagem de tela cheia (não existe "puxar pra
+       atualizar" no computador/mouse, e aqui a página inteira volta a
+       rolar do jeito de sempre, com o cabeçalho grudado no topo por
+       position:sticky em vez de fazer parte de um app-shell fixo) */
+    html{overflow:auto;overscroll-behavior:auto}
+    body{position:static;inset:auto;width:auto;height:auto;overflow:visible;overscroll-behavior:auto}
+    #app-shell{position:static;top:auto;height:auto;overflow:visible}
+    header.top{position:sticky;top:0}
+    .wrap{overflow-y:visible;-webkit-overflow-scrolling:auto;overscroll-behavior-y:auto}
     #app-shell:not([hidden]){display:grid;grid-template-columns:250px 1fr;grid-template-rows:auto 1fr;min-height:100vh}
     header.top{grid-column:1/-1;grid-row:1}
     .top-inner{max-width:1100px}
@@ -2773,12 +2833,27 @@ document.addEventListener('click', function(ev){
 });
 document.addEventListener('keydown', function(ev){ if(ev.key==='Escape') fecharBalao(); });
 window.addEventListener('resize', function(){ if(aberto) fecharBalao(); });
+// o balão é anexado direto no <body> (fora da área que rola, .wrap) -
+// sem isso, rolar a tela com o balão aberto deixava ele "pra trás",
+// descolado do botão que ele deveria estar apontando.
+(function(){
+  var w = document.querySelector('.wrap');
+  if(w) w.addEventListener('scroll', function(){ if(aberto) fecharBalao(); }, {passive:true});
+})();
+
+// desde que o app passou a travar a rolagem da página inteira (cabeçalho e
+// menu de baixo sempre fixos, sem o "puxar pra atualizar" do Safari mexer
+// neles), quem rola de verdade é só a área de conteúdo (.wrap) - por isso
+// "voltar pro topo" ao trocar de aba/modo precisa mexer nela, não mais na
+// janela inteira (que não rola mais nada).
+const elWrap = document.querySelector('.wrap');
+function rolarTopo(){ if(elWrap) elWrap.scrollTo({top:0}); }
 
 const bS=document.getElementById('btn-semana'), bF=document.getElementById('btn-fds');
 function setModo(m){
   estado.modo = m; aberto = null;
   bS.setAttribute('aria-pressed', m==='semana'); bF.setAttribute('aria-pressed', m==='fds');
-  render(); window.scrollTo({top:0});
+  render(); rolarTopo();
 }
 bS.onclick=function(){ setModo('semana'); };
 bF.onclick=function(){ setModo('fds'); };
@@ -4197,7 +4272,7 @@ function setAba(qual){
     document.getElementById(a.vista).hidden = !ativo;
     if(ativo) a.ir();
   });
-  window.scrollTo({top:0});
+  rolarTopo();
 }
 ABAS.forEach(function(a){
   document.getElementById(a.btn).onclick = function(){ setAba(a.key); };
