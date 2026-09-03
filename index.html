@@ -10,7 +10,15 @@
 <script type="module">
   import { createAuthClient } from 'https://esm.sh/@neondatabase/auth@0.4.2-beta';
   import { NeonPostgrestClient, fetchWithToken } from 'https://esm.sh/@neondatabase/postgrest-js@0.2.0-beta';
-  var client = createAuthClient('https://ep-soft-bread-ac808or4.neonauth.sa-east-1.aws.neon.tech/dieta_treino/auth');
+  // antes isso apontava direto pro dominio neonauth...neon.tech - como esse
+  // dominio e diferente do dominio do app (vercel.app), o cookie de sessao
+  // e "de outro site" pro navegador, e o Safari do iPhone bloqueia isso por
+  // padrao (protecao contra rastreamento entre sites) mesmo o login tendo
+  // dado certo do lado do servidor. Por isso funcionava no computador mas
+  // nao no celular. Agora aponta pro proprio dominio do app, que o
+  // vercel.json redireciona por baixo dos panos pro neon.tech - assim o
+  // cookie vira "do mesmo site" e o Safari deixa de bloquear.
+  var client = createAuthClient('https://dieta-e-treino-sage.vercel.app/auth');
   var db = new NeonPostgrestClient({
     dataApiUrl: 'https://ep-soft-bread-ac808or4.apirest.sa-east-1.aws.neon.tech/dieta_treino/rest/v1',
     options: {
@@ -954,6 +962,7 @@ document.getElementById('form-login').onsubmit = async function(ev){
   var email = document.getElementById('login-email').value.trim();
   var senha = document.getElementById('login-senha').value;
   var tentativas = 0;
+  var ultimoErro = null; // temporario, so pra diagnostico - ver comentario abaixo
   try{
     while(true){
       try{
@@ -963,6 +972,7 @@ document.getElementById('form-login').onsubmit = async function(ev){
         await entrarNoApp();
         return;
       }catch(e){
+        ultimoErro = e;
         // numa rede instavel (celular, por exemplo) a chamada pode lancar
         // erro no navegador (ou nem terminar, dai o comTimeout acima entra
         // em cena) mesmo quando o login foi aceito do outro lado e a
@@ -976,7 +986,7 @@ document.getElementById('form-login').onsubmit = async function(ev){
             await entrarNoApp();
             return;
           }
-        }catch(e2){ /* getSession tambem falhou - segue pra tentar de novo abaixo */ }
+        }catch(e2){ ultimoErro = e2; /* getSession tambem falhou - segue pra tentar de novo abaixo */ }
         tentativas++;
         if(tentativas >= 2) throw e;
         btn.textContent = 'Tentando de novo...';
@@ -984,7 +994,12 @@ document.getElementById('form-login').onsubmit = async function(ev){
       }
     }
   }catch(e){
-    mostrarErroAuth('erro-login', 'Não foi possível entrar agora.\nTente de novo em alguns instantes.');
+    ultimoErro = e || ultimoErro;
+    // DEBUG TEMPORARIO: mostrando o motivo tecnico junto pra descobrir
+    // onde exatamente esta travando pro Carlos. Tirar assim que achar
+    // a causa real.
+    var pista = ultimoErro && ultimoErro.message ? '\n[' + ultimoErro.message + ']' : '';
+    mostrarErroAuth('erro-login', 'Não foi possível entrar agora.\nTente de novo em alguns instantes.' + pista);
   }finally{ btn.disabled = false; btn.textContent = txtOriginal; }
 };
 
@@ -1040,23 +1055,37 @@ document.getElementById('form-convite').onsubmit = async function(ev){
   }finally{ btn.disabled = false; }
 };
 
+// chamado uma vez pra cada etapa do carregamento da organizacao - alem do
+// timeout, marca o resultado com o nome da etapa (list/create/getFullOrg/
+// setActive/getActiveMemberRole) e tambem conta como falha um retorno tipo
+// {data:null,error:{...}} (que nao lanca excecao sozinho, so retorna um erro
+// dentro do objeto). Isso e temporario, so pra descobrir exatamente ONDE
+// esta travando pro Carlos - depois que achar o problema real, dá pra tirar.
+async function passo(nome, promise){
+  var r;
+  try{ r = await comTimeout(promise, 6000); }
+  catch(e){ throw new Error(nome + ': ' + (e && e.message ? e.message : String(e))); }
+  if(r && r.error) throw new Error(nome + ': ' + (r.error.message || JSON.stringify(r.error)));
+  return r;
+}
+
 async function carregarOrganizacaoAtiva(){
-  var lista = await comTimeout(neon.organization.list(), 6000);
+  var lista = await passo('list', neon.organization.list());
   var orgs = (lista && lista.data) || [];
   if(orgs.length === 0){
     var nomeUser = (sessaoAtual && sessaoAtual.user && sessaoAtual.user.name) || 'Minha organização';
     var slug = 'org-' + Math.random().toString(36).slice(2,8);
-    await comTimeout(neon.organization.create({ name: nomeUser, slug: slug }), 6000);
-    lista = await comTimeout(neon.organization.list(), 6000);
+    await passo('create', neon.organization.create({ name: nomeUser, slug: slug }));
+    lista = await passo('list2', neon.organization.list());
     orgs = (lista && lista.data) || [];
   }
-  var full = await comTimeout(neon.organization.getFullOrganization(
+  var full = await passo('getFullOrganization', neon.organization.getFullOrganization(
     orgs[0] ? { query: { organizationId: orgs[0].id } } : undefined
-  ), 6000);
+  ));
   orgAtiva = full && full.data;
-  if(orgAtiva) await comTimeout(neon.organization.setActive({ organizationId: orgAtiva.id }), 6000);
+  if(orgAtiva) await passo('setActive', neon.organization.setActive({ organizationId: orgAtiva.id }));
 
-  var papel = await comTimeout(neon.organization.getActiveMemberRole(), 6000);
+  var papel = await passo('getActiveMemberRole', neon.organization.getActiveMemberRole());
   papelAtual = (papel && papel.data && papel.data.role) || (papel && papel.data) || 'member';
 }
 
