@@ -1,12 +1,17 @@
-// Proxy de autenticacao (versao 2). A tentativa anterior usava um arquivo
-// com nome especial (api/auth/[...path].js) pra capturar qualquer caminho
-// depois de /api/auth/ automaticamente - só que isso só funcionou pra
-// caminhos de UM pedaço (tipo /api/auth/get-session) e nao pra caminhos de
-// vários pedaços (tipo /api/auth/sign-in/email, que é exatamente o que o
-// login usa!). Essa versao e mais simples e nao depende dessa convencao: o
-// vercel.json manda TODO pedido de /api/auth/... pra esse arquivo unico,
-// passando o caminho de verdade como um parametro (?path=...), e aqui a
-// gente so monta o endereco final com ele.
+// Proxy de autenticacao. O app (dieta-e-treino-sage.vercel.app) chama esse
+// endereco (/api/auth/...) em vez de chamar o serviço de login
+// (neonauth...neon.tech) diretamente. Assim o cookie de sessao vira "do
+// mesmo site" pro navegador (inclusive Safari no iPhone), em vez de "de
+// outro site" - que era o motivo do login funcionar no computador mas nao
+// no celular.
+//
+// O vercel.json manda todo pedido de /api/auth/... pra esse arquivo unico,
+// passando o caminho de verdade como parametro (?path=...). Aqui a gente
+// monta o endereco final com esse caminho, refaz o pedido do zero pro
+// servico de login de verdade (com o cabecalho de endereco certo - o
+// servico rejeita pedidos cujo cabecalho nao bate com o dele, com
+// "Invalid hostname header"), e devolve a resposta dele (incluindo o
+// cookie) como se tivesse vindo do proprio app.
 
 export const config = { runtime: 'edge' };
 
@@ -17,8 +22,6 @@ export default async function handler(request) {
   var url = new URL(request.url);
   var caminho = url.searchParams.get('path') || '';
   url.searchParams.delete('path');
-  var debug = url.searchParams.get('debug') === '1';
-  url.searchParams.delete('debug');
 
   var destino = DESTINO_BASE + (caminho ? '/' + caminho : '') + (url.search ? url.search : '');
 
@@ -28,16 +31,6 @@ export default async function handler(request) {
     var v = request.headers.get(nome);
     if (v) headers.set(nome, v);
   });
-
-  // modo de diagnostico temporario: /api/auth/qualquercoisa?debug=1
-  if (debug) {
-    var vistos = {};
-    headers.forEach(function(v, k){ vistos[k] = v; });
-    return new Response(JSON.stringify({ destino: destino, headersQueEuMandaria: vistos }, null, 2), {
-      status: 200,
-      headers: { 'content-type': 'application/json' }
-    });
-  }
 
   var temCorpo = !(request.method === 'GET' || request.method === 'HEAD');
 
