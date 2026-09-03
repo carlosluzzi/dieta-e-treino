@@ -966,7 +966,6 @@ document.getElementById('form-login').onsubmit = async function(ev){
   var email = document.getElementById('login-email').value.trim();
   var senha = document.getElementById('login-senha').value;
   var tentativas = 0;
-  var ultimoErro = null; // temporario, so pra diagnostico - ver comentario abaixo
   try{
     while(true){
       try{
@@ -976,7 +975,6 @@ document.getElementById('form-login').onsubmit = async function(ev){
         await entrarNoApp();
         return;
       }catch(e){
-        ultimoErro = e;
         // numa rede instavel (celular, por exemplo) a chamada pode lancar
         // erro no navegador (ou nem terminar, dai o comTimeout acima entra
         // em cena) mesmo quando o login foi aceito do outro lado e a
@@ -990,7 +988,7 @@ document.getElementById('form-login').onsubmit = async function(ev){
             await entrarNoApp();
             return;
           }
-        }catch(e2){ ultimoErro = e2; /* getSession tambem falhou - segue pra tentar de novo abaixo */ }
+        }catch(e2){ /* getSession tambem falhou - segue pra tentar de novo abaixo */ }
         tentativas++;
         if(tentativas >= 2) throw e;
         btn.textContent = 'Tentando de novo...';
@@ -998,12 +996,7 @@ document.getElementById('form-login').onsubmit = async function(ev){
       }
     }
   }catch(e){
-    ultimoErro = e || ultimoErro;
-    // DEBUG TEMPORARIO: mostrando o motivo tecnico junto pra descobrir
-    // onde exatamente esta travando pro Carlos. Tirar assim que achar
-    // a causa real.
-    var pista = ultimoErro && ultimoErro.message ? '\n[' + ultimoErro.message + ']' : '';
-    mostrarErroAuth('erro-login', 'Não foi possível entrar agora.\nTente de novo em alguns instantes.' + pista);
+    mostrarErroAuth('erro-login', 'Não foi possível entrar agora.\nTente de novo em alguns instantes.');
   }finally{ btn.disabled = false; btn.textContent = txtOriginal; }
 };
 
@@ -1020,9 +1013,10 @@ document.getElementById('form-cadastro').onsubmit = async function(ev){
     var r = await comTimeout(neon.signUp.email({ email: email, password: senha, name: nome }), 8000);
     if(r.error){ mostrarErroAuth('erro-cadastro', r.error.message || 'Não foi possível criar a conta.'); return; }
     sessaoAtual = r.data;
-    var slug = 'casal-' + Math.random().toString(36).slice(2,8);
-    var org = await comTimeout(neon.organization.create({ name: 'Dieta e treino', slug: slug }), 8000);
-    if(org.error){ mostrarErroAuth('erro-cadastro', 'Conta criada, mas houve um problema ao montar sua organização. Tente entrar de novo.'); return; }
+    // a organização é criada automaticamente (com o nome da própria pessoa,
+    // ver PRINCÍPIO DE ARQUITETURA) dentro de entrarNoApp()/
+    // carregarOrganizacaoAtiva(), na primeira vez que a conta ainda não tem
+    // nenhuma organização - não precisa criar aqui.
     await entrarNoApp();
   }catch(e){
     mostrarErroAuth('erro-cadastro', 'Não foi possível criar a conta agora. Tente de novo em instantes.');
@@ -1059,37 +1053,23 @@ document.getElementById('form-convite').onsubmit = async function(ev){
   }finally{ btn.disabled = false; }
 };
 
-// chamado uma vez pra cada etapa do carregamento da organizacao - alem do
-// timeout, marca o resultado com o nome da etapa (list/create/getFullOrg/
-// setActive/getActiveMemberRole) e tambem conta como falha um retorno tipo
-// {data:null,error:{...}} (que nao lanca excecao sozinho, so retorna um erro
-// dentro do objeto). Isso e temporario, so pra descobrir exatamente ONDE
-// esta travando pro Carlos - depois que achar o problema real, dá pra tirar.
-async function passo(nome, promise){
-  var r;
-  try{ r = await comTimeout(promise, 6000); }
-  catch(e){ throw new Error(nome + ': ' + (e && e.message ? e.message : String(e))); }
-  if(r && r.error) throw new Error(nome + ': ' + (r.error.message || JSON.stringify(r.error)));
-  return r;
-}
-
 async function carregarOrganizacaoAtiva(){
-  var lista = await passo('list', neon.organization.list());
+  var lista = await comTimeout(neon.organization.list(), 6000);
   var orgs = (lista && lista.data) || [];
   if(orgs.length === 0){
     var nomeUser = (sessaoAtual && sessaoAtual.user && sessaoAtual.user.name) || 'Minha organização';
     var slug = 'org-' + Math.random().toString(36).slice(2,8);
-    await passo('create', neon.organization.create({ name: nomeUser, slug: slug }));
-    lista = await passo('list2', neon.organization.list());
+    await comTimeout(neon.organization.create({ name: nomeUser, slug: slug }), 6000);
+    lista = await comTimeout(neon.organization.list(), 6000);
     orgs = (lista && lista.data) || [];
   }
-  var full = await passo('getFullOrganization', neon.organization.getFullOrganization(
+  var full = await comTimeout(neon.organization.getFullOrganization(
     orgs[0] ? { query: { organizationId: orgs[0].id } } : undefined
-  ));
+  ), 6000);
   orgAtiva = full && full.data;
-  if(orgAtiva) await passo('setActive', neon.organization.setActive({ organizationId: orgAtiva.id }));
+  if(orgAtiva) await comTimeout(neon.organization.setActive({ organizationId: orgAtiva.id }), 6000);
 
-  var papel = await passo('getActiveMemberRole', neon.organization.getActiveMemberRole());
+  var papel = await comTimeout(neon.organization.getActiveMemberRole(), 6000);
   papelAtual = (papel && papel.data && papel.data.role) || (papel && papel.data) || 'member';
 }
 
