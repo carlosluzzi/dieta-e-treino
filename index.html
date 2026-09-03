@@ -379,8 +379,8 @@
   .link-trocar{display:block;width:100%;margin-top:16px;font-size:14px;color:var(--azul);
     background:none;border:0;cursor:pointer;text-decoration:none;padding:4px}
   .erro-auth{font-size:13px;color:var(--nao);font-weight:700;text-align:center;
-    margin-bottom:12px;display:none}
-  .erro-auth.mostra{display:block}
+    margin-bottom:12px;visibility:hidden;white-space:pre-line;line-height:1.4;min-height:2.8em}
+  .erro-auth.mostra{visibility:visible}
   .badge-convite{display:inline-block;font-size:12px;font-weight:600;color:var(--azul);
     background:var(--car-soft);border-radius:12px;padding:5px 12px;margin-bottom:14px}
 
@@ -933,15 +933,38 @@ document.getElementById('form-login').onsubmit = async function(ev){
   ev.preventDefault();
   limparErroAuth('erro-login');
   var btn = document.getElementById('btn-login'); btn.disabled = true;
+  var email = document.getElementById('login-email').value.trim();
+  var senha = document.getElementById('login-senha').value;
+  var tentativas = 0;
   try{
-    var email = document.getElementById('login-email').value.trim();
-    var senha = document.getElementById('login-senha').value;
-    var r = await neon.signIn.email({ email: email, password: senha });
-    if(r.error){ mostrarErroAuth('erro-login', 'E-mail ou senha incorretos.'); return; }
-    sessaoAtual = r.data;
-    await entrarNoApp();
+    while(true){
+      try{
+        var r = await neon.signIn.email({ email: email, password: senha });
+        if(r.error){ mostrarErroAuth('erro-login', 'E-mail ou senha incorretos.'); return; }
+        sessaoAtual = r.data;
+        await entrarNoApp();
+        return;
+      }catch(e){
+        // numa rede instavel (celular, por exemplo) a chamada pode lancar
+        // erro no navegador mesmo quando o login foi aceito do outro lado
+        // e a resposta que se perdeu no caminho - antes de desistir,
+        // confere se ja existe uma sessao valida pra nao pedir senha de
+        // novo por um problema que nao teve nada a ver com a senha
+        try{
+          var s = await neon.getSession();
+          if(s && s.data && s.data.session){
+            sessaoAtual = s.data;
+            await entrarNoApp();
+            return;
+          }
+        }catch(e2){ /* getSession tambem falhou - segue pra tentar de novo abaixo */ }
+        tentativas++;
+        if(tentativas >= 3) throw e;
+        await new Promise(function(res){ setTimeout(res, 800 * tentativas); });
+      }
+    }
   }catch(e){
-    mostrarErroAuth('erro-login', 'Não foi possível entrar agora. Tente de novo em instantes.');
+    mostrarErroAuth('erro-login', 'Não foi possível entrar agora.\nTente de novo em alguns instantes.');
   }finally{ btn.disabled = false; }
 };
 
@@ -997,7 +1020,7 @@ document.getElementById('form-convite').onsubmit = async function(ev){
   }finally{ btn.disabled = false; }
 };
 
-async function entrarNoApp(){
+async function carregarOrganizacaoAtiva(){
   var lista = await neon.organization.list();
   var orgs = (lista && lista.data) || [];
   if(orgs.length === 0){
@@ -1015,6 +1038,25 @@ async function entrarNoApp(){
 
   var papel = await neon.organization.getActiveMemberRole();
   papelAtual = (papel && papel.data && papel.data.role) || (papel && papel.data) || 'member';
+}
+
+async function entrarNoApp(){
+  // signIn ja funcionou nesse ponto (sessaoAtual existe) - se algo aqui
+  // embaixo falhar (rede instavel, limite de requisicoes por causa de
+  // varias tentativas seguidas etc.), tenta mais 2 vezes com pausa
+  // crescente antes de desistir, em vez de derrubar a pessoa de volta
+  // pra tela de senha por um problema que nao tem nada a ver com a senha
+  var tentativas = 0;
+  while(true){
+    try{
+      await carregarOrganizacaoAtiva();
+      break;
+    }catch(e){
+      tentativas++;
+      if(tentativas >= 3) throw e;
+      await new Promise(function(r){ setTimeout(r, 800 * tentativas); });
+    }
+  }
 
   document.getElementById('tela-instalar').hidden = true;
   document.getElementById('tela-auth').hidden = true;
