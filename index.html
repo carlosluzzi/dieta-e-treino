@@ -359,6 +359,17 @@
   .campo input{width:100%;padding:6px 10px;border-radius:6px;border:0.5px solid var(--hair);
     background:#fff;font-size:16px;color:var(--ink);box-sizing:border-box}
   .campo input:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:transparent}
+  /* navegador (autofill de e-mail/senha salvos) pinta fundo amarelo por
+     padrao - forcamos o fundo branco de volta com o truque do box-shadow
+     inset gigante, que e o unico jeito que funciona (background normal
+     nao sobrescreve o estilo de autofill do proprio navegador) */
+  .campo input:-webkit-autofill,
+  .campo input:-webkit-autofill:hover,
+  .campo input:-webkit-autofill:focus{
+    -webkit-box-shadow:0 0 0px 1000px #fff inset;
+    -webkit-text-fill-color:var(--ink);
+    caret-color:var(--ink);
+    transition:background-color 5000s ease-in-out 0s}
   .btn-pill{display:block;width:100%;padding:10px;border-radius:8px;border:0;
     font-size:16px;font-weight:500;cursor:pointer;margin-top:4px;box-sizing:border-box}
   .btn-pill.primario{background:var(--azul);color:#fff}
