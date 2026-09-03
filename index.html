@@ -379,8 +379,9 @@
   .link-trocar{display:block;width:100%;margin-top:16px;font-size:14px;color:var(--azul);
     background:none;border:0;cursor:pointer;text-decoration:none;padding:4px}
   .erro-auth{font-size:13px;color:var(--nao);font-weight:700;text-align:center;
-    margin-bottom:12px;visibility:hidden;white-space:pre-line;line-height:1.4;min-height:2.8em}
-  .erro-auth.mostra{visibility:visible}
+    white-space:pre-line;line-height:1.4;max-height:0;margin-bottom:0;overflow:hidden;
+    transition:max-height .22s ease,margin-bottom .22s ease}
+  .erro-auth.mostra{max-height:4.5em;margin-bottom:12px}
   .badge-convite{display:inline-block;font-size:12px;font-weight:600;color:var(--azul);
     background:var(--car-soft);border-radius:12px;padding:5px 12px;margin-bottom:14px}
 
@@ -902,6 +903,22 @@ function limparErroAuth(id){
   el.classList.remove('mostra');
 }
 
+// numa rede ruim uma chamada pode nao dar erro nenhum e tambem nunca
+// terminar (nem sucesso, nem falha) - sem isso o await fica parado pra
+// sempre e o botao trava desabilitado sem mostrar nada pra pessoa. Com
+// isso, depois de "ms" ela vira uma falha normal, que o resto do codigo
+// ja sabe tratar (mostra erro, deixa tentar de novo).
+function comTimeout(promise, ms){
+  return new Promise(function(resolve, reject){
+    var vencido = false;
+    var t = setTimeout(function(){ vencido = true; reject(new Error('demorou demais')); }, ms);
+    Promise.resolve(promise).then(
+      function(v){ if(!vencido){ clearTimeout(t); resolve(v); } },
+      function(e){ if(!vencido){ clearTimeout(t); reject(e); } }
+    );
+  });
+}
+
 function alternarAuth(qual){
   document.getElementById('auth-login').hidden = qual!=='login';
   document.getElementById('auth-cadastro').hidden = qual!=='cadastro';
@@ -914,7 +931,7 @@ document.getElementById('ir-login').onclick = function(){ alternarAuth('login');
 async function iniciarFluxoAuth(){
   neon = await window.neonReadyPromise;
   db = window.neonDb;
-  var s = await neon.getSession();
+  var s = await comTimeout(neon.getSession(), 8000).catch(function(){ return null; });
   if(s && s.data && s.data.session){
     sessaoAtual = s.data;
     await entrarNoApp();
@@ -932,26 +949,28 @@ async function iniciarFluxoAuth(){
 document.getElementById('form-login').onsubmit = async function(ev){
   ev.preventDefault();
   limparErroAuth('erro-login');
-  var btn = document.getElementById('btn-login'); btn.disabled = true;
+  var btn = document.getElementById('btn-login'); var txtOriginal = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Entrando...';
   var email = document.getElementById('login-email').value.trim();
   var senha = document.getElementById('login-senha').value;
   var tentativas = 0;
   try{
     while(true){
       try{
-        var r = await neon.signIn.email({ email: email, password: senha });
+        var r = await comTimeout(neon.signIn.email({ email: email, password: senha }), 6000);
         if(r.error){ mostrarErroAuth('erro-login', 'E-mail ou senha incorretos.'); return; }
         sessaoAtual = r.data;
         await entrarNoApp();
         return;
       }catch(e){
         // numa rede instavel (celular, por exemplo) a chamada pode lancar
-        // erro no navegador mesmo quando o login foi aceito do outro lado
-        // e a resposta que se perdeu no caminho - antes de desistir,
-        // confere se ja existe uma sessao valida pra nao pedir senha de
-        // novo por um problema que nao teve nada a ver com a senha
+        // erro no navegador (ou nem terminar, dai o comTimeout acima entra
+        // em cena) mesmo quando o login foi aceito do outro lado e a
+        // resposta que se perdeu no caminho - antes de desistir, confere
+        // se ja existe uma sessao valida pra nao pedir senha de novo por
+        // um problema que nao teve nada a ver com a senha
         try{
-          var s = await neon.getSession();
+          var s = await comTimeout(neon.getSession(), 6000);
           if(s && s.data && s.data.session){
             sessaoAtual = s.data;
             await entrarNoApp();
@@ -959,13 +978,14 @@ document.getElementById('form-login').onsubmit = async function(ev){
           }
         }catch(e2){ /* getSession tambem falhou - segue pra tentar de novo abaixo */ }
         tentativas++;
-        if(tentativas >= 3) throw e;
+        if(tentativas >= 2) throw e;
+        btn.textContent = 'Tentando de novo...';
         await new Promise(function(res){ setTimeout(res, 800 * tentativas); });
       }
     }
   }catch(e){
     mostrarErroAuth('erro-login', 'Não foi possível entrar agora.\nTente de novo em alguns instantes.');
-  }finally{ btn.disabled = false; }
+  }finally{ btn.disabled = false; btn.textContent = txtOriginal; }
 };
 
 document.getElementById('form-cadastro').onsubmit = async function(ev){
@@ -978,11 +998,11 @@ document.getElementById('form-cadastro').onsubmit = async function(ev){
     var senha = document.getElementById('cad-senha').value;
     var senha2 = document.getElementById('cad-senha2').value;
     if(senha !== senha2){ mostrarErroAuth('erro-cadastro', 'As senhas não são iguais.'); return; }
-    var r = await neon.signUp.email({ email: email, password: senha, name: nome });
+    var r = await comTimeout(neon.signUp.email({ email: email, password: senha, name: nome }), 8000);
     if(r.error){ mostrarErroAuth('erro-cadastro', r.error.message || 'Não foi possível criar a conta.'); return; }
     sessaoAtual = r.data;
     var slug = 'casal-' + Math.random().toString(36).slice(2,8);
-    var org = await neon.organization.create({ name: 'Dieta e treino', slug: slug });
+    var org = await comTimeout(neon.organization.create({ name: 'Dieta e treino', slug: slug }), 8000);
     if(org.error){ mostrarErroAuth('erro-cadastro', 'Conta criada, mas houve um problema ao montar sua organização. Tente entrar de novo.'); return; }
     await entrarNoApp();
   }catch(e){
@@ -999,20 +1019,20 @@ document.getElementById('form-convite').onsubmit = async function(ev){
     var nome = document.getElementById('cv-nome').value.trim();
     var email = document.getElementById('cv-email').value.trim();
     var senha = document.getElementById('cv-senha').value;
-    var r = await neon.signUp.email({ email: email, password: senha, name: nome });
+    var r = await comTimeout(neon.signUp.email({ email: email, password: senha, name: nome }), 8000);
     if(r.error){
       mostrarErroAuth('erro-convite', r.error.message || 'Não foi possível criar sua conta.');
       return;
     }
     sessaoAtual = r.data;
-    var ac = await neon.organization.acceptInvitation({ invitationId: conviteId });
+    var ac = await comTimeout(neon.organization.acceptInvitation({ invitationId: conviteId }), 8000);
     if(ac.error){
       mostrarErroAuth('erro-convite', 'Convite não aceito: use o mesmo e-mail para o qual ele foi enviado.');
       return;
     }
     var orgId = (ac.data && ac.data.invitation && ac.data.invitation.organizationId) ||
                 (ac.data && ac.data.member && ac.data.member.organizationId);
-    if(orgId) await neon.organization.setActive({ organizationId: orgId });
+    if(orgId) await comTimeout(neon.organization.setActive({ organizationId: orgId }), 8000);
     history.replaceState(null, '', location.pathname);
     await entrarNoApp();
   }catch(e){
@@ -1021,41 +1041,36 @@ document.getElementById('form-convite').onsubmit = async function(ev){
 };
 
 async function carregarOrganizacaoAtiva(){
-  var lista = await neon.organization.list();
+  var lista = await comTimeout(neon.organization.list(), 6000);
   var orgs = (lista && lista.data) || [];
   if(orgs.length === 0){
     var nomeUser = (sessaoAtual && sessaoAtual.user && sessaoAtual.user.name) || 'Minha organização';
     var slug = 'org-' + Math.random().toString(36).slice(2,8);
-    await neon.organization.create({ name: nomeUser, slug: slug });
-    lista = await neon.organization.list();
+    await comTimeout(neon.organization.create({ name: nomeUser, slug: slug }), 6000);
+    lista = await comTimeout(neon.organization.list(), 6000);
     orgs = (lista && lista.data) || [];
   }
-  var full = await neon.organization.getFullOrganization(
+  var full = await comTimeout(neon.organization.getFullOrganization(
     orgs[0] ? { query: { organizationId: orgs[0].id } } : undefined
-  );
+  ), 6000);
   orgAtiva = full && full.data;
-  if(orgAtiva) await neon.organization.setActive({ organizationId: orgAtiva.id });
+  if(orgAtiva) await comTimeout(neon.organization.setActive({ organizationId: orgAtiva.id }), 6000);
 
-  var papel = await neon.organization.getActiveMemberRole();
+  var papel = await comTimeout(neon.organization.getActiveMemberRole(), 6000);
   papelAtual = (papel && papel.data && papel.data.role) || (papel && papel.data) || 'member';
 }
 
 async function entrarNoApp(){
   // signIn ja funcionou nesse ponto (sessaoAtual existe) - se algo aqui
-  // embaixo falhar (rede instavel, limite de requisicoes por causa de
-  // varias tentativas seguidas etc.), tenta mais 2 vezes com pausa
-  // crescente antes de desistir, em vez de derrubar a pessoa de volta
-  // pra tela de senha por um problema que nao tem nada a ver com a senha
-  var tentativas = 0;
-  while(true){
-    try{
-      await carregarOrganizacaoAtiva();
-      break;
-    }catch(e){
-      tentativas++;
-      if(tentativas >= 3) throw e;
-      await new Promise(function(r){ setTimeout(r, 800 * tentativas); });
-    }
+  // embaixo falhar (rede instavel, ou travar de vez - dai o comTimeout
+  // dentro de carregarOrganizacaoAtiva entra em cena), tenta mais 1 vez
+  // antes de desistir, em vez de derrubar a pessoa de volta pra tela de
+  // senha por um problema que nao tem nada a ver com a senha
+  try{
+    await carregarOrganizacaoAtiva();
+  }catch(e){
+    await new Promise(function(r){ setTimeout(r, 800); });
+    await carregarOrganizacaoAtiva();
   }
 
   document.getElementById('tela-instalar').hidden = true;
