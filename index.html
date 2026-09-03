@@ -15,10 +15,14 @@
   // e "de outro site" pro navegador, e o Safari do iPhone bloqueia isso por
   // padrao (protecao contra rastreamento entre sites) mesmo o login tendo
   // dado certo do lado do servidor. Por isso funcionava no computador mas
-  // nao no celular. Agora aponta pro proprio dominio do app, que o
-  // vercel.json redireciona por baixo dos panos pro neon.tech - assim o
-  // cookie vira "do mesmo site" e o Safari deixa de bloquear.
-  var client = createAuthClient('https://dieta-e-treino-sage.vercel.app/auth');
+  // nao no celular. Agora aponta pro proprio dominio do app, que a funcao
+  // em api/auth/[...path].js repassa de verdade (nao so redireciona) pro
+  // neon.tech - assim o cookie vira "do mesmo site" e o Safari deixa de
+  // bloquear. (a primeira tentativa foi so um "rewrite" no vercel.json, mas
+  // esse jeito mantinha o endereco errado numa informacao tecnica do pedido
+  // e o servico de login recusava com "Invalid hostname header" - por isso
+  // agora e uma funcao de verdade que refaz o pedido do zero.)
+  var client = createAuthClient('https://dieta-e-treino-sage.vercel.app/api/auth');
   var db = new NeonPostgrestClient({
     dataApiUrl: 'https://ep-soft-bread-ac808or4.apirest.sa-east-1.aws.neon.tech/dieta_treino/rest/v1',
     options: {
