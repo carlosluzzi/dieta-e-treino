@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Dieta e treino</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#ab181e">
 <script>
   window.neonReadyPromise = new Promise(function(resolve){ window.__resolveNeon = resolve; });
 </script>
@@ -409,8 +415,8 @@
   .tela-cheia .cartao{width:100%;max-width:400px;background:var(--card);border-radius:16px;
     box-shadow:var(--sh);padding:28px 24px;text-align:center}
   .tela-cheia .logo-app{width:64px;height:64px;border-radius:16px;margin:0 auto 16px;
-    background:linear-gradient(160deg,var(--car),var(--isa));display:flex;align-items:center;
-    justify-content:center;font-size:26px;font-weight:700;color:#fff;letter-spacing:-.02em}
+    display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .tela-cheia .logo-app img{width:100%;height:100%;object-fit:contain}
   .tela-cheia h1{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0 0 6px}
   .tela-cheia p.sub{font-size:15px;color:var(--ink2);margin:0 0 22px;line-height:1.45}
   /* ---------- tela cheia da sessão de treino ("Iniciar treino" no Diário) ----------
@@ -500,11 +506,11 @@
     background:rgba(255,255,255,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);
     backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid rgba(0,0,0,.08)}
   .tabbar-item{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:4px;
-    background:none;border:0;border-radius:12px;margin:0;
+    background:none;border:0;border-radius:0;margin:0;
     padding:18px 0 calc(20px + env(safe-area-inset-bottom,0px)) 0;
     color:var(--ink3);cursor:pointer;min-width:0;transition:background-color .15s ease}
   .tabbar-ico{width:24px;height:24px}
-  .tabbar-item span{font-size:10.5px;font-weight:500;letter-spacing:-.005em;white-space:nowrap}
+  .tabbar-item span{font-size:12px;font-weight:500;letter-spacing:-.005em;white-space:nowrap}
   .tabbar-item[aria-pressed="true"]{color:var(--azul);background:var(--fill)}
   .tabbar-item:focus-visible{outline:2px solid var(--azul);outline-offset:1px;border-radius:8px}
 
@@ -627,6 +633,26 @@
   .tr-carga-input:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:transparent}
   .tr-registro .btn-pill{margin-top:10px}
   .tr-registro .erro-auth{margin-top:8px}
+  /* Sessão de treino com séries individuais (kg x reps por série, igual a um
+     app de treino "de verdade") - ver abrirSessaoTreino/montarSessaoTreino. */
+  .tr-serie-bloco{margin-top:18px;padding-top:14px;border-top:1px solid var(--hair)}
+  .tr-serie-bloco:first-of-type{margin-top:14px}
+  .tr-serie-titulo{font-size:14.5px;font-weight:700;color:var(--ink);margin-bottom:8px}
+  .tr-serie-tabela{width:100%;border-collapse:collapse}
+  .tr-serie-tabela th{text-align:center;font-weight:500;color:var(--ink3);font-size:10.5px;text-transform:uppercase;
+    letter-spacing:.02em;padding:0 4px 6px}
+  .tr-serie-tabela th:first-child,.tr-serie-tabela td:first-child{text-align:left;padding-left:0}
+  .tr-serie-tabela td{padding:5px 4px;vertical-align:middle;text-align:center}
+  .tr-serie-num{font-size:13.5px;font-weight:700;color:var(--ink2)}
+  .tr-serie-anterior{font-size:11.5px;color:var(--ink3);white-space:nowrap}
+  .tr-serie-kg,.tr-serie-reps{width:52px;padding:7px 3px;border-radius:9px;border:1px solid var(--hair);
+    font-size:15px;text-align:center;background:var(--fill2)}
+  .tr-serie-kg:focus,.tr-serie-reps:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:transparent}
+  .tr-serie-check{width:28px;height:28px;border-radius:50%;border:1px solid var(--hair);background:var(--fill2);
+    color:var(--ink3);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0}
+  .tr-serie-check[aria-pressed="true"]{background:var(--azul);border-color:var(--azul);color:#fff}
+  .tr-serie-add{margin-top:6px;width:100%;padding:9px;border-radius:10px;border:1px dashed var(--hair);
+    background:none;color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer}
   .pg-vazio{font-size:14px;color:var(--ink2);padding:8px 0}
   .tr-hist-linha{background:var(--card);border-radius:var(--rc);padding:10px 12px;margin-top:8px;box-shadow:var(--sh-min)}
   .tr-hist-linha:first-child{margin-top:0}
@@ -665,7 +691,7 @@
 
 <div id="tela-instalar" class="tela-cheia" hidden>
   <div class="cartao">
-    <div class="logo-app">DT</div>
+    <div class="logo-app"><img src="icons/icon-192.png" alt="Dieta e treino"></div>
     <h1>Instale o Dieta e treino</h1>
     <p id="instrucao-instalar">Carregando instruções pro seu aparelho...</p>
     <p style="color:#888;font-size:14px;margin-top:16px">Adicione à tela de início para abrir como um app, em tela cheia e sem a barra do navegador.</p>
@@ -675,7 +701,7 @@
 
 <div id="tela-auth" class="tela-cheia" hidden>
   <div class="cartao">
-    <div class="logo-app">DT</div>
+    <div class="logo-app"><img src="icons/icon-192.png" alt="Dieta e treino"></div>
 
     <div id="auth-login">
       <h1>Entrar</h1>
@@ -937,7 +963,7 @@
     <span>Dieta</span>
   </button>
   <button id="aba-treino" aria-pressed="false" class="tabbar-item">
-    <svg class="tabbar-ico" viewBox="0 0 512 512" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="34" stroke-linejoin="round" d="M476.867,203.8h-8.533v-42.667c0-33.28-26.453-59.733-59.733-59.733c-16.809,0-31.87,6.755-42.667,17.722v-9.189 c0-33.28-26.453-59.733-59.733-59.733c-16.809,0-31.87,6.755-42.667,17.722v-9.189C263.533,25.453,237.08-1,203.8-1 c-33.28,0-59.733,26.453-59.733,59.733V152.6H31.427c-12.8,0-23.893,11.093-23.893,23.893v157.013 c0,12.8,11.093,23.893,23.893,23.893h112.64v93.867c0,33.28,26.453,59.733,59.733,59.733c33.28,0,59.733-26.453,59.733-59.733 v-9.189C274.33,453.045,289.391,459.8,306.2,459.8c32.427,0,59.733-26.453,59.733-59.733v-9.189 C376.73,401.845,391.791,408.6,408.6,408.6c32.427,0,59.733-26.453,59.733-59.733v-51.2h8.533c13.653,0,25.6-11.093,25.6-25.6 V229.4C502.467,214.893,491.373,203.8,476.867,203.8z M31.427,340.333c-3.413,0-6.827-3.413-6.827-6.827v-10.24h34.133 c4.267,0,8.533-3.413,8.533-8.533s-3.413-8.533-8.533-8.533H24.6v-17.067h25.6c4.267,0,8.533-3.413,8.533-8.533 s-3.413-8.533-8.533-8.533H24.6V255h17.067c4.267,0,8.533-3.413,8.533-8.533s-3.413-8.533-8.533-8.533H24.6v-61.44 c0-3.413,3.413-6.827,6.827-6.827h112.64v170.667H31.427z M246.467,451.267c0,23.893-18.773,42.667-42.667,42.667 s-42.667-18.773-42.667-42.667v-102.4V161.133v-102.4c0-23.893,18.773-42.667,42.667-42.667c23.04,0,42.667,18.773,42.667,42.667 v51.2v290.133V451.267z M348.867,400.067c0,23.893-18.773,42.667-42.667,42.667s-42.667-18.773-42.667-42.667V109.933 c0-23.893,18.773-42.667,42.667-42.667c23.04,0,42.667,18.773,42.667,42.667v51.2v187.733V400.067z M451.267,348.867 c0,23.893-18.773,42.667-42.667,42.667c-23.893,0-42.667-18.773-42.667-42.667V161.133c0-23.893,18.773-42.667,42.667-42.667 c23.04,0,42.667,18.773,42.667,42.667v51.2v76.8V348.867z M485.4,272.067c0,5.12-3.413,8.533-8.533,8.533h-8.533v-59.733h8.533 c5.12,0,8.533,3.413,8.533,8.533V272.067z"/></svg>
+    <svg class="tabbar-ico" viewBox="-110 -110 732 732" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="49" stroke-linejoin="round" d="M476.867,203.8h-8.533v-42.667c0-33.28-26.453-59.733-59.733-59.733c-16.809,0-31.87,6.755-42.667,17.722v-9.189 c0-33.28-26.453-59.733-59.733-59.733c-16.809,0-31.87,6.755-42.667,17.722v-9.189C263.533,25.453,237.08-1,203.8-1 c-33.28,0-59.733,26.453-59.733,59.733V152.6H31.427c-12.8,0-23.893,11.093-23.893,23.893v157.013 c0,12.8,11.093,23.893,23.893,23.893h112.64v93.867c0,33.28,26.453,59.733,59.733,59.733c33.28,0,59.733-26.453,59.733-59.733 v-9.189C274.33,453.045,289.391,459.8,306.2,459.8c32.427,0,59.733-26.453,59.733-59.733v-9.189 C376.73,401.845,391.791,408.6,408.6,408.6c32.427,0,59.733-26.453,59.733-59.733v-51.2h8.533c13.653,0,25.6-11.093,25.6-25.6 V229.4C502.467,214.893,491.373,203.8,476.867,203.8z M31.427,340.333c-3.413,0-6.827-3.413-6.827-6.827v-10.24h34.133 c4.267,0,8.533-3.413,8.533-8.533s-3.413-8.533-8.533-8.533H24.6v-17.067h25.6c4.267,0,8.533-3.413,8.533-8.533 s-3.413-8.533-8.533-8.533H24.6V255h17.067c4.267,0,8.533-3.413,8.533-8.533s-3.413-8.533-8.533-8.533H24.6v-61.44 c0-3.413,3.413-6.827,6.827-6.827h112.64v170.667H31.427z M246.467,451.267c0,23.893-18.773,42.667-42.667,42.667 s-42.667-18.773-42.667-42.667v-102.4V161.133v-102.4c0-23.893,18.773-42.667,42.667-42.667c23.04,0,42.667,18.773,42.667,42.667 v51.2v290.133V451.267z M348.867,400.067c0,23.893-18.773,42.667-42.667,42.667s-42.667-18.773-42.667-42.667V109.933 c0-23.893,18.773-42.667,42.667-42.667c23.04,0,42.667,18.773,42.667,42.667v51.2v187.733V400.067z M451.267,348.867 c0,23.893-18.773,42.667-42.667,42.667c-23.893,0-42.667-18.773-42.667-42.667V161.133c0-23.893,18.773-42.667,42.667-42.667 c23.04,0,42.667,18.773,42.667,42.667v51.2v76.8V348.867z M485.4,272.067c0,5.12-3.413,8.533-8.533,8.533h-8.533v-59.733h8.533 c5.12,0,8.533,3.413,8.533,8.533V272.067z"/></svg>
     <span>Treino</span>
   </button>
   <button id="aba-progresso" aria-pressed="false" class="tabbar-item">
@@ -2983,28 +3009,55 @@ document.addEventListener('keydown', function(ev){ if(ev.key==='Escape') fecharB
 window.addEventListener('resize', function(){ if(aberto) fecharBalao(); });
 
 /* Clicar num <summary> de qualquer <details> do app (Novo registro, Anamnese,
-   Listas do nutricionista, etc.) não pode rolar a tela — nem abrindo nem
-   fechando. Abrindo, o toggle nativo do <details> foca o <summary> e a barra
-   fixa do topo faz o navegador "corrigir" o scroll até o topo; por isso o
-   toggle é sempre feito manualmente, sem o comportamento nativo de foco.
-   Fechando, o problema é outro: o conteúdo revelado ocupava espaço abaixo do
-   <summary>, e ao encolher esse espaço o navegador pode constatar que o
-   scroll atual não cabe mais (ficou maior que o novo scrollHeight) e "puxa"
-   a tela de volta - então além do toggle manual, comparamos a posição do
-   <summary> na tela antes/depois e corrigimos o scroll pra compensar
-   exatamente a diferença, sem esperar o navegador decidir sozinho. */
+   Listas do nutricionista, etc.) não pode rolar a tela de forma abrupta —
+   nem abrindo nem fechando. Abrindo, o toggle nativo do <details> foca o
+   <summary> e a barra fixa do topo faz o navegador "corrigir" o scroll até
+   o topo; por isso o toggle é sempre feito manualmente, sem o comportamento
+   nativo de foco (isso sozinho já resolve o caso de abrir).
+   Fechando é outra causa: o conteúdo que estava dentro do <details> ocupava
+   espaço, e ao encolher esse espaço o navegador constata que o scroll atual
+   (scrollTop) não cabe mais no novo scrollHeight, menor - e nesse instante
+   ele FORÇA o scroll pra baixo sozinho, na mesma "tacada" que fecha o
+   <details> (isso acontece assim que qualquer coisa lê o layout de novo,
+   antes da gente conseguir reagir - não dá pra "pegar" o valor no meio do
+   caminho). Não dá pra evitar que o scroll precise diminuir quando o
+   conteúdo de fato ficou menor, mas dá pra evitar o "pulo" seco: reservamos
+   um respiro temporário embaixo da área rolável ANTES de fechar (impedindo
+   o navegador de forçar o clamp instantâneo), aí fazemos a MESMA correção
+   de forma suave (scroll animado) e só então tiramos o respiro - já com a
+   tela descansando na posição final, sem susto. */
 document.addEventListener('click', function(ev){
   const s = ev.target.closest && ev.target.closest('summary');
   if(!s) return;
   const d = s.parentElement;
   if(!d || d.tagName !== 'DETAILS') return;
   ev.preventDefault();
-  const antes = s.getBoundingClientRect().top;
-  d.open = !d.open;
-  if(elWrap){
-    const depois = s.getBoundingClientRect().top;
-    elWrap.scrollTop += (depois - antes);
+  const estavaAberto = d.open;
+  if(!elWrap){ d.open = !estavaAberto; return; }
+  if(!estavaAberto){ d.open = true; return; }
+  const scrollTopAntes = elWrap.scrollTop;
+  d.open = false;
+  // Lendo scrollTop logo após fechar, o navegador já "clampou" sozinho pro
+  // valor final correto (isso acontece na hora, antes de qualquer pintura
+  // de tela) - então esse número É o limite real, sem precisar calcular
+  // nada. A gente só não deixa esse pulo aparecer: devolve o scroll pra
+  // posição de antes (agora com um respiro temporário embaixo, criando
+  // espaço pra isso ser possível) e desce de novo suavemente até o limite
+  // real que acabamos de descobrir.
+  const limiteNatural = elWrap.scrollTop;
+  if(limiteNatural >= scrollTopAntes){ return; }
+  elWrap.style.paddingBottom = (scrollTopAntes - limiteNatural + 80) + 'px';
+  elWrap.scrollTop = scrollTopAntes;
+  let limpo = false;
+  function tirarReserva(){
+    if(limpo) return;
+    limpo = true;
+    elWrap.style.paddingBottom = '';
+    elWrap.removeEventListener('scrollend', tirarReserva);
   }
+  elWrap.addEventListener('scrollend', tirarReserva);
+  elWrap.scrollTo({top: limiteNatural, behavior: 'smooth'});
+  setTimeout(tirarReserva, 700);
 });
 // o balão é anexado direto no <body> (fora da área que rola, .wrap) -
 // sem isso, rolar a tela com o balão aberto deixava ele "pra trás",
@@ -4573,16 +4626,26 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
   }).join('');
   document.getElementById('tr-aerobico-obs').textContent = c.observacao_aerobico || '';
 
-  /* Histórico: os treinos já feitos (treino_registros), com a carga lançada em
-     cada exercício - vale tanto pra olhar o que já foi feito quanto de apoio
-     pra próxima vez (não fica mais uma caixa de lançar carga aqui na aba
-     Treino - isso passou pro botão "Iniciar treino" no Diário). */
+  /* Histórico: os treinos já feitos (treino_registros), com as séries
+     lançadas em cada exercício - vale tanto pra olhar o que já foi feito
+     quanto de apoio pra próxima vez (não fica mais uma caixa de lançar
+     carga aqui na aba Treino - isso passou pro botão "Iniciar treino" no
+     Diário). Cada exercício guarda `series` (kg x reps por série); o campo
+     antigo `carga` (um valor só, sem reps) ainda é lido aqui por garantia,
+     caso sobre algum registro de antes dessa mudança. */
   const histBox = document.getElementById('tr-historico');
   histBox.innerHTML = !registros.length
     ? '<p class="pg-vazio">Nenhum treino registrado ainda.</p>'
     : registros.map(function(rg){
-        const itens = (rg.exercicios||[]).filter(function(e){ return e.carga!=null; })
-          .map(function(e){ return e.nome+': '+fmtNum(e.carga,1)+' kg'; }).join(' · ');
+        const itens = (rg.exercicios||[]).map(function(e){
+          if(e.series && e.series.length){
+            const s = e.series.filter(function(s){ return s.kg!=null || s.reps!=null; })
+              .map(function(s){ return (s.kg!=null?fmtNum(s.kg,1)+'kg':'-')+(s.reps!=null?'×'+s.reps:''); }).join(', ');
+            return s ? e.nome+': '+s : '';
+          }
+          if(e.carga!=null) return e.nome+': '+fmtNum(e.carga,1)+' kg';
+          return '';
+        }).filter(Boolean).join(' · ');
         return '<div class="tr-hist-linha"><div class="tr-hist-cab"><span class="tr-hist-data">'+brData(rg.dia)+'</span>'
           + '<span class="tr-hist-chave">'+rg.treino_chave+'</span></div>'
           + '<div class="tr-hist-itens">'+(itens || 'Sem carga lançada')+'</div></div>';
@@ -4609,10 +4672,20 @@ async function salvarRegistroTreino(chave, c, box, btn){
   erro.classList.remove('mostra');
   if(!db || !orgAtiva || !sessaoAtual){ erro.textContent='Entre na conta primeiro.'; erro.classList.add('mostra'); return; }
   const t = c.treinos[chave];
-  const inputs = box.querySelectorAll('.tr-carga-input');
-  const exercicios = (t.ex||[]).map(function(e, idx){
-    const val = inputs[idx] ? inputs[idx].value : '';
-    return { nome: e[0], carga: val!=='' ? parseFloat(val) : null };
+  const exercicios = Array.prototype.map.call(box.querySelectorAll('.tr-serie-bloco'), function(bloco){
+    const idx = parseInt(bloco.getAttribute('data-ex'), 10);
+    const nome = (t.ex[idx]||[])[0] || '';
+    const series = Array.prototype.map.call(bloco.querySelectorAll('.tr-serie-linha'), function(linha){
+      const kgIn = linha.querySelector('.tr-serie-kg');
+      const repsIn = linha.querySelector('.tr-serie-reps');
+      const chk = linha.querySelector('.tr-serie-check');
+      return {
+        kg: kgIn && kgIn.value!=='' ? parseFloat(kgIn.value) : null,
+        reps: repsIn && repsIn.value!=='' ? parseInt(repsIn.value,10) : null,
+        feita: !!(chk && chk.getAttribute('aria-pressed')==='true')
+      };
+    });
+    return { nome: nome, series: series };
   });
   const orig = btn.textContent;
   btn.disabled = true; btn.textContent = 'Salvando...';
@@ -4642,6 +4715,7 @@ async function salvarRegistroTreino(chave, c, box, btn){
    ver rodada de unificação Início->Diário / limpeza da aba Treino). */
 let sessaoTreinoConteudo = null;
 let sessaoTreinoChave = null;
+let sessaoTreinoRegistros = [];
 async function abrirSessaoTreino(){
   document.getElementById('tela-sessao-treino').hidden = false;
   sessaoTreinoChave = null;
@@ -4666,6 +4740,16 @@ async function abrirSessaoTreino(){
     sessaoTreinoConteudo = linha.conteudo;
     const semanas = sessaoTreinoConteudo.semanas || [];
     if(!semanas.some(function(s){ return s.n===treinoSemana; })) treinoSemana = semanas[0] ? semanas[0].n : 1;
+    // histórico do usuário, pra saber o "Anterior" (kg x reps da última vez
+    // que essa série desse exercício foi feita) e pré-preencher os campos -
+    // igual a um app de treino de verdade, em vez de começar tudo em branco.
+    try{
+      const rr = await db.from('treino_registros')
+        .select('dia,treino_chave,exercicios')
+        .eq('organization_id', orgAtiva.id).eq('user_id', uid)
+        .order('dia', { ascending:false }).limit(30);
+      sessaoTreinoRegistros = (rr && rr.data) || [];
+    }catch(e){ sessaoTreinoRegistros = []; }
     montarSessaoTreino();
   }catch(e){
     corpo.innerHTML = '<p class="pg-vazio">Não deu pra carregar o treino agora.</p>';
@@ -4676,6 +4760,28 @@ function fecharSessaoTreino(){
   atualizarCardTreinoHoje();
 }
 document.getElementById('sessao-treino-fechar').onclick = fecharSessaoTreino;
+// Quantas séries mostrar de saída pra um exercício, a partir do texto de
+// "séries válidas" do plano (ex.: "3x8–10" -> 3). Sem número reconhecível,
+// cai pra 3 (o mais comum na periodização) - o "+ Adicionar série" cobre
+// qualquer caso a mais.
+function numSeriesPadrao(seriesValidas){
+  const m = /^(\d+)\s*x/i.exec(String(seriesValidas||'').trim());
+  return m ? Math.max(1, parseInt(m[1],10)) : 3;
+}
+// kg/reps da série `idxSerie` desse exercício na última vez (dia mais
+// recente, ignorando hoje) que esse treino foi registrado - ou null se
+// nunca foi feito antes.
+function serieAnterior(nomeExercicio, idxSerie){
+  const hoje = iso(new Date());
+  for(let i=0;i<sessaoTreinoRegistros.length;i++){
+    const rg = sessaoTreinoRegistros[i];
+    if(rg.dia === hoje || rg.treino_chave !== sessaoTreinoChave) continue;
+    const ex = (rg.exercicios||[]).find(function(x){ return x.nome===nomeExercicio; });
+    const s = ex && ex.series && ex.series[idxSerie];
+    if(s && (s.kg!=null || s.reps!=null)) return s;
+  }
+  return null;
+}
 function montarSessaoTreino(){
   const c = sessaoTreinoConteudo;
   const corpo = document.getElementById('sessao-treino-corpo');
@@ -4696,16 +4802,35 @@ function montarSessaoTreino(){
     if(c.core_por_treino && c.core_por_treino[sessaoTreinoChave]){
       core = '<div class="tr-core"><b>Core: </b>' + c.core_por_treino[sessaoTreinoChave].map(function(x){ return x[0]+' - '+x[1]; }).join(' · ') + '</div>';
     }
-    const registroLinhas = (t.ex||[]).map(function(e){
-      return '<div class="tr-registro-linha"><span class="tr-registro-nome">'+e[0]+'</span>'
-        + '<input type="number" step="0.5" inputmode="decimal" class="tr-carga-input" placeholder="kg"></div>';
+    const blocos = (t.ex||[]).map(function(e, idx){
+      const nSeries = numSeriesPadrao(e[3]);
+      let linhasSerie = '';
+      for(let s=0; s<nSeries; s++){
+        const ant = serieAnterior(e[0], s);
+        const antTxt = ant ? (ant.kg!=null?fmtNum(ant.kg,1):'-')+' kg × '+(ant.reps!=null?ant.reps:'-') : '—';
+        const kgVal = ant && ant.kg!=null ? ant.kg : '';
+        const repsVal = ant && ant.reps!=null ? ant.reps : '';
+        linhasSerie += '<tr class="tr-serie-linha" data-serie="'+s+'">'
+          + '<td class="tr-serie-num">'+(s+1)+'</td>'
+          + '<td class="tr-serie-anterior">'+antTxt+'</td>'
+          + '<td><input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg" value="'+kgVal+'"></td>'
+          + '<td><input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="reps" value="'+repsVal+'"></td>'
+          + '<td><button type="button" class="tr-serie-check" aria-pressed="false">✓</button></td>'
+          + '</tr>';
+      }
+      return '<div class="tr-serie-bloco" data-ex="'+idx+'">'
+        + '<div class="tr-serie-titulo">'+e[0]+'</div>'
+        + '<table class="tr-serie-tabela"><thead><tr><th>Série</th><th>Anterior</th><th>kg</th><th>Reps</th><th></th></tr></thead>'
+        + '<tbody>'+linhasSerie+'</tbody></table>'
+        + '<button type="button" class="tr-serie-add" data-ex="'+idx+'">+ Adicionar série</button>'
+        + '</div>';
     }).join('');
     corpoTreino = '<h4 style="margin-top:18px">Treino '+sessaoTreinoChave.replace('2','')+' - '+t.nome+'</h4>'
       + '<div class="tr-tabela-wrap"><table class="tr-tabela"><thead><tr><th>Exercício</th><th>Aquecimento</th><th>Teste de carga</th><th>Séries válidas</th><th>Descanso</th></tr></thead><tbody>'+linhas+'</tbody></table></div>'
       + core
       + '<div class="tr-registro" id="sessao-treino-registro">'
-      + '<div class="tr-registro-head"><span class="tr-registro-tit">Carga de hoje</span></div>'
-      + registroLinhas
+      + '<div class="tr-registro-head"><span class="tr-registro-tit">Registro de hoje</span></div>'
+      + blocos
       + '<button type="button" class="btn-pill primario" id="sessao-treino-salvar">Salvar treino de hoje</button>'
       + '<div class="erro-auth tr-erro-registro"></div>'
       + '</div>';
@@ -4713,6 +4838,29 @@ function montarSessaoTreino(){
   corpo.innerHTML = chips + corpoTreino;
   Array.prototype.forEach.call(corpo.querySelectorAll('.tr-chip-sel'), function(b){
     b.onclick = function(){ sessaoTreinoChave = b.getAttribute('data-chave'); montarSessaoTreino(); };
+  });
+  Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-check'), function(b){
+    b.onclick = function(){ b.setAttribute('aria-pressed', b.getAttribute('aria-pressed')!=='true'); };
+  });
+  Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-add'), function(b){
+    b.onclick = function(){
+      const bloco = corpo.querySelector('.tr-serie-bloco[data-ex="'+b.getAttribute('data-ex')+'"]');
+      const corpoTabela = bloco.querySelector('tbody');
+      const s = corpoTabela.querySelectorAll('.tr-serie-linha').length;
+      const linha = document.createElement('tr');
+      linha.className = 'tr-serie-linha';
+      linha.setAttribute('data-serie', s);
+      linha.innerHTML = '<td class="tr-serie-num">'+(s+1)+'</td>'
+        + '<td class="tr-serie-anterior">—</td>'
+        + '<td><input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg"></td>'
+        + '<td><input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="reps"></td>'
+        + '<td><button type="button" class="tr-serie-check" aria-pressed="false">✓</button></td>';
+      corpoTabela.appendChild(linha);
+      linha.querySelector('.tr-serie-check').onclick = function(){
+        const chk = linha.querySelector('.tr-serie-check');
+        chk.setAttribute('aria-pressed', chk.getAttribute('aria-pressed')!=='true');
+      };
+    };
   });
   const btnSalvar = document.getElementById('sessao-treino-salvar');
   if(btnSalvar){
