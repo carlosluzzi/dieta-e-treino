@@ -1231,8 +1231,11 @@ function nomesParaExportar(){
 function atualizarMarca(){
   var texto = textoIntegrantes();
   var el = document.getElementById('marca-sub');
-  if(el) el.textContent = texto;
-  document.title = 'Dieta e treino — ' + texto;
+  // Com uma pessoa só na organização não faz sentido escrever "Só você" no
+  // cabeçalho (é óbvio de quem é a conta); o texto só aparece quando há mais
+  // gente na organização, pra dizer quem está incluído (ex.: "Você e Isabela").
+  if(el) el.textContent = texto === 'Só você' ? '' : texto;
+  document.title = texto === 'Só você' ? 'Dieta e treino' : ('Dieta e treino - ' + texto);
 }
 
 /* =========================================================
@@ -1487,7 +1490,7 @@ var ParserPDF = (function(){
       var l = (linhas[i]||'').trim(); i++;
       if(!l) continue;
       var cols = l.split(/\s{2,}/).map(function(c){ return c.trim(); }).filter(Boolean);
-      if(cols[1] === '—' || cols[1] === '-') cols = [cols[0] + ' — ' + cols[2]].concat(cols.slice(3));
+      if(cols[1] === '—' || cols[1] === '-') cols = [cols[0] + ' - ' + cols[2]].concat(cols.slice(3));
       if(cols.length >= 3){
         if(atual) itens.push(atual);
         atual = { modalidade: cols[0]||'', frequencia: cols[1]||'', duracao: cols[2]||'', protocolo: cols[3]||'', momento: cols[4]||'' };
@@ -1748,6 +1751,22 @@ function atualizarNomePdfVersoes(){
   document.getElementById('vs-pdf-status').innerHTML = '';
 }
 
+/* Troca travessão longo (—) por travessão curto (-) em qualquer texto vindo de
+   fora (PDF/texto colado) antes de esse conteúdo entrar no app — o Carlos não
+   quer travessão longo em nenhum lugar da tela, só que a leitura do PDF em si
+   (ParserPDF) precisa continuar reconhecendo travessão longo, porque é assim
+   que o Pedro escreve. Percorre string/array/objeto recursivamente. */
+function normalizarTravessoes(valor){
+  if(typeof valor === 'string') return valor.replace(/\s*—\s*/g, ' - ');
+  if(Array.isArray(valor)) return valor.map(normalizarTravessoes);
+  if(valor && typeof valor === 'object'){
+    var out = {};
+    Object.keys(valor).forEach(function(k){ out[k] = normalizarTravessoes(valor[k]); });
+    return out;
+  }
+  return valor;
+}
+
 async function extrairPdfParaVersoes(){
   var input = document.getElementById('vs-pdf-arquivo');
   var status = document.getElementById('vs-pdf-status');
@@ -1765,6 +1784,11 @@ async function extrairPdfParaVersoes(){
     if(versoesEstado.tabela === 'planos_dieta') resultado = ParserPDF.parsearPdfDieta(texto);
     else if(versoesEstado.tabela === 'planos_treino') resultado = ParserPDF.parsearPdfTreino(texto);
     else resultado = ParserPDF.parsearPdfHabitosOuSuplementacao(texto);
+    // O PDF do Pedro costuma vir com travessão longo (—); o app inteiro exibe só
+    // travessão curto, então normaliza aqui, no resultado já extraído, uma vez só
+    // — a extração em si (ParserPDF) continua reconhecendo travessão longo no
+    // texto original, porque é assim que ele aparece na fonte.
+    resultado = normalizarTravessoes(resultado);
     document.getElementById('vs-json').value = JSON.stringify(resultado, null, 2);
     if(resultado.data_avaliacao && !document.getElementById('vs-vigente').value){
       document.getElementById('vs-vigente').value = resultado.data_avaliacao;
@@ -1772,7 +1796,7 @@ async function extrairPdfParaVersoes(){
     if(resultado.atualizacao && !document.getElementById('vs-label').value){
       document.getElementById('vs-label').value = resultado.atualizacao;
     }
-    status.innerHTML = '<p style="color:#1B5E20;font-size:13px">Extraído! Essa leitura é automática (sem revisão de IA) — confira o JSON abaixo com calma antes de salvar, principalmente as quantidades e os itens sem valor reconhecido.</p>';
+    status.innerHTML = '<p style="color:#1B5E20;font-size:13px">Extraído! Essa leitura é automática (sem revisão de IA) - confira o JSON abaixo com calma antes de salvar, principalmente as quantidades e os itens sem valor reconhecido.</p>';
   }catch(e){
     status.innerHTML = '<p class="erro-auth mostra">Não consegui ler esse PDF: ' + (e && e.message ? e.message : e) + '</p>';
   }finally{
@@ -1794,7 +1818,7 @@ async function carregarVersoesHistorico(){
     var linhas = (r && r.data) || [];
     if(!linhas.length){ alvo.innerHTML = '<p class="pg-vazio">Nenhuma versão cadastrada ainda.</p>'; return; }
     alvo.innerHTML = linhas.map(function(l){
-      return '<div class="pg-linha"><span class="pg-data">'+brData(l.vigente_a_partir)+'</span><span class="pg-vals">'+(l.versao_label || '—')+'</span></div>';
+      return '<div class="pg-linha"><span class="pg-data">'+brData(l.vigente_a_partir)+'</span><span class="pg-vals">'+(l.versao_label || '-')+'</span></div>';
     }).join('');
   }catch(e){
     alvo.innerHTML = '<p class="pg-vazio">Não deu pra carregar as versões agora.</p>';
@@ -1814,7 +1838,7 @@ async function usarVersaoAtualComoBase(){
       .lte('vigente_a_partir', iso(new Date()))
       .order('vigente_a_partir', { ascending:false }).limit(1);
     var linha = r && r.data && r.data[0];
-    if(!linha){ mostrarErroAuth('vs-erro', 'Não tem nenhuma versão vigente ainda pra usar de base — comece do zero.'); return; }
+    if(!linha){ mostrarErroAuth('vs-erro', 'Não tem nenhuma versão vigente ainda pra usar de base - comece do zero.'); return; }
     document.getElementById('vs-json').value = JSON.stringify(linha.conteudo, null, 2);
     if(!document.getElementById('vs-label').value) document.getElementById('vs-label').value = linha.versao_label || '';
   }catch(e){
@@ -2288,7 +2312,7 @@ function parseVal(v){
   if(m) return {n:parseFloat(m[1].replace(',','.')), u:(m[2]||'').replace(/\s*\(.*\)\s*/,'').trim()||'un'};
   return {n:null,u:String(v)};
 }
-function fmt(v){ if(v===null||v===undefined) return '—'; return typeof v==='number' ? v+' g' : String(v); }
+function fmt(v){ if(v===null||v===undefined) return '-'; return typeof v==='number' ? v+' g' : String(v); }
 function fmtQtd(n,u){
   if(u==='g') return n>=1000 ? String(Math.round(n/100)/10).replace('.',',')+' kg' : n+' g';
   const p = PLURAIS[u];
@@ -2603,14 +2627,14 @@ function totalTxt(vi,vc,nomeI,nomeC,temI,temC){
   if(na) return fmt(vi);
   if(nb) return fmt(vc);
   if(a || b) return 'a gosto';
-  return '—';
+  return '-';
 }
 function celulaTotal(vi,vc,nomeI,nomeC,temI,temC,chaveP){
   const t = totalTxt(vi,vc,nomeI,nomeC,temI,temC);
   const p = parseVal(t);
   const clicavel = p && p.n!==null && p.u==='g' && !(temI&&temC&&nomeI!==nomeC);
   const d = document.createElement(clicavel ? 'button' : 'div');
-  d.className='val p'+(t==='—'?' zero':'')+((t==='à parte'||t==='a gosto')?' sep':'');
+  d.className='val p'+(t==='-'?' zero':'')+((t==='à parte'||t==='a gosto')?' sep':'');
   d.textContent = t;
   if(clicavel){
     d.type='button';
@@ -2695,7 +2719,7 @@ function renderCompras(){
     doSec.forEach(function(l){
       const li = document.createElement('li');
       const esq = document.createElement('span');
-      const det = [l.detalhe, l.obs].filter(Boolean).join(' — ');
+      const det = [l.detalhe, l.obs].filter(Boolean).join(' - ');
       esq.appendChild(document.createTextNode(l.nome));
       if(det){ const sp=document.createElement('span'); sp.className='det'; sp.textContent=det; esq.appendChild(sp); }
       const dir = document.createElement('b'); dir.textContent = l.compra;
@@ -2719,7 +2743,7 @@ function renderCompras(){
 function textoCompleto(){
   const L = [];
   const dias = diasAtuais();
-  L.push('CARDÁPIO — '+(estado.modo==='semana'?'segunda a sexta':'fim de semana')+', '+dias+(dias>1?' dias':' dia'));
+  L.push('CARDÁPIO - '+(estado.modo==='semana'?'segunda a sexta':'fim de semana')+', '+dias+(dias>1?' dias':' dia'));
   L.push(nomesParaExportar());
   L.push('');
   PLANO[estado.modo].forEach(function(meal){
@@ -2728,7 +2752,7 @@ function textoCompleto(){
       const d = a[vIdx];
       if(!d && meal.versoes.length>1) return;
       let cab = meal.nome.toUpperCase();
-      if(meal.versoes.length>1) cab += ' — '+versao.nome+' ('+d+(d>1?' dias':' dia')+')';
+      if(meal.versoes.length>1) cab += ' - '+versao.nome+' ('+d+(d>1?' dias':' dia')+')';
       L.push(cab);
       if(meal.hora.i && meal.hora.c && meal.hora.i===meal.hora.c) L.push(meal.hora.i);
       else L.push([meal.hora.i?'Isabella '+meal.hora.i:'', meal.hora.c?'Carlos '+meal.hora.c:''].filter(Boolean).join(' / '));
@@ -2749,7 +2773,7 @@ function textoCompleto(){
     });
   });
   const r = calcularCompras();
-  L.push('LISTA DE COMPRAS — '+dias+(dias>1?' dias':' dia'));
+  L.push('LISTA DE COMPRAS - '+dias+(dias>1?' dias':' dia'));
   SECOES.forEach(function(sec){
     const doSec = r.linhas.filter(function(l){ return l.secao===sec; })
       .sort(function(a,b){ return a.nome.localeCompare(b.nome,'pt'); });
@@ -2830,8 +2854,8 @@ function htmlFatores(){
     '<table><tr><th>Alimento</th><th style="text-align:right">Correção</th><th style="text-align:right">Cocção</th></tr>'+
     ks.map(function(k){
       return '<tr><td>'+k.charAt(0).toUpperCase()+k.slice(1)+'</td><td class="q">'+
-        ((F[k].fc&&F[k].fc!==1)?F[k].fc.toFixed(2).replace('.',','):'—')+'</td><td class="q">'+
-        ((F[k].ic&&F[k].ic!==1)?F[k].ic.toFixed(2).replace('.',','):'—')+'</td></tr>';
+        ((F[k].fc&&F[k].fc!==1)?F[k].fc.toFixed(2).replace('.',','):'-')+'</td><td class="q">'+
+        ((F[k].ic&&F[k].ic!==1)?F[k].ic.toFixed(2).replace('.',','):'-')+'</td></tr>';
     }).join('')+'</table>';
 }
 function htmlOrientacoes(){
@@ -2884,6 +2908,20 @@ document.addEventListener('click', function(ev){
 });
 document.addEventListener('keydown', function(ev){ if(ev.key==='Escape') fecharBalao(); });
 window.addEventListener('resize', function(){ if(aberto) fecharBalao(); });
+
+/* Clicar num <summary> de qualquer <details> do app (Novo registro, Anamnese,
+   Listas do nutricionista, etc.) não pode rolar a tela — em alguns navegadores
+   o toggle nativo do <details> foca o <summary> e a barra fixa do topo faz o
+   navegador "corrigir" o scroll até o topo pra tentar mostrar o elemento.
+   Por isso o toggle é sempre feito manualmente aqui, sem o comportamento nativo. */
+document.addEventListener('click', function(ev){
+  const s = ev.target.closest && ev.target.closest('summary');
+  if(!s) return;
+  const d = s.parentElement;
+  if(!d || d.tagName !== 'DETAILS') return;
+  ev.preventDefault();
+  d.open = !d.open;
+});
 // o balão é anexado direto no <body> (fora da área que rola, .wrap) -
 // sem isso, rolar a tela com o balão aberto deixava ele "pra trás",
 // descolado do botão que ele deveria estar apontando.
@@ -3442,7 +3480,7 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover){
   const info = document.createElement('div'); info.className='kcal';
   const mt = macrosDaTroca(t);
   if(mt && mt.estimado) info.innerHTML = 'Contando <b>'+fmtKcal(mt.k)+' kcal</b>. Proteína, carboidrato e gordura ficam de fora, porque só as calorias foram informadas.';
-  else if(mt) info.innerHTML = 'Dá <b>'+fmtKcal(mt.k)+' kcal</b> — P '+Math.round(mt.p)+' g · C '+Math.round(mt.c)+' g · G '+Math.round(mt.g)+' g.';
+  else if(mt) info.innerHTML = 'Dá <b>'+fmtKcal(mt.k)+' kcal</b> - P '+Math.round(mt.p)+' g · C '+Math.round(mt.c)+' g · G '+Math.round(mt.g)+' g.';
   else info.textContent = 'Escolha o alimento e a quantidade para calcular.';
   box.appendChild(info);
 
@@ -3468,7 +3506,7 @@ function renderDiaBox(){
   h.textContent = DIAS_CAB[d.getDay()]+', '+d.getDate()+' de '+MESES[d.getMonth()];
   const sub = document.createElement('span'); sub.className='sub';
   sub.textContent = (fimDeSemana(d)?'Cardápio de fim de semana':'Cardápio de segunda a sexta')+
-    ' — marcando como '+nomeDoPerfil(diario.perfil);
+    ' - marcando como '+nomeDoPerfil(diario.perfil);
   box.appendChild(h); box.appendChild(sub);
 
   meals.forEach(function(meal){
@@ -3773,7 +3811,7 @@ function renderResumo(){
     ul.style.margin='0'; ul.style.paddingLeft='16px'; ul.style.fontSize='13px'; ul.style.lineHeight='1.6';
     e.obs.forEach(function(o){
       const li = document.createElement('li');
-      li.textContent = brData(o.dia)+' — '+o.txt;
+      li.textContent = brData(o.dia)+' - '+o.txt;
       ul.appendChild(li);
     });
     alvo.appendChild(ul);
@@ -3785,7 +3823,7 @@ function textoRelatorio(){
   const nome = nomeDoPerfil(diario.perfil);
   const L = [];
   const ini = brData(e.dias[0]), fim = brData(e.dias[e.dias.length-1]);
-  L.push('DIÁRIO DA DIETA — '+nome);
+  L.push('DIÁRIO DA DIETA - '+nome);
   L.push('Período de '+ini+' a '+fim+' ('+e.diasMarcados+(e.diasMarcados===1?' dia marcado':' dias marcados')+')');
   L.push('');
   if(!e.tot.total){ L.push('Nenhuma refeição marcada nesse período.'); return L.join('\n'); }
@@ -3912,20 +3950,20 @@ const EVO_METRICAS = [
   { key:'imc', rotulo:'IMC', unidade:'', casas:2,
     calcular:function(m, ref){ if(m.peso_kg==null || !ref || !ref.altura_m) return null; return m.peso_kg / (ref.altura_m*ref.altura_m); },
     faixa:function(ref){ return ref && ref.imc_min!=null ? [ref.imc_min, ref.imc_max] : null; } },
-  { key:'gordura', rotulo:'% de gordura', unidade:'%', casas:1,
+  { key:'gordura', rotulo:'% de gordura', unidade:'%', casas:2,
     calcular:function(m){ return m.percentual_gordura; },
     faixa:function(ref){ return ref && ref.gordura_min!=null ? [ref.gordura_min, ref.gordura_max] : null; } },
-  { key:'magra', rotulo:'% de massa magra', unidade:'%', casas:1,
+  { key:'magra', rotulo:'% de massa magra', unidade:'%', casas:2,
     calcular:function(m){ return m.percentual_massa_magra; },
     faixa:function(ref){ return ref && ref.magra_min!=null ? [ref.magra_min, ref.magra_max] : null; } },
-  { key:'gordakg', rotulo:'Massa gorda', unidade:'kg', casas:1,
+  { key:'gordakg', rotulo:'Massa gorda', unidade:'kg', casas:2,
     calcular:function(m){ if(m.peso_kg==null || m.percentual_gordura==null) return null; return m.peso_kg * m.percentual_gordura/100; },
     faixa:function(ref){ return ref && ref.gorda_kg_min!=null ? [ref.gorda_kg_min, ref.gorda_kg_max] : null; } },
-  { key:'magrakg', rotulo:'Massa magra', unidade:'kg', casas:1,
+  { key:'magrakg', rotulo:'Massa magra', unidade:'kg', casas:2,
     calcular:function(m){ if(m.peso_kg==null || m.percentual_massa_magra==null) return null; return m.peso_kg * m.percentual_massa_magra/100; },
     faixa:function(ref){ return ref && ref.magra_kg_min!=null ? [ref.magra_kg_min, ref.magra_kg_max] : null; } }
 ];
-function fmtNum(v, casas){ if(v==null || isNaN(v)) return '—'; return v.toFixed(casas).replace('.', ','); }
+function fmtNum(v, casas){ if(v==null || isNaN(v)) return '-'; return v.toFixed(casas).replace('.', ','); }
 function faixaSituacao(v, min, max){ if(v<min) return 'abaixo'; if(v>max) return 'alto'; return 'normal'; }
 function barraFaixa(valor, min, max){
   const largura = Math.max(max-min, 0.0001);
@@ -3952,7 +3990,7 @@ function montarCardsEvolucao(){
     const valor = m.calcular(ultimo, evoReferencia);
     let html = '<div class="evo-card"><div class="evo-card-rotulo">'+m.rotulo+'</div>';
     if(valor==null){
-      html += '<div class="evo-card-num">—</div>';
+      html += '<div class="evo-card-num">-</div>';
       if(m.key==='imc') html += '<div class="evo-card-semfaixa">Configure sua altura</div>';
     }else{
       html += '<div class="evo-card-num">'+fmtNum(valor, m.casas)+(m.unidade ? ' <small>'+m.unidade+'</small>' : '')+'</div>';
@@ -4018,7 +4056,7 @@ function abrirReferenciasDlg(){
   const r = evoReferencia || {};
   document.getElementById('dlg-tit').textContent = 'Minhas faixas de referência';
   function par(rotulo, idMin, idMax, vMin, vMax){
-    return '<div class="campo"><label>'+rotulo+' — mínimo / máximo</label>'
+    return '<div class="campo"><label>'+rotulo+' - mínimo / máximo</label>'
       +'<div style="display:flex;gap:8px">'
       +'<input type="number" step="0.01" inputmode="decimal" id="'+idMin+'" value="'+valOuVazio(vMin)+'" placeholder="mín.">'
       +'<input type="number" step="0.01" inputmode="decimal" id="'+idMax+'" value="'+valOuVazio(vMax)+'" placeholder="máx.">'
@@ -4093,7 +4131,7 @@ async function renderProgresso(){
       if(l.peso_kg!==null && l.peso_kg!==undefined) partes.push(l.peso_kg+' kg');
       if(l.percentual_gordura!==null && l.percentual_gordura!==undefined) partes.push(l.percentual_gordura+'% gordura');
       if(l.percentual_massa_magra!==null && l.percentual_massa_magra!==undefined) partes.push(l.percentual_massa_magra+'% magra');
-      return '<div class="pg-linha"><span class="pg-data">'+brData(l.data)+'</span><span class="pg-vals">'+(partes.join(' · ')||'—')+'</span></div>';
+      return '<div class="pg-linha"><span class="pg-data">'+brData(l.data)+'</span><span class="pg-vals">'+(partes.join(' · ')||'-')+'</span></div>';
     }).join('');
   }catch(e){
     lista.innerHTML = '<p class="pg-vazio">Não deu pra carregar agora.</p>';
@@ -4370,7 +4408,7 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
   const divBox = document.getElementById('tr-divisao');
   divBox.innerHTML = (c.divisao.ordem||[]).map(function(d){
     const off = d === 'OFF';
-    const label = off ? 'Descanso' : d.replace('A2','A (2º)');
+    const label = off ? '×' : d;
     return '<span class="tr-chip'+(off?' off':'')+'">'+label+'</span>';
   }).join('');
   document.getElementById('tr-divisao-nota').textContent = c.divisao.nota || '';
@@ -4401,7 +4439,7 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
     }).join('');
     let core = '';
     if(c.core_por_treino && c.core_por_treino[k]){
-      core = '<div class="tr-core"><b>Core: </b>' + c.core_por_treino[k].map(function(x){ return x[0]+' — '+x[1]; }).join(' · ') + '</div>';
+      core = '<div class="tr-core"><b>Core: </b>' + c.core_por_treino[k].map(function(x){ return x[0]+' - '+x[1]; }).join(' · ') + '</div>';
     }
     const ultimoReg = registros.find(function(rg){ return rg.treino_chave===k; });
     const registroLinhas = (t.ex||[]).map(function(e, idx){
@@ -4417,7 +4455,7 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
       + '<div class="erro-auth tr-erro-registro"></div>'
       + '</div>';
     return '<div class="tr-treino-card">'
-      + '<h4>Treino '+letra+(ehBonus?' · bônus':'')+' — '+t.nome+'</h4>'
+      + '<h4>Treino '+letra+(ehBonus?' · bônus':'')+' - '+t.nome+'</h4>'
       + '<div class="tr-tabela-wrap"><table class="tr-tabela"><thead><tr><th>Exercício</th><th>Aquecimento</th><th>Teste de carga</th><th>Séries válidas</th><th>Descanso</th></tr></thead><tbody>'+linhas+'</tbody></table></div>'
       + core
       + registroBox
@@ -4443,7 +4481,7 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
   }
   function blocoPares(titulo, arr){
     if(!arr || !arr.length) return '';
-    return '<h5>'+titulo+'</h5><ul>'+arr.map(function(x){ return '<li>'+x[0]+' — '+x[1]+'</li>'; }).join('')+'</ul>';
+    return '<h5>'+titulo+'</h5><ul>'+arr.map(function(x){ return '<li>'+x[0]+' - '+x[1]+'</li>'; }).join('')+'</ul>';
   }
   document.getElementById('tr-extra').innerHTML =
     bloco('Anamnese', c.anamnese) + bloco('Diagnóstico', c.diagnostico) + bloco('Objetivo da fase', c.objetivo_fase) +
