@@ -124,7 +124,8 @@
   .top-inner{max-width:720px;margin:0 auto;padding:0 16px;display:flex;flex-wrap:wrap;
     gap:10px 16px;align-items:center;justify-content:space-between}
   .marca{font-size:22px;font-weight:700;letter-spacing:-.021em;line-height:1.18}
-  .marca small{display:block;font-size:13px;font-weight:400;color:var(--ink2);letter-spacing:0;margin-top:1px}
+  .marca-logo{display:block;width:32px;height:32px;border-radius:8px;object-fit:cover}
+  .marca small{display:block;font-size:13px;font-weight:400;color:var(--ink2);letter-spacing:0;margin-top:4px}
 
   /* ---------- segmented control ---------- */
   .switch{display:inline-flex;background:var(--fill);border-radius:12px;padding:2px;gap:2px}
@@ -135,6 +136,8 @@
   .switch button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--sh-min)}
   .switch button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
   .switch-wrap{flex-wrap:wrap}
+  .resumo .switch{display:flex;width:100%}
+  .resumo .switch button{flex:1 1 0;text-align:center}
 
   /* ---------- abas ---------- */
   .abas{display:inline-flex;background:var(--fill);border-radius:12px;padding:2px;gap:2px;margin-top:16px}
@@ -280,7 +283,7 @@
   .perfil{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px}
   .perfil .rot{font-size:15px;color:var(--ink2)}
   .mes{display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px}
-  .mes h2{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0;text-transform:capitalize}
+  .mes h2{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0}
   .mes .nav{display:flex;gap:6px;align-items:center}
   .mes .nav button{height:34px;min-width:34px;padding:0 12px;font-size:15px;font-weight:500;background:var(--card);
     border:0;border-radius:12px;cursor:pointer;color:var(--azul);box-shadow:var(--sh-min)}
@@ -516,7 +519,7 @@
 
   /* ---------- aba Hoje ---------- */
   .hoje-cabecalho{padding:20px 0 4px}
-  .hoje-cabecalho h1{font-size:26px;font-weight:700;letter-spacing:-.022em;margin:0;text-transform:capitalize}
+  .hoje-cabecalho h1{font-size:26px;font-weight:700;letter-spacing:-.022em;margin:0}
   .hoje-sub{font-size:14px;color:var(--ink2);margin:2px 0 0}
   .hoje-cartao{background:var(--card);border-radius:var(--r);padding:16px;margin-top:14px;box-shadow:var(--sh)}
   .hoje-cartao.desabilitado{opacity:.62}
@@ -543,15 +546,19 @@
   .hb-vazio-bloco{font-size:14px;color:var(--ink2);padding:2px 0 10px;margin:0}
   .hb-vazio-bloco .btn-pill{margin-top:8px}
   /* ---------- aba Progresso ---------- */
-  .progresso-form-card{background:var(--card);border-radius:var(--r);padding:18px 16px;margin-top:16px;box-shadow:var(--sh)}
+  .progresso-form-card{background:var(--card);border-radius:var(--r);padding:14px 16px;margin-top:16px;box-shadow:var(--sh)}
   .progresso-form-card h2, .progresso-historico h2, .evo-secao h2{font-size:17px;font-weight:700;letter-spacing:-.015em;margin:0 0 14px}
   .progresso-form-card summary{font-size:17px;font-weight:700;letter-spacing:-.015em;cursor:pointer;list-style:none;
     display:flex;align-items:center;justify-content:space-between}
   .progresso-form-card summary::-webkit-details-marker{display:none}
   .progresso-form-card summary::after{content:'›';color:var(--ink3);font-weight:400;transition:transform .15s ease}
   .progresso-form-card[open] summary::after{transform:rotate(90deg)}
-  .progresso-form-card[open] summary{margin-bottom:14px}
+  .progresso-form-card[open] summary{margin-bottom:10px}
   .progresso-form-card .campo:first-of-type{margin-top:2px}
+  .progresso-form-card .campo{margin-bottom:8px}
+  .progresso-form-card .campo label{margin:0 0 4px;font-size:12.5px}
+  .progresso-form-card .pg-linha3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .progresso-form-card .pg-linha3 .campo label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .progresso-historico{margin-top:20px}
   .pg-linha{display:flex;justify-content:space-between;align-items:baseline;background:var(--card);
     border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--sh-min)}
@@ -599,7 +606,9 @@
   .tr-sub{font-size:13px;color:var(--ink2);margin:0}
   .tr-nota{font-size:12.5px;color:var(--ink2);margin:8px 0 0;line-height:1.4}
   .tr-divisao{display:flex;gap:6px;flex-wrap:wrap}
-  .tr-chip{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:12px;background:var(--fill);color:var(--ink2)}
+  #tr-divisao{flex-wrap:nowrap}
+  #tr-divisao .tr-chip{flex:1 1 0}
+  .tr-chip{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:12px;background:var(--fill);color:var(--ink2);text-align:center}
   .tr-chip.off{background:transparent;color:var(--ink3);border:1px dashed var(--hair)}
   .tr-treino-card{background:var(--card);border-radius:var(--r);padding:16px;margin-top:12px;box-shadow:var(--sh)}
   .tr-treino-card h4{font-size:16px;font-weight:700;letter-spacing:-.01em;margin:0 0 12px}
@@ -756,7 +765,7 @@
 <div id="app-shell" hidden>
 <header class="top">
   <div class="top-inner">
-    <div class="marca">Dieta e treino<small id="marca-sub"></small></div>
+    <div class="marca"><img class="marca-logo" src="icons/icon-192.png" alt="Dieta e treino"><small id="marca-sub"></small></div>
     <button class="conta-btn" id="btn-conta" title="Sua conta">?</button>
   </div>
 </header>
@@ -939,9 +948,11 @@
     <details class="progresso-form-card">
       <summary>Novo registro</summary>
       <div class="campo"><label for="pg-data">Data</label><input type="date" id="pg-data"></div>
-      <div class="campo"><label for="pg-peso">Peso (kg)</label><input type="number" step="0.1" id="pg-peso" inputmode="decimal"></div>
-      <div class="campo"><label for="pg-gordura">% de gordura</label><input type="number" step="0.1" id="pg-gordura" inputmode="decimal"></div>
-      <div class="campo"><label for="pg-magra">% de massa magra</label><input type="number" step="0.1" id="pg-magra" inputmode="decimal"></div>
+      <div class="pg-linha3">
+        <div class="campo"><label for="pg-peso">Peso (kg)</label><input type="number" step="0.1" id="pg-peso" inputmode="decimal"></div>
+        <div class="campo"><label for="pg-gordura">% gordura</label><input type="number" step="0.1" id="pg-gordura" inputmode="decimal"></div>
+        <div class="campo"><label for="pg-magra">% magra</label><input type="number" step="0.1" id="pg-magra" inputmode="decimal"></div>
+      </div>
       <div class="campo"><label for="pg-obs">Observação</label><input type="text" id="pg-obs"></div>
       <button class="btn-pill primario" id="pg-salvar">Salvar medição</button>
       <div class="erro-auth" id="pg-erro"></div>
@@ -967,7 +978,7 @@
     <span>Treino</span>
   </button>
   <button id="aba-progresso" aria-pressed="false" class="tabbar-item">
-    <svg class="tabbar-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M5 15.5 9.5 11l3 2.6L19 7.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7.5h4v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg class="tabbar-ico" viewBox="18 17 1060 1060" aria-hidden="true"><path fill="currentColor" d="M607.04 234.5C623.94 237.35 644.45 229.91 659.9 239.58C679.89 252.1 674.74 278.43 674.8 298.5C674.84 310.63 675.8 323.41 663.85 330.36C657.63 333.99 650.42 333.28 643.5 333.3C631.83 333.35 620.17 333.28 608.5 333.27C567.17 333.25 525.83 333.23 484.5 333.26C473.17 333.27 461.83 333.27 450.5 333.22C444.08 333.2 437.66 333.81 431.78 330.7C419.92 324.44 420.29 312.22 420.29 300.5C420.29 292.5 420.27 284.5 420.29 276.5C420.34 262.98 420.78 249.94 432.7 241.18C448.44 229.6 470.17 237.25 487.99 234.5C489.44 218.17 494.74 203.8 506.73 192.22C531.51 168.27 575.26 172.03 595.42 200.1C602.88 210.49 605.74 221.98 607.04 234.5ZM542.74 212.37C515.23 218.45 523.81 260.8 552.36 254.7C580.02 248.79 570.67 206.21 542.74 212.37ZM407.73 271.29C407.73 282.41 407.73 293.53 407.73 304.64C400.47 305.7 392.85 305.16 385.5 305.14C372.5 305.12 359.5 305.15 346.5 305.15C337.62 305.15 326.26 303.44 320.57 312.07C315.31 320.04 317.74 337.01 317.73 346.5C317.69 373.83 317.94 401.17 317.75 428.5C317.01 535.16 317.89 641.84 317.86 748.5C317.85 778.83 317.86 809.17 317.87 839.5C317.87 848.85 315.73 869.04 321.03 876.45C327.67 885.74 340.62 883.27 350.5 883.31C376.16 883.4 401.84 883.41 427.5 883.33C503.83 883.12 580.17 883.34 656.5 883.29C680.83 883.28 705.17 883.36 729.5 883.3C739.46 883.28 755.19 884.8 764.46 882.85C781.8 879.2 777.17 853.39 777.19 840.5C777.26 796.17 777.15 751.83 777.2 707.5C777.32 609.5 777.24 511.5 777.31 413.5C777.33 388.83 777.37 364.17 777.3 339.5C777.28 330.5 779.8 317.62 773.08 310.41C766.51 303.36 756.22 305.14 747.5 305.12C734.5 305.09 721.5 305.17 708.5 305.17C701.5 305.16 694.27 305.64 687.35 304.71C687.35 293.64 687.35 282.57 687.35 271.5C699.94 269.5 713.73 270.96 726.5 270.95C752.19 270.93 782.82 265.99 801.34 288.16C814.83 304.3 813.4 320.67 813.39 340.5C813.38 364.5 813.36 388.5 813.4 412.5C813.57 520.5 813.29 628.5 813.36 736.5C813.38 767.17 813.32 797.83 813.34 828.5C813.34 842.7 815.02 861.71 812.68 875.34C809.3 895.1 793.31 912.78 773.38 916.69C759.53 919.41 744.55 917.83 730.5 917.87C703.5 917.94 676.5 917.94 649.5 917.88C569.5 917.7 489.5 917.86 409.5 917.89C391.17 917.9 372.83 917.86 354.5 917.88C327.99 917.91 305.34 919.26 289.45 894.05C280.11 879.23 281.67 862.27 281.65 845.5C281.63 817.5 281.67 789.5 281.64 761.5C281.51 651.5 281.51 541.5 281.65 431.5C281.69 402.17 281.65 372.83 281.62 343.5C281.61 325.24 279.86 307.21 291.07 291.63C308.97 266.77 336.49 271.01 363.5 270.97C378.05 270.94 393.29 269.7 407.73 271.29ZM466.5 439.92C471.23 442.5 476.7 443.62 481.65 445.8C487.07 448.2 492.28 451.65 497.88 453.55C507.62 456.86 516.85 459.53 523.48 468.04C534.13 481.72 529.84 498.67 532.14 514.5C533.08 520.95 533.73 527.74 535.5 534.02C536.54 537.68 538.8 540.81 540.23 544.3C542.35 549.5 543.81 555.22 544.58 560.78C546.74 576.49 544.98 596.09 545.77 612.5C546.54 628.79 553.66 650.3 535.63 660.14C529.83 663.31 521.33 663.53 520.08 655.5C518.92 647.97 518.74 638.24 520.41 630.79C522.19 622.86 527.51 617.36 526.53 608.8C524.9 594.58 515.91 582.5 511.32 569.23C508.42 560.84 509.86 553.5 508.42 545.24C507.59 540.53 504.72 535.91 503.12 531.4C501.32 526.3 500.35 520.97 499.5 515.64C497.23 519.1 496.3 523.38 494.73 527.25C490.19 538.49 487.42 549.2 488.35 561.47C489.15 571.99 492.95 581.58 495.75 591.64C498.44 601.34 500.64 611.5 501.82 621.5C503.91 639.41 503.61 657.62 500.71 675.41C498.93 686.35 494.66 697.43 494.13 708.5C493.46 722.65 499.5 735.64 500.57 749.65C501.72 764.79 496.16 782.66 493.04 797.5C490.6 809.11 487.53 823.6 492.64 834.84C495.9 842.01 503.29 845.93 506.91 852.63C509.11 856.69 507.86 861.25 503.53 863.13C497.81 865.62 487.12 864.96 481.82 861.64C479.36 860.1 478.07 857.48 475.7 855.83C472.39 853.54 468.38 853.13 467.64 848.5C467.22 845.87 467.82 843.13 467.92 840.5C468.06 836.51 467.58 832.49 467.89 828.5C468.45 821.03 469.43 814.05 469.01 806.5C468.16 791.07 461.09 776.84 460.05 761.5C459.32 750.64 462.91 740.26 462.81 729.5C462.71 719.27 457.67 709.58 456.28 699.46C454.5 686.48 453.05 673.44 451.27 660.45C450.42 654.28 450.55 647.67 448.5 641.77C444.83 661.61 443.22 681.88 439.37 701.66C437.73 710.14 433.45 718.12 432.4 726.69C430.9 739 435.41 751.71 433.87 764.5C432.29 777.64 426.19 789.71 424.48 802.89C422.95 814.7 424.52 826.68 424.57 838.5C424.58 842.05 425.57 845.78 424.71 849.29C423.73 853.26 419.89 853.51 417.01 855.51C414.44 857.28 413.02 860.18 410.3 861.82C405.06 864.99 394 865.59 388.45 863.1C384.22 861.2 382.84 856.67 385.08 852.61C388.24 846.88 395.62 842.57 399.56 835.09C405.85 823.15 402.16 808.1 399.83 795.53C396.92 779.86 392.55 763.53 394.18 747.5C395.55 734.14 401.87 722.1 401.42 708.5C401.1 698.96 397.6 689.87 396.24 680.46C393.85 663.94 392.6 647.21 394.29 630.53C395.44 619.17 397.26 607.75 400.33 596.74C403.94 583.81 409.12 571.04 409.57 557.46C410.05 542.91 404.5 528.61 398.6 515.5C396.72 519.4 396.76 524.74 395.51 529.02C393.97 534.29 390.29 539.29 389.36 544.67C388.03 552.35 389.27 559.8 386.9 567.45C382.4 581.99 371.84 594.86 371.03 610.5C370.54 619.92 377.76 628.13 378.07 639.5C378.32 648.36 379.81 664.57 366.55 661.83C365.06 661.52 363.62 660.95 362.27 660.26C343.79 650.87 350.71 628.73 351.78 612.5C352.94 594.97 350.35 576.88 353.01 559.5C354.38 550.56 358.97 543.6 361.65 535.24C363.97 528.03 364.66 519.9 365.67 512.42C367.92 495.86 363.27 480.13 375.71 466.21C382.38 458.75 391.05 456.79 400.02 453.5C406.33 451.19 412.24 447.48 418.48 444.91C422.78 443.14 427.6 442.25 431.5 439.78C431.67 437.67 432.19 434.93 431.51 432.87C430.78 430.65 427.46 428.41 425.98 426.53C422.86 422.56 420.18 417.82 418.46 413.07C409.88 389.29 419.85 356.66 449.5 357.01C480.14 357.38 488.77 391.43 478.85 415.39C476.99 419.86 474.25 423.98 471.21 427.73C469.94 429.3 467.18 431.04 466.52 432.9C465.77 434.96 466.33 437.8 466.5 439.92ZM700.64 380.15C706.01 378.35 717.55 379.54 723.5 379.71C726.04 379.78 728.62 379.98 730.18 382.29C733 386.48 731.41 399.2 731.43 404.5C731.51 423.5 731.39 442.5 731.37 461.5C731.37 469.83 731.59 478.17 731.45 486.5C731.38 490.25 730.77 494.19 726.49 495.13C720.37 496.48 712.77 495.38 706.5 495.36C703.82 495.35 700.91 495.62 698.78 493.72C695.09 490.43 696.61 478.36 696.62 473.5C696.63 455.17 696.61 436.83 696.62 418.5C696.63 409.17 696.64 399.83 696.65 390.5C696.65 386.73 696.15 381.66 700.64 380.15ZM653.64 420.26C660.02 418.77 667.96 420.04 674.5 420.06C677.42 420.07 680.1 419.91 682.14 422.34C684.64 425.31 683.77 429.9 683.78 433.5C683.82 443.17 683.75 452.83 683.76 462.5C683.77 470.5 683.92 478.51 683.82 486.5C683.78 489.89 683.29 493.84 679.45 494.96C676.09 495.95 671.97 495.34 668.5 495.34C663.86 495.34 655.33 496.87 651.42 494.08C647.81 491.5 648.83 486.31 648.86 482.5C648.94 471.84 648.85 461.16 648.84 450.5C648.83 443.17 648.64 435.82 648.79 428.5C648.87 424.99 649.64 421.19 653.64 420.26ZM605.61 448.26C612.08 446.91 619.9 448.04 626.5 448.1C629.32 448.13 632.12 448.03 634.03 450.47C636.16 453.2 635.47 457.44 635.51 460.71C635.6 468.63 635.64 476.57 635.56 484.5C635.52 487.9 636 492.91 632.21 494.67C628.69 496.3 612.03 495.7 607.5 495.33C604.99 495.12 602.76 494.38 601.54 491.96C599.3 487.52 600.73 476.73 600.71 471.5C600.68 465.7 598.1 449.83 605.61 448.26ZM593.66 541.23C600.72 539.19 622.91 540.71 631.5 540.72C658.17 540.75 684.83 540.77 711.5 540.74C721.63 540.72 746.23 536.26 745.28 552.5C744.43 567.02 721.2 562.92 711.5 562.94C685.5 563 659.5 562.96 633.5 562.93C624.83 562.92 616.17 562.94 607.5 562.93C603.64 562.92 599.46 563.39 595.66 562.7C585.38 560.84 582.94 544.34 593.66 541.23ZM594.63 595.2C602.56 593.21 622.32 594.74 631.5 594.72C658.17 594.67 684.83 594.76 711.5 594.76C721.73 594.76 745.93 590.24 745.17 606.5C744.47 621.25 720.38 616.92 710.5 616.92C684.83 616.91 659.17 616.92 633.5 616.93C622.2 616.94 606.41 618.36 595.63 616.69C584.34 614.94 583.53 597.99 594.63 595.2ZM594.62 649.23C602.73 647.16 623.12 648.76 632.5 648.76C658.83 648.77 685.17 648.83 711.5 648.76C721.73 648.73 745.76 644.4 745.22 660.5C744.72 675.25 721.24 671.06 711.5 671.05C685.5 671.03 659.5 671.07 633.5 671.05C622.65 671.05 605.67 672.48 595.54 670.81C584.39 668.98 583.69 652.02 594.62 649.23ZM593.81 723.38C602.26 720.42 612.36 724.22 613.58 733.76C614.47 740.81 613.67 748.4 613.67 755.5C613.68 771.83 613.58 788.17 613.67 804.5C613.72 813.37 613.98 824.75 602.5 826.17C595.51 827.03 587.77 823.98 586.22 816.41C584.71 808.96 585.85 800.1 585.89 792.5C585.96 777.83 585.8 763.17 585.88 748.5C585.92 740.09 583.57 726.97 593.81 723.38ZM704.72 723.27C712.31 720.73 722.26 723.91 723.9 732.54C725.32 740.06 724.15 748.85 724.13 756.5C724.1 772.5 724.16 788.5 724.1 804.5C724.07 813.65 724.39 825.01 712.5 826.15C706.04 826.78 698.85 824.41 697.07 817.45C695.35 810.75 696.57 802.4 696.56 795.5C696.54 779.83 696.61 764.17 696.62 748.5C696.62 739.96 694.23 726.77 704.72 723.27ZM579.16 738.08C579.16 762.36 579.16 786.65 579.16 810.93C576.51 810.94 573.94 811.07 571.39 810.22C556.89 805.38 559.95 787.45 559.93 775.5C559.91 763.79 556.45 744.37 570.63 739.13C573.43 738.09 576.22 738.11 579.16 738.08ZM730.54 810.5C730.54 786.5 730.54 762.5 730.54 738.5C752.78 735.68 749.64 761.23 749.64 775.5C749.63 789.47 752.1 813.48 730.54 810.5ZM689.91 762.91C689.91 770.45 689.91 778 689.91 785.55C666.59 785.55 643.26 785.55 619.94 785.55C619.94 778 619.94 770.45 619.94 762.91C643.26 762.91 666.59 762.91 689.91 762.91Z"/></svg>
     <span>Evolução</span>
   </button>
 </nav>
@@ -3496,7 +3507,9 @@ function renderDiario(){
     diario.mes = new Date(h.getFullYear(), h.getMonth(), 1);
     diario.sel = iso(h);
   }
-  document.getElementById('mes-nome').textContent = MESES[diario.mes.getMonth()]+' de '+diario.mes.getFullYear();
+  const nomeMesAtual = MESES[diario.mes.getMonth()];
+  document.getElementById('mes-nome').textContent =
+    nomeMesAtual.charAt(0).toUpperCase()+nomeMesAtual.slice(1)+' de '+diario.mes.getFullYear();
   renderCalendario();
   renderDiaBox();
   renderResumo();
@@ -4054,8 +4067,11 @@ function abrirBackup(){
 function renderResumoHoje(){
   const hj = new Date();
   const diaIso = iso(hj);
-  document.getElementById('hoje-data').textContent =
-    hj.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
+  const dataPorExtenso = hj.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'});
+  const partesData = dataPorExtenso.split(' de ');
+  document.getElementById('hoje-data').textContent = (partesData.length===2)
+    ? partesData[0].charAt(0).toUpperCase()+partesData[0].slice(1)+' de '+partesData[1].charAt(0).toUpperCase()+partesData[1].slice(1)
+    : dataPorExtenso.charAt(0).toUpperCase()+dataPorExtenso.slice(1);
 
   const meals = refeicoesDoDia(hj);
   const reg = (diario.log[diario.perfil]||{})[diaIso];
