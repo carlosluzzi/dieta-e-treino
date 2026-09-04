@@ -81,6 +81,7 @@
     --hair:#EBEBF0; --fill:#EFEFF3; --fill2:#F7F7F9;
     --isa:#D63C71; --isa-soft:#FDF0F5; --car:#0A72C9; --car-soft:#EEF5FC;
     --ok:#2E9E52; --ad:#DE8C0A; --nao:#DB4436;
+    --ok-soft:#E3F5E9; --ad-soft:#FCEEDA; --nao-soft:#FBE8E6;
     --pan:#3A3A3C; --azul:#0A72C9;
     --r:16px; --rc:11px;
     --sh:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05);
@@ -515,12 +516,42 @@
 
   /* ---------- aba Progresso ---------- */
   .progresso-form-card{background:var(--card);border-radius:var(--r);padding:18px 16px;margin-top:16px;box-shadow:var(--sh)}
-  .progresso-form-card h2, .progresso-historico h2{font-size:17px;font-weight:700;letter-spacing:-.015em;margin:0 0 14px}
+  .progresso-form-card h2, .progresso-historico h2, .evo-secao h2{font-size:17px;font-weight:700;letter-spacing:-.015em;margin:0 0 14px}
   .progresso-historico{margin-top:20px}
   .pg-linha{display:flex;justify-content:space-between;align-items:baseline;background:var(--card);
     border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--sh-min)}
   .pg-linha .pg-data{font-size:13px;color:var(--ink2)}
   .pg-linha .pg-vals{font-size:14px;font-weight:600;text-align:right}
+
+  /* ---------- aba Evolução: cartões com faixa de referência + gráfico ---------- */
+  .evo-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:14px}
+  .evo-card{background:var(--card);border-radius:var(--r);padding:14px;box-shadow:var(--sh)}
+  .evo-card-rotulo{font-size:12.5px;color:var(--ink2);font-weight:600}
+  .evo-card-num{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
+  .evo-card-num small{font-size:13px;font-weight:500;color:var(--ink2);margin-left:2px}
+  .evo-card-situacao{font-size:12px;font-weight:600;margin-top:3px}
+  .evo-card-situacao.abaixo{color:var(--ad)}
+  .evo-card-situacao.normal{color:var(--ok)}
+  .evo-card-situacao.alto{color:var(--nao)}
+  .evo-card-semfaixa{font-size:11.5px;color:var(--ink3);margin-top:8px}
+  .evo-barra{position:relative;height:16px;margin-top:10px}
+  .evo-barra-trilho{position:absolute;left:0;right:0;top:5px;height:6px;border-radius:12px;overflow:hidden;background:var(--fill)}
+  .evo-barra-zona{position:absolute;top:0;bottom:0}
+  .evo-zona-abaixo{background:var(--ad-soft)}
+  .evo-zona-normal{background:var(--ok-soft)}
+  .evo-zona-alto{background:var(--nao-soft)}
+  .evo-barra-marcador{position:absolute;top:8px;width:12px;height:12px;margin-left:-6px;margin-top:-6px;
+    border-radius:50%;background:var(--azul);border:2px solid var(--card);box-shadow:var(--sh-min)}
+  .evo-link{display:block;background:none;border:0;padding:10px 2px;margin:0;color:var(--azul);
+    font-size:13px;font-weight:600;cursor:pointer;text-align:left}
+  .evo-secao{margin-top:24px}
+  .evo-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:12px}
+  .evo-chip{flex:0 0 auto;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:12px;
+    background:var(--fill);color:var(--ink2);border:0;cursor:pointer;white-space:nowrap}
+  .evo-chip[aria-pressed="true"]{background:var(--azul);color:#fff}
+  .evo-grafico-wrap{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:14px 8px;overflow-x:auto}
+  .evo-grafico-wrap svg{display:block}
+  .evo-grafico-wrap .pg-vazio{padding:24px 12px;text-align:center}
 
   .tr-secao{margin-top:18px}
   .tr-secao h2{font-size:20px;font-weight:700;letter-spacing:-.02em;margin:0 0 4px}
@@ -827,6 +858,18 @@
   </div>
 
   <div id="vista-progresso" hidden>
+    <section class="evo-cards" id="evo-cards"></section>
+    <button class="evo-link" id="btn-config-referencias" onclick="abrirReferenciasDlg()">Configurar minhas faixas de referência</button>
+
+    <section class="evo-secao">
+      <h2>Evolução</h2>
+      <div class="evo-chips" id="evo-metricas-chips"></div>
+      <div class="evo-grafico-wrap">
+        <svg id="evo-grafico"></svg>
+        <p id="evo-grafico-vazio" class="pg-vazio" hidden>Registre pelo menos 2 medições pra ver a evolução aqui.</p>
+      </div>
+    </section>
+
     <section class="progresso-form-card">
       <h2>Registrar hoje</h2>
       <div class="campo"><label for="pg-data">Data</label><input type="date" id="pg-data"></div>
@@ -868,7 +911,7 @@
   </button>
   <button id="aba-progresso" aria-pressed="false" class="tabbar-item">
     <svg class="tabbar-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M5 15.5 9.5 11l3 2.6L19 7.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7.5h4v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <span>Progresso</span>
+    <span>Evolução</span>
   </button>
 </nav>
 </div>
@@ -3852,19 +3895,197 @@ document.getElementById('hoje-ir-habitos').onclick = function(){ abrirHabitosDlg
 document.getElementById('hoje-ir-progresso').onclick = function(){ setAba('progresso'); };
 
 /* --- aba Progresso --- */
+// ---------- aba Evolução (cartões com faixa + gráfico por medição real) ----------
+// A faixa "normal" de cada métrica vem da avaliação que o próprio nutricionista
+// passou pra cada pessoa (progresso_referencias) - nunca é estimada por fórmula.
+// O gráfico liga os pontos pelas datas reais das medições, sem período fixo
+// (30/90/180 dias) - o Carlos pediu isso de propósito, já que ele não mede em
+// intervalo regular.
+let evoRegistros = []; // em ordem crescente (mais antiga primeiro)
+let evoReferencia = null;
+let evoMetricaAtual = 'peso';
+const EVO_METRICAS = [
+  { key:'peso', rotulo:'Peso', unidade:'kg', casas:1,
+    calcular:function(m){ return m.peso_kg; },
+    faixa:function(){ return null; } },
+  { key:'imc', rotulo:'IMC', unidade:'', casas:2,
+    calcular:function(m, ref){ if(m.peso_kg==null || !ref || !ref.altura_m) return null; return m.peso_kg / (ref.altura_m*ref.altura_m); },
+    faixa:function(ref){ return ref && ref.imc_min!=null ? [ref.imc_min, ref.imc_max] : null; } },
+  { key:'gordura', rotulo:'% de gordura', unidade:'%', casas:1,
+    calcular:function(m){ return m.percentual_gordura; },
+    faixa:function(ref){ return ref && ref.gordura_min!=null ? [ref.gordura_min, ref.gordura_max] : null; } },
+  { key:'magra', rotulo:'% de massa magra', unidade:'%', casas:1,
+    calcular:function(m){ return m.percentual_massa_magra; },
+    faixa:function(ref){ return ref && ref.magra_min!=null ? [ref.magra_min, ref.magra_max] : null; } },
+  { key:'gordakg', rotulo:'Massa gorda', unidade:'kg', casas:1,
+    calcular:function(m){ if(m.peso_kg==null || m.percentual_gordura==null) return null; return m.peso_kg * m.percentual_gordura/100; },
+    faixa:function(ref){ return ref && ref.gorda_kg_min!=null ? [ref.gorda_kg_min, ref.gorda_kg_max] : null; } },
+  { key:'magrakg', rotulo:'Massa magra', unidade:'kg', casas:1,
+    calcular:function(m){ if(m.peso_kg==null || m.percentual_massa_magra==null) return null; return m.peso_kg * m.percentual_massa_magra/100; },
+    faixa:function(ref){ return ref && ref.magra_kg_min!=null ? [ref.magra_kg_min, ref.magra_kg_max] : null; } }
+];
+function fmtNum(v, casas){ if(v==null || isNaN(v)) return '—'; return v.toFixed(casas).replace('.', ','); }
+function faixaSituacao(v, min, max){ if(v<min) return 'abaixo'; if(v>max) return 'alto'; return 'normal'; }
+function barraFaixa(valor, min, max){
+  const largura = Math.max(max-min, 0.0001);
+  const pad = largura*0.35;
+  const escMin = min-pad, escMax = max+pad, escLargura = escMax-escMin;
+  const pct = function(v){ return Math.max(0, Math.min(100, (v-escMin)/escLargura*100)); };
+  const pMin = pct(min), pMax = pct(max), pValor = pct(valor);
+  return '<div class="evo-barra">'
+    +'<div class="evo-barra-trilho">'
+      +'<div class="evo-barra-zona evo-zona-abaixo" style="left:0;width:'+pMin+'%"></div>'
+      +'<div class="evo-barra-zona evo-zona-normal" style="left:'+pMin+'%;width:'+(pMax-pMin)+'%"></div>'
+      +'<div class="evo-barra-zona evo-zona-alto" style="left:'+pMax+'%;width:'+(100-pMax)+'%"></div>'
+    +'</div>'
+    +'<div class="evo-barra-marcador" style="left:'+pValor+'%"></div>'
+  +'</div>';
+}
+function montarCardsEvolucao(){
+  const cont = document.getElementById('evo-cards');
+  if(!cont) return;
+  if(!evoRegistros.length){ cont.innerHTML = ''; return; }
+  const ultimo = evoRegistros[evoRegistros.length-1];
+  const situacaoTxt = { abaixo:'Abaixo', normal:'Normal', alto:'Alto' };
+  cont.innerHTML = EVO_METRICAS.map(function(m){
+    const valor = m.calcular(ultimo, evoReferencia);
+    let html = '<div class="evo-card"><div class="evo-card-rotulo">'+m.rotulo+'</div>';
+    if(valor==null){
+      html += '<div class="evo-card-num">—</div>';
+      if(m.key==='imc') html += '<div class="evo-card-semfaixa">Configure sua altura</div>';
+    }else{
+      html += '<div class="evo-card-num">'+fmtNum(valor, m.casas)+(m.unidade ? ' <small>'+m.unidade+'</small>' : '')+'</div>';
+      const faixa = m.faixa(evoReferencia);
+      if(faixa){
+        const sit = faixaSituacao(valor, faixa[0], faixa[1]);
+        html += '<div class="evo-card-situacao '+sit+'">'+situacaoTxt[sit]+'</div>';
+        html += barraFaixa(valor, faixa[0], faixa[1]);
+      }else if(m.key!=='peso'){
+        html += '<div class="evo-card-semfaixa">Sem faixa configurada</div>';
+      }
+    }
+    html += '</div>';
+    return html;
+  }).join('');
+}
+function montarChipsEvolucao(){
+  const cont = document.getElementById('evo-metricas-chips');
+  if(!cont) return;
+  cont.innerHTML = EVO_METRICAS.map(function(m){
+    return '<button type="button" class="evo-chip" data-m="'+m.key+'" aria-pressed="'+(m.key===evoMetricaAtual)+'">'+m.rotulo+'</button>';
+  }).join('');
+  Array.prototype.forEach.call(cont.querySelectorAll('.evo-chip'), function(btn){
+    btn.onclick = function(){ evoMetricaAtual = btn.dataset.m; montarChipsEvolucao(); desenharGraficoEvolucao(); };
+  });
+}
+function desenharGraficoEvolucao(){
+  const svgEl = document.getElementById('evo-grafico');
+  const vazioEl = document.getElementById('evo-grafico-vazio');
+  if(!svgEl || !vazioEl) return;
+  const metrica = EVO_METRICAS.filter(function(m){ return m.key===evoMetricaAtual; })[0];
+  const pontos = evoRegistros
+    .map(function(r){ return { data:r.data, valor: metrica.calcular(r, evoReferencia) }; })
+    .filter(function(p){ return p.valor!=null && !isNaN(p.valor); });
+  if(pontos.length < 2){
+    svgEl.innerHTML = ''; svgEl.hidden = true; vazioEl.hidden = false; return;
+  }
+  vazioEl.hidden = true; svgEl.hidden = false;
+  const largura = Math.max(280, pontos.length*70);
+  const altura = 180, mTopo = 26, mBaixo = 30, mLado = 20;
+  const valores = pontos.map(function(p){ return p.valor; });
+  let vMin = Math.min.apply(null, valores), vMax = Math.max.apply(null, valores);
+  if(vMin===vMax){ vMin -= 1; vMax += 1; }
+  const folga = (vMax-vMin)*0.3;
+  const escMin = vMin-folga, escMax = vMax+folga;
+  const escY = function(v){ return mTopo + (1-(v-escMin)/(escMax-escMin))*(altura-mTopo-mBaixo); };
+  const t0 = new Date(pontos[0].data).getTime(), t1 = new Date(pontos[pontos.length-1].data).getTime();
+  const escX = function(d){ return t1===t0 ? mLado : mLado + (new Date(d).getTime()-t0)/(t1-t0)*(largura-mLado*2); };
+  const pts = pontos.map(function(p){ return { x:escX(p.data), y:escY(p.valor), v:p.valor, d:p.data }; });
+  let svg = '<polyline points="'+pts.map(function(c){ return c.x+','+c.y; }).join(' ')+'" fill="none" stroke="#0A72C9" stroke-width="2"/>';
+  pts.forEach(function(c){
+    svg += '<circle cx="'+c.x+'" cy="'+c.y+'" r="4" fill="#0A72C9" stroke="#fff" stroke-width="1.5"/>';
+    svg += '<text x="'+c.x+'" y="'+(c.y-10)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#1D1D1F">'+fmtNum(c.v, metrica.casas)+'</text>';
+    svg += '<text x="'+c.x+'" y="'+(altura-12)+'" text-anchor="middle" font-size="10" fill="#A1A1A6">'+brData(c.d)+'</text>';
+  });
+  svgEl.setAttribute('viewBox', '0 0 '+largura+' '+altura);
+  svgEl.setAttribute('width', largura);
+  svgEl.setAttribute('height', altura);
+  svgEl.innerHTML = svg;
+}
+function valOuVazio(v){ return v==null ? '' : String(v); }
+function abrirReferenciasDlg(){
+  const r = evoReferencia || {};
+  document.getElementById('dlg-tit').textContent = 'Minhas faixas de referência';
+  function par(rotulo, idMin, idMax, vMin, vMax){
+    return '<div class="campo"><label>'+rotulo+' — mínimo / máximo</label>'
+      +'<div style="display:flex;gap:8px">'
+      +'<input type="number" step="0.01" inputmode="decimal" id="'+idMin+'" value="'+valOuVazio(vMin)+'" placeholder="mín.">'
+      +'<input type="number" step="0.01" inputmode="decimal" id="'+idMax+'" value="'+valOuVazio(vMax)+'" placeholder="máx.">'
+      +'</div></div>';
+  }
+  document.getElementById('dlg-body').innerHTML =
+    '<p style="font-size:13px;color:var(--ink2);margin:0 0 14px;line-height:1.4">Preenche uma vez só, com o que o nutricionista te passou na avaliação. Serve só pra desenhar a barrinha de cada medida - se deixar em branco, o cartão mostra o número sem a faixa.</p>'
+    +'<div class="campo"><label for="ref-altura">Sua altura (m)</label><input type="number" step="0.01" inputmode="decimal" id="ref-altura" value="'+valOuVazio(r.altura_m)+'"></div>'
+    +par('IMC', 'ref-imc-min', 'ref-imc-max', r.imc_min, r.imc_max)
+    +par('% de gordura', 'ref-gordura-min', 'ref-gordura-max', r.gordura_min, r.gordura_max)
+    +par('% de massa magra', 'ref-magra-min', 'ref-magra-max', r.magra_min, r.magra_max)
+    +par('Massa gorda (kg)', 'ref-gordakg-min', 'ref-gordakg-max', r.gorda_kg_min, r.gorda_kg_max)
+    +par('Massa magra (kg)', 'ref-magrakg-min', 'ref-magrakg-max', r.magra_kg_min, r.magra_kg_max)
+    +'<button class="btn-pill primario" id="ref-salvar">Salvar</button>'
+    +'<div class="erro-auth" id="ref-erro"></div>';
+  abrirDlg();
+  document.getElementById('ref-salvar').onclick = salvarReferencias;
+}
+async function salvarReferencias(){
+  const btn = document.getElementById('ref-salvar');
+  const erro = document.getElementById('ref-erro');
+  erro.classList.remove('mostra');
+  if(!db || !orgAtiva || !sessaoAtual){ erro.textContent='Entre na conta primeiro.'; erro.classList.add('mostra'); return; }
+  const num = function(id){ const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
+  btn.disabled = true;
+  try{
+    await db.from('progresso_referencias').upsert({
+      organization_id: orgAtiva.id,
+      user_id: sessaoAtual.user.id,
+      altura_m: num('ref-altura'),
+      imc_min: num('ref-imc-min'), imc_max: num('ref-imc-max'),
+      gordura_min: num('ref-gordura-min'), gordura_max: num('ref-gordura-max'),
+      magra_min: num('ref-magra-min'), magra_max: num('ref-magra-max'),
+      gorda_kg_min: num('ref-gordakg-min'), gorda_kg_max: num('ref-gordakg-max'),
+      magra_kg_min: num('ref-magrakg-min'), magra_kg_max: num('ref-magrakg-max'),
+      atualizado_por: sessaoAtual.user.id
+    }, { onConflict: 'organization_id,user_id' });
+    fecharDlg();
+    renderProgresso();
+  }catch(e){
+    erro.textContent = 'Não deu pra salvar agora.'; erro.classList.add('mostra');
+  }finally{ btn.disabled = false; }
+}
 async function renderProgresso(){
   const campoData = document.getElementById('pg-data');
   if(!campoData.value) campoData.value = iso(new Date());
   const lista = document.getElementById('pg-lista');
   lista.innerHTML = '<p class="pg-vazio">Carregando...</p>';
   try{
-    if(!db || !orgAtiva || !sessaoAtual){ lista.innerHTML = '<p class="pg-vazio">Entre na conta pra ver o histórico.</p>'; return; }
+    if(!db || !orgAtiva || !sessaoAtual){
+      lista.innerHTML = '<p class="pg-vazio">Entre na conta pra ver o histórico.</p>';
+      evoRegistros = []; evoReferencia = null; montarCardsEvolucao();
+      return;
+    }
     const uid = sessaoAtual.user.id;
     const r = await db.from('progresso_medidas')
       .select('data,peso_kg,percentual_gordura,percentual_massa_magra,observacoes')
       .eq('organization_id', orgAtiva.id).eq('user_id', uid)
       .order('data', { ascending:false }).limit(60);
+    const rRef = await db.from('progresso_referencias')
+      .select('altura_m,imc_min,imc_max,gordura_min,gordura_max,magra_min,magra_max,gorda_kg_min,gorda_kg_max,magra_kg_min,magra_kg_max')
+      .eq('organization_id', orgAtiva.id).eq('user_id', uid).limit(1);
     const linhas = (r && r.data) || [];
+    evoReferencia = (rRef && rRef.data && rRef.data[0]) || null;
+    evoRegistros = linhas.slice().reverse();
+    montarCardsEvolucao();
+    montarChipsEvolucao();
+    desenharGraficoEvolucao();
     if(!linhas.length){ lista.innerHTML = '<p class="pg-vazio">Nenhuma medição ainda.</p>'; return; }
     lista.innerHTML = linhas.map(function(l){
       const partes = [];
