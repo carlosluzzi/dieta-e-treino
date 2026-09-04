@@ -399,6 +399,11 @@
      tambem acontece com .btn-pill, desde que passou a ser escondido
      dinamicamente (btn-pular-instalar no mobile/tablet) */
   .btn-pill[hidden]{display:none}
+  .perfil[hidden]{display:none}
+  /* mesmo bug de novo: .perfil{display:flex} vencia o [hidden] do navegador,
+     então o bloco "Vendo <nome>" continuava aparecendo mesmo sozinho na
+     organização (deveria sumir - montarSwitchesPerfil() já escondia certo,
+     só o CSS que não deixava esconder de verdade) */
   .tela-cheia{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;
     align-items:center;justify-content:center;padding:24px 16px;overflow-y:auto}
   .tela-cheia .cartao{width:100%;max-width:400px;background:var(--card);border-radius:16px;
@@ -473,11 +478,11 @@
   .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;
     background:rgba(255,255,255,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);
     backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid rgba(0,0,0,.08)}
-  .tabbar-item{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:2px;
+  .tabbar-item{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:4px;
     background:none;border:0;border-radius:12px;margin:0 3px;
-    padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px)) 2px;
+    padding:9px 2px calc(9px + env(safe-area-inset-bottom,0px)) 2px;
     color:var(--ink3);cursor:pointer;min-width:0;transition:background-color .15s ease}
-  .tabbar-ico{width:24px;height:24px}
+  .tabbar-ico{width:27px;height:27px}
   .tabbar-item span{font-size:10.5px;font-weight:500;letter-spacing:-.005em;white-space:nowrap}
   .tabbar-item[aria-pressed="true"]{color:var(--azul);background:var(--fill)}
   .tabbar-item:focus-visible{outline:2px solid var(--azul);outline-offset:1px;border-radius:8px}
@@ -510,13 +515,16 @@
   .hb-item label{font-size:14px;line-height:1.4;flex:1}
   .hb-vazio-bloco{font-size:14px;color:var(--ink2);padding:2px 0 10px;margin:0}
   .hb-vazio-bloco .btn-pill{margin-top:8px}
-  .hoje-atalhos{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
-  .hoje-atalho{flex:1 1 140px;padding:12px 14px;border-radius:14px;border:0;background:var(--fill2);
-    color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;text-align:left}
-
   /* ---------- aba Progresso ---------- */
   .progresso-form-card{background:var(--card);border-radius:var(--r);padding:18px 16px;margin-top:16px;box-shadow:var(--sh)}
   .progresso-form-card h2, .progresso-historico h2, .evo-secao h2{font-size:17px;font-weight:700;letter-spacing:-.015em;margin:0 0 14px}
+  .progresso-form-card summary{font-size:17px;font-weight:700;letter-spacing:-.015em;cursor:pointer;list-style:none;
+    display:flex;align-items:center;justify-content:space-between}
+  .progresso-form-card summary::-webkit-details-marker{display:none}
+  .progresso-form-card summary::after{content:'›';color:var(--ink3);font-weight:400;transition:transform .15s ease}
+  .progresso-form-card[open] summary::after{transform:rotate(90deg)}
+  .progresso-form-card[open] summary{margin-bottom:14px}
+  .progresso-form-card .campo:first-of-type{margin-top:2px}
   .progresso-historico{margin-top:20px}
   .pg-linha{display:flex;justify-content:space-between;align-items:baseline;background:var(--card);
     border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--sh-min)}
@@ -691,10 +699,6 @@
 <header class="top">
   <div class="top-inner">
     <div class="marca">Dieta e treino<small id="marca-sub"></small></div>
-    <div class="switch" role="group" aria-label="Dia">
-      <button id="btn-semana" aria-pressed="true">Segunda a sexta</button>
-      <button id="btn-fds" aria-pressed="false">Fim de semana</button>
-    </div>
     <button class="conta-btn" id="btn-conta" title="Sua conta">?</button>
   </div>
 </header>
@@ -738,11 +742,6 @@
       <div class="hoje-cartao-barra"><div class="hoje-cartao-barra-fill" id="hoje-habitos-barra"></div></div>
       <button class="hoje-cartao-cta" id="hoje-ir-habitos">Ver rotina e suplementação</button>
     </div>
-
-    <div class="hoje-atalhos">
-      <button class="hoje-atalho" id="hoje-ir-plano">Ver plano da dieta</button>
-      <button class="hoje-atalho" id="hoje-ir-progresso">Registrar progresso</button>
-    </div>
   </div>
 
   <div id="vista-diario" hidden>
@@ -782,6 +781,10 @@
   </div>
 
   <div id="vista-plano" hidden>
+  <div class="switch" role="group" aria-label="Dia" style="margin-bottom:14px">
+    <button id="btn-semana" aria-pressed="true">Segunda a sexta</button>
+    <button id="btn-fds" aria-pressed="false">Fim de semana</button>
+  </div>
   <div class="planejador">
     <span class="rot">Planejando</span>
     <div class="stepper" id="st-dias"></div>
@@ -812,6 +815,11 @@
     <h2>Listas do nutricionista</h2>
     <div id="blocos-listas"></div>
   </section>
+
+  <div class="rodape">
+    <p><button class="reset" id="reset">Voltar tudo ao plano original</button></p>
+    <p>As escolhas ficam salvas neste aparelho e também vão dentro do link. Quantidades de substituição calculadas pelas tabelas de equivalência do plano; quando o plano traz uma quantidade específica, ela vale mais que a tabela.</p>
+  </div>
   </div>
 
   <div id="vista-treino" hidden>
@@ -870,8 +878,8 @@
       </div>
     </section>
 
-    <section class="progresso-form-card">
-      <h2>Registrar hoje</h2>
+    <details class="progresso-form-card">
+      <summary>Novo registro</summary>
       <div class="campo"><label for="pg-data">Data</label><input type="date" id="pg-data"></div>
       <div class="campo"><label for="pg-peso">Peso (kg)</label><input type="number" step="0.1" id="pg-peso" inputmode="decimal"></div>
       <div class="campo"><label for="pg-gordura">% de gordura</label><input type="number" step="0.1" id="pg-gordura" inputmode="decimal"></div>
@@ -879,16 +887,11 @@
       <div class="campo"><label for="pg-obs">Observação</label><input type="text" id="pg-obs"></div>
       <button class="btn-pill primario" id="pg-salvar">Salvar medição</button>
       <div class="erro-auth" id="pg-erro"></div>
-    </section>
+    </details>
     <section class="progresso-historico">
       <h2>Histórico</h2>
       <div id="pg-lista"></div>
     </section>
-  </div>
-
-  <div class="rodape">
-    <p><button class="reset" id="reset">Voltar tudo ao plano original</button></p>
-    <p>As escolhas ficam salvas neste aparelho e também vão dentro do link. Quantidades de substituição calculadas pelas tabelas de equivalência do plano; quando o plano traz uma quantidade específica, ela vale mais que a tabela.</p>
   </div>
 </div>
 
@@ -902,7 +905,7 @@
     <span>Dieta</span>
   </button>
   <button id="aba-treino" aria-pressed="false" class="tabbar-item">
-    <svg class="tabbar-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="3" y="9.5" width="2.5" height="5" rx="1" fill="currentColor"/><rect x="18.5" y="9.5" width="2.5" height="5" rx="1" fill="currentColor"/><rect x="5.5" y="8" width="2" height="8" rx="1" fill="currentColor"/><rect x="16.5" y="8" width="2" height="8" rx="1" fill="currentColor"/></svg>
+    <svg class="tabbar-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 12h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="2" y="9" width="3" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="19" y="9" width="3" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="4.6" y="7.3" width="2.3" height="9.4" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="17.1" y="7.3" width="2.3" height="9.4" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
     <span>Treino</span>
   </button>
   <button id="aba-diario" aria-pressed="false" class="tabbar-item">
@@ -3890,9 +3893,7 @@ document.getElementById('hoje-ir-diario').onclick = function(){
   diario.sel = iso(hj);
   setAba('diario');
 };
-document.getElementById('hoje-ir-plano').onclick = function(){ setAba('plano'); };
 document.getElementById('hoje-ir-habitos').onclick = function(){ abrirHabitosDlg(); };
-document.getElementById('hoje-ir-progresso').onclick = function(){ setAba('progresso'); };
 
 /* --- aba Progresso --- */
 // ---------- aba Evolução (cartões com faixa + gráfico por medição real) ----------
