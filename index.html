@@ -116,7 +116,13 @@
   /* iOS aproxima a tela ao focar campo com menos de 16px. Todos os campos ficam
      em 16px e o tamanho aparente é ajustado pelo espaçamento. */
   select,textarea,input{font-size:16px}
-  #app-shell{position:fixed;top:var(--vv-top,0px);left:0;right:0;height:var(--vh-real,100vh);overflow:hidden;z-index:20}
+  /* altura em 100dvh (unidade "dynamic viewport height" do CSS moderno,
+     igual ao .app do PSCPP Tracker) em vez do --vh-real calculado via JS -
+     o dvh já é resolvido pelo próprio Safari considerando a área real
+     visível (barra do navegador, tela cheia do app instalado, etc), sem
+     precisar recalcular na mão. --vv-top continua vindo do JS (visualViewport)
+     só pra desviar do teclado, que é um problema à parte da altura. */
+  #app-shell{position:fixed;top:var(--vv-top,0px);left:0;right:0;height:100dvh;overflow:hidden;z-index:20}
   #app-shell:not([hidden]){display:flex;flex-direction:column}
   /* --tabbar-h precisa somar exatamente os mesmos números do .tabbar-item
      (padding-topo + ícone + gap + linha do rótulo + padding-baixo, ver
