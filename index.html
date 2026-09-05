@@ -652,7 +652,7 @@
   .tr-detalhes h5{font-size:11.5px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.02em;margin:14px 0 4px}
   .tr-detalhes h5:first-child{margin-top:10px}
   .tr-detalhes ul{margin:0 0 0 18px;padding:0;font-size:13px;color:var(--ink2);line-height:1.5}
-  .tr-registro{margin-top:14px;padding-top:14px;border-top:1px solid var(--hair)}
+  .tr-registro{margin-top:14px;padding-top:14px}
   .tr-registro-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px}
   .tr-registro-tit{font-size:11.5px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.02em}
   .tr-registro-ultima{font-size:12px;color:var(--ink3)}
@@ -667,15 +667,15 @@
   /* Sessão de treino com séries individuais (kg x reps por série, igual a um
      app de treino "de verdade", inspirado no Strong) - ver
      abrirSessaoTreino/montarSessaoTreino/ligarSwipeSerie/abrirMenuExercicio. */
-  .tr-serie-bloco{margin-top:18px;padding-top:14px;border-top:1px solid var(--hair)}
+  .tr-serie-bloco{margin-top:18px;padding-top:14px}
   .tr-serie-bloco:first-of-type{margin-top:14px}
   .tr-serie-cab{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
   .tr-serie-titulo-wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1 1 auto;min-width:0}
   .tr-serie-titulo{font-size:14.5px;font-weight:700;color:var(--azul);margin:0}
-  .tr-tipo-badge{flex-shrink:0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
-    padding:2px 7px;border-radius:6px}
-  .tr-tipo-badge.tr-tipo-ativacao{background:var(--fill);color:var(--ink2)}
-  .tr-tipo-badge.tr-tipo-isometrico{background:#FFF1E6;color:#B4530A}
+  .tr-tipo-badge{flex-shrink:0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
+    padding:4px 9px;border-radius:8px}
+  .tr-tipo-badge.tr-tipo-ativacao{background:#2E4C6D;color:#fff}
+  .tr-tipo-badge.tr-tipo-isometrico{background:#9A4B00;color:#fff}
   .tr-serie-menu-btn{flex-shrink:0;width:26px;height:26px;border-radius:8px;border:none;background:var(--fill);
     color:var(--azul);font-size:14px;font-weight:800;line-height:1;cursor:pointer;letter-spacing:1px}
   .tr-serie-nota{margin:-2px 0 10px;padding:8px 10px;border-radius:10px;background:#FFF6D8;color:#8A6D1A;
@@ -715,7 +715,7 @@
   .tr-semana-faixa{margin:-6px 0 14px;font-size:12px;color:var(--ink2);line-height:1.4}
 
   /* menu "..." de opções por exercício + nota, no estilo cartão escuro do Strong */
-  .tr-menu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:80;display:flex;
+  .tr-menu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:120;display:flex;
     align-items:flex-end;justify-content:center;padding:0 12px calc(16px + env(safe-area-inset-bottom,0px))}
   .tr-menu-card{width:100%;max-width:420px;background:#2C2C2E;border-radius:16px;overflow:hidden;
     box-shadow:0 8px 30px rgba(0,0,0,.35)}
@@ -732,7 +732,7 @@
   .tr-nota-botoes .btn-pill{flex:1 1 0;margin-top:0;padding:10px}
 
   .tr-descanso-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));
-    transform:translateX(-50%);z-index:85;background:#2C2C2E;color:#fff;border-radius:999px;
+    transform:translateX(-50%);z-index:120;background:#2C2C2E;color:#fff;border-radius:999px;
     padding:10px 10px 10px 16px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;
     box-shadow:0 8px 24px rgba(0,0,0,.35)}
   .tr-descanso-fechar{width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,255,255,.15);
@@ -4706,7 +4706,6 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
   Object.keys(c.treinos||{}).forEach(function(k){ if(ordemUnica.indexOf(k)===-1) ordemUnica.push(k); });
   document.getElementById('tr-treinos').innerHTML = ordemUnica.map(function(k){
     const t = c.treinos[k]; if(!t) return '';
-    const letra = k.replace('2','');
     const ehBonus = (c.divisao.ordem||[]).indexOf(k)===-1;
     const linhas = (t.ex||[]).map(function(e){
       return '<tr><td class="tr-ex-nome">'+e[0]+'</td><td class="tr-num">'+e[1]+'</td><td class="tr-num">'+e[2]+'</td><td class="tr-num">'+e[3]+'</td><td class="tr-num">'+e[4]+'</td></tr>';
@@ -4716,7 +4715,7 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
       core = '<div class="tr-core"><b>Core: </b>' + c.core_por_treino[k].map(function(x){ return x[0]+' - '+x[1]; }).join(' · ') + '</div>';
     }
     return '<div class="tr-treino-card">'
-      + '<h4>Treino '+letra+(ehBonus?' · bônus':'')+' - '+t.nome+'</h4>'
+      + '<h4>Treino '+k+(ehBonus?' · bônus':'')+' - '+t.nome+'</h4>'
       + '<div class="tr-tabela-wrap"><table class="tr-tabela"><thead><tr><th>Exercício</th><th>Aquecimento</th><th>Teste de carga</th><th>Séries válidas</th><th>Descanso</th></tr></thead><tbody>'+linhas+'</tbody></table></div>'
       + core
       + '</div>';
@@ -4989,7 +4988,7 @@ function montarSessaoTreino(){
         + '<button type="button" class="tr-serie-add" data-ex="'+idx+'" data-tipo="'+tipo+'">+ Adicionar série</button>'
         + '</div>';
     }).join('');
-    corpoTreino = '<h4 style="margin-top:18px">Treino '+sessaoTreinoChave.replace('2','')+' - '+t.nome+'</h4>'
+    corpoTreino = '<h4 style="margin-top:18px">Treino '+sessaoTreinoChave+' - '+t.nome+'</h4>'
       + semanaInfo
       + core
       + '<div class="tr-registro" id="sessao-treino-registro">'
