@@ -87,12 +87,12 @@
 </script>
 <style>
   :root{
-    --bg:#F5F5F7; --card:#FFFFFF; --ink:#1D1D1F; --ink2:#6E6E73; --ink3:#A1A1A6;
-    --hair:#EBEBF0; --fill:#EFEFF3; --fill2:#F7F7F9;
+    --bg:#F9F9F7; --card:#FFFFFF; --ink:#1D1D1F; --ink2:#6E6E73; --ink3:#A1A1A6;
+    --hair:#E9E9E5; --fill:#F0F0EE; --fill2:#F5F5F3;
     --isa:#D63C71; --isa-soft:#FDF0F5; --car:#0A72C9; --car-soft:#EEF5FC;
     --ok:#2E9E52; --ad:#DE8C0A; --nao:#DB4436;
     --ok-soft:#E3F5E9; --ad-soft:#FCEEDA; --nao-soft:#FBE8E6;
-    --pan:#3A3A3C; --azul:#0A72C9;
+    --pan:#3A3A3C; --azul:#AB181E; --azul-soft:#FBEAEB;
     --r:16px; --rc:11px;
     --sh:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05);
     --sh-min:0 1px 3px rgba(0,0,0,.10);
@@ -670,7 +670,12 @@
   .tr-serie-bloco{margin-top:18px;padding-top:14px;border-top:1px solid var(--hair)}
   .tr-serie-bloco:first-of-type{margin-top:14px}
   .tr-serie-cab{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+  .tr-serie-titulo-wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1 1 auto;min-width:0}
   .tr-serie-titulo{font-size:14.5px;font-weight:700;color:var(--azul);margin:0}
+  .tr-tipo-badge{flex-shrink:0;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
+    padding:2px 7px;border-radius:6px}
+  .tr-tipo-badge.tr-tipo-ativacao{background:var(--fill);color:var(--ink2)}
+  .tr-tipo-badge.tr-tipo-isometrico{background:#FFF1E6;color:#B4530A}
   .tr-serie-menu-btn{flex-shrink:0;width:26px;height:26px;border-radius:8px;border:none;background:var(--fill);
     color:var(--azul);font-size:14px;font-weight:800;line-height:1;cursor:pointer;letter-spacing:1px}
   .tr-serie-nota{margin:-2px 0 10px;padding:8px 10px;border-radius:10px;background:#FFF6D8;color:#8A6D1A;
@@ -703,6 +708,11 @@
   .tr-serie-check[aria-pressed="true"]{background:var(--ink);color:#fff}
   .tr-serie-add{margin-top:6px;width:100%;padding:9px;border-radius:10px;border:1px dashed var(--hair);
     background:none;color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer}
+  /* ativação (ex.: Wall Slide) - sem kg/reps/anterior, só um checklist de
+     séries com a meta de repetições fixa do plano. */
+  .tr-linha-ativacao{grid-template-columns:32px 1fr 32px}
+  .tr-serie-ativacao-label{font-size:13px;color:var(--ink2)}
+  .tr-semana-faixa{margin:-6px 0 14px;font-size:12px;color:var(--ink2);line-height:1.4}
 
   /* menu "..." de opções por exercício + nota, no estilo cartão escuro do Strong */
   .tr-menu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:80;display:flex;
@@ -4865,6 +4875,12 @@ function numSeriesPadrao(seriesValidas){
   const m = /^(\d+)\s*x/i.exec(String(seriesValidas||'').trim());
   return m ? Math.max(1, parseInt(m[1],10)) : 3;
 }
+// "—" no plano é o jeito da nutricionista escrever "não se aplica" - não
+// deve virar uma tag vazia tipo "Teste de carga —" na tela.
+function temValorPlano(v){
+  const s = String(v||'').trim();
+  return !!s && s!=='—' && s!=='-';
+}
 // kg/reps da série `idxSerie` desse exercício na última vez (dia mais
 // recente, ignorando hoje) que esse treino foi registrado - ou null se
 // nunca foi feito antes.
@@ -4901,47 +4917,80 @@ function montarSessaoTreino(){
     if(c.core_por_treino && c.core_por_treino[sessaoTreinoChave]){
       core = '<div class="tr-core"><b>Core: </b>' + c.core_por_treino[sessaoTreinoChave].map(function(x){ return x[0]+' - '+x[1]; }).join(' · ') + '</div>';
     }
+    // info da semana atual (série/RIR/intervalo padrão do bloco todo) - vale
+    // pra qualquer exercício do treino, por isso fica uma vez só no topo.
+    const semAtual = (c.semanas||[]).find(function(s){ return s.n===treinoSemana; });
+    const semanaInfo = semAtual
+      ? '<div class="tr-semana-faixa">Semana '+semAtual.n+' · Séries válidas: '+semAtual.reps+' · Intensidade: '+semAtual.rir+' · Intervalos: '+semAtual.intervalo+'</div>'
+      : '';
+    const badgesTipo = { ativacao: 'Ativação', isometrico: 'Isométrico' };
     const blocos = (t.ex||[]).map(function(e, idx){
-      const nSeries = numSeriesPadrao(e[3]);
-      // colunas de referência do plano (aquecimento, teste de carga, alvo de
-      // séries e descanso) que antes ficavam só na tabela de cima - agora
+      const tipo = e[5] || 'normal';
+      const badge = badgesTipo[tipo] ? '<span class="tr-tipo-badge tr-tipo-'+tipo+'">'+badgesTipo[tipo]+'</span>' : '';
+      // colunas de referência do plano (aquecimento, teste de carga, séries
+      // válidas e descanso) que antes ficavam só na tabela de cima - agora
       // aparecem junto de cada exercício aqui embaixo, pra não precisar
-      // rolar pra cima e pra baixo o tempo todo durante o treino.
+      // rolar pra cima e pra baixo o tempo todo durante o treino. "—" no
+      // plano significa "não se aplica", então não vira tag.
       const metaPartes = [];
-      if(e[1]) metaPartes.push('<span class="tr-meta-tag"><b>Aquecimento</b>'+e[1]+'</span>');
-      if(e[2]) metaPartes.push('<span class="tr-meta-tag"><b>Teste de carga</b>'+e[2]+'</span>');
-      if(e[3]) metaPartes.push('<span class="tr-meta-tag"><b>Alvo</b>'+e[3]+'</span>');
-      if(e[4]) metaPartes.push('<span class="tr-meta-tag"><b>Descanso</b>'+e[4]+'</span>');
+      if(temValorPlano(e[1])) metaPartes.push('<span class="tr-meta-tag"><b>Aquecimento</b>'+e[1]+'</span>');
+      if(temValorPlano(e[2])) metaPartes.push('<span class="tr-meta-tag"><b>Teste de carga</b>'+e[2]+'</span>');
+      if(temValorPlano(e[3])) metaPartes.push('<span class="tr-meta-tag"><b>Séries válidas</b>'+e[3]+'</span>');
+      if(temValorPlano(e[4])) metaPartes.push('<span class="tr-meta-tag"><b>Descanso</b>'+e[4]+'</span>');
       const meta = metaPartes.length ? '<div class="tr-serie-meta">'+metaPartes.join('')+'</div>' : '';
       let linhasSerie = '';
-      for(let s=0; s<nSeries; s++){
-        const ant = serieAnterior(e[0], s);
-        const antTxt = ant ? (ant.kg!=null?fmtNum(ant.kg,1):'-')+' kg × '+(ant.reps!=null?ant.reps:'-') : '—';
-        const kgVal = ant && ant.kg!=null ? ant.kg : '';
-        const repsVal = ant && ant.reps!=null ? ant.reps : '';
-        linhasSerie += '<div class="tr-serie-linha-wrap">'
-          + '<button type="button" class="tr-serie-excluir">Excluir</button>'
-          + '<div class="tr-serie-linha" data-serie="'+s+'">'
-          + '<span class="tr-serie-num">'+(s+1)+'</span>'
-          + '<span class="tr-serie-anterior">'+antTxt+'</span>'
-          + '<input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg" value="'+kgVal+'">'
-          + '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="reps" value="'+repsVal+'">'
-          + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
-          + '</div></div>';
+      let cabecalho = '';
+      if(tipo==='ativacao'){
+        // ativação (ex.: Wall Slide) não tem teste de carga nem série válida
+        // de verdade - só um número fixo de repetições no aquecimento (ex.:
+        // "2x15"). Mostra um checklist simples, sem kg/reps/anterior.
+        const partes = /^(\d+)\s*x\s*(\d+)/i.exec(String(e[1]||''));
+        const nSets = partes ? Math.max(1, parseInt(partes[1],10)) : 2;
+        const repsAlvo = partes ? partes[2] : '';
+        for(let s=0; s<nSets; s++){
+          linhasSerie += '<div class="tr-serie-linha-wrap">'
+            + '<button type="button" class="tr-serie-excluir">Excluir</button>'
+            + '<div class="tr-serie-linha tr-linha-ativacao" data-serie="'+s+'">'
+            + '<span class="tr-serie-num">'+(s+1)+'</span>'
+            + '<span class="tr-serie-ativacao-label">'+(repsAlvo?repsAlvo+' reps':'')+'</span>'
+            + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
+            + '</div></div>';
+        }
+      } else {
+        const nSeries = numSeriesPadrao(e[3]);
+        const repsLabel = tipo==='isometrico' ? 'Segundos' : 'Reps';
+        const repsPlaceholder = tipo==='isometrico' ? 'seg' : 'reps';
+        cabecalho = '<div class="tr-serie-header-row"><span>Série</span><span>Anterior</span><span>kg</span><span>'+repsLabel+'</span><span></span></div>';
+        for(let s=0; s<nSeries; s++){
+          const ant = serieAnterior(e[0], s);
+          const antTxt = ant ? (ant.kg!=null?fmtNum(ant.kg,1):'-')+' kg × '+(ant.reps!=null?ant.reps:'-') : '—';
+          const kgVal = ant && ant.kg!=null ? ant.kg : '';
+          const repsVal = ant && ant.reps!=null ? ant.reps : '';
+          linhasSerie += '<div class="tr-serie-linha-wrap">'
+            + '<button type="button" class="tr-serie-excluir">Excluir</button>'
+            + '<div class="tr-serie-linha" data-serie="'+s+'">'
+            + '<span class="tr-serie-num">'+(s+1)+'</span>'
+            + '<span class="tr-serie-anterior">'+antTxt+'</span>'
+            + '<input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg" value="'+kgVal+'">'
+            + '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="'+repsPlaceholder+'" value="'+repsVal+'">'
+            + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
+            + '</div></div>';
+        }
       }
-      return '<div class="tr-serie-bloco" data-ex="'+idx+'">'
-        + '<div class="tr-serie-cab"><span class="tr-serie-titulo">'+e[0]+'</span>'
+      return '<div class="tr-serie-bloco" data-ex="'+idx+'" data-tipo="'+tipo+'">'
+        + '<div class="tr-serie-cab"><span class="tr-serie-titulo-wrap"><span class="tr-serie-titulo">'+e[0]+'</span>'+badge+'</span>'
         + '<button type="button" class="tr-serie-menu-btn" data-ex="'+idx+'" aria-label="Opções do exercício">•••</button></div>'
         + '<div class="tr-serie-nota" data-ex="'+idx+'" hidden></div>'
         + meta
         + '<div class="tr-serie-linhas">'
-        + '<div class="tr-serie-header-row"><span>Série</span><span>Anterior</span><span>kg</span><span>Reps</span><span></span></div>'
+        + cabecalho
         + linhasSerie
         + '</div>'
-        + '<button type="button" class="tr-serie-add" data-ex="'+idx+'">+ Adicionar série</button>'
+        + '<button type="button" class="tr-serie-add" data-ex="'+idx+'" data-tipo="'+tipo+'">+ Adicionar série</button>'
         + '</div>';
     }).join('');
     corpoTreino = '<h4 style="margin-top:18px">Treino '+sessaoTreinoChave.replace('2','')+' - '+t.nome+'</h4>'
+      + semanaInfo
       + core
       + '<div class="tr-registro" id="sessao-treino-registro">'
       + '<div class="tr-registro-head"><span class="tr-registro-tit">Registro de hoje</span></div>'
@@ -4967,17 +5016,28 @@ function montarSessaoTreino(){
     b.onclick = function(){
       const bloco = corpo.querySelector('.tr-serie-bloco[data-ex="'+b.getAttribute('data-ex')+'"]');
       const linhasBox = bloco.querySelector('.tr-serie-linhas');
+      const tipo = b.getAttribute('data-tipo') || 'normal';
       const s = linhasBox.querySelectorAll('.tr-serie-linha').length;
       const wrap = document.createElement('div');
       wrap.className = 'tr-serie-linha-wrap';
-      wrap.innerHTML = '<button type="button" class="tr-serie-excluir">Excluir</button>'
-        + '<div class="tr-serie-linha" data-serie="'+s+'">'
-        + '<span class="tr-serie-num">'+(s+1)+'</span>'
-        + '<span class="tr-serie-anterior">—</span>'
-        + '<input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg">'
-        + '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="reps">'
-        + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
-        + '</div>';
+      if(tipo==='ativacao'){
+        wrap.innerHTML = '<button type="button" class="tr-serie-excluir">Excluir</button>'
+          + '<div class="tr-serie-linha tr-linha-ativacao" data-serie="'+s+'">'
+          + '<span class="tr-serie-num">'+(s+1)+'</span>'
+          + '<span class="tr-serie-ativacao-label"></span>'
+          + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
+          + '</div>';
+      } else {
+        const repsPlaceholder = tipo==='isometrico' ? 'seg' : 'reps';
+        wrap.innerHTML = '<button type="button" class="tr-serie-excluir">Excluir</button>'
+          + '<div class="tr-serie-linha" data-serie="'+s+'">'
+          + '<span class="tr-serie-num">'+(s+1)+'</span>'
+          + '<span class="tr-serie-anterior">—</span>'
+          + '<input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg">'
+          + '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="'+repsPlaceholder+'">'
+          + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
+          + '</div>';
+      }
       linhasBox.appendChild(wrap);
       ligarCheckSerie(wrap.querySelector('.tr-serie-check'));
       ligarSwipeSerie(wrap);
