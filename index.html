@@ -116,13 +116,18 @@
   /* iOS aproxima a tela ao focar campo com menos de 16px. Todos os campos ficam
      em 16px e o tamanho aparente é ajustado pelo espaçamento. */
   select,textarea,input{font-size:16px}
-  /* altura em 100dvh (unidade "dynamic viewport height" do CSS moderno,
-     igual ao .app do PSCPP Tracker) em vez do --vh-real calculado via JS -
-     o dvh já é resolvido pelo próprio Safari considerando a área real
-     visível (barra do navegador, tela cheia do app instalado, etc), sem
-     precisar recalcular na mão. --vv-top continua vindo do JS (visualViewport)
-     só pra desviar do teclado, que é um problema à parte da altura. */
-  #app-shell{position:fixed;top:var(--vv-top,0px);left:0;right:0;height:100dvh;overflow:hidden;z-index:20}
+  /* altura em 100dvh, igual ao .app do PSCPP Tracker - e position:relative
+     em vez de fixed, também igual ao PSCPP Tracker. Essa troca de fixed pra
+     relative é o que resolve a faixa sobrando embaixo: o body já é
+     position:fixed;inset:0 (ocupa a tela inteira certinho), então o
+     #app-shell não precisa ser fixed de novo - e um "fixed" dentro de outro
+     "fixed" com overflow:hidden é o tipo de combinação que o Safari do
+     iPhone às vezes recorta um pixel antes do fundo de verdade da tela,
+     sobrando aquela faixa. Com relative isso não acontece (o .tabbar, que
+     é fixed de verdade, nunca é cortado por um ancestral relative).
+     top:var(--vv-top) continua fazendo o mesmo efeito de antes (desviar
+     do teclado), porque o body já ocupa exatamente a tela toda. */
+  #app-shell{position:relative;top:var(--vv-top,0px);left:0;right:0;height:100dvh;overflow:hidden;z-index:20}
   #app-shell:not([hidden]){display:flex;flex-direction:column}
   /* --tabbar-h precisa somar exatamente os mesmos números do .tabbar-item
      (padding-topo + ícone + gap + linha do rótulo + padding-baixo, ver
