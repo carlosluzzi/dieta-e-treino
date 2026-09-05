@@ -665,25 +665,68 @@
   .tr-registro .btn-pill{margin-top:10px}
   .tr-registro .erro-auth{margin-top:8px}
   /* Sessão de treino com séries individuais (kg x reps por série, igual a um
-     app de treino "de verdade") - ver abrirSessaoTreino/montarSessaoTreino. */
+     app de treino "de verdade", inspirado no Strong) - ver
+     abrirSessaoTreino/montarSessaoTreino/ligarSwipeSerie/abrirMenuExercicio. */
   .tr-serie-bloco{margin-top:18px;padding-top:14px;border-top:1px solid var(--hair)}
   .tr-serie-bloco:first-of-type{margin-top:14px}
-  .tr-serie-titulo{font-size:14.5px;font-weight:700;color:var(--ink);margin-bottom:8px}
-  .tr-serie-tabela{width:100%;border-collapse:collapse}
-  .tr-serie-tabela th{text-align:center;font-weight:500;color:var(--ink3);font-size:10.5px;text-transform:uppercase;
-    letter-spacing:.02em;padding:0 4px 6px}
-  .tr-serie-tabela th:first-child,.tr-serie-tabela td:first-child{text-align:left;padding-left:0}
-  .tr-serie-tabela td{padding:5px 4px;vertical-align:middle;text-align:center}
-  .tr-serie-num{font-size:13.5px;font-weight:700;color:var(--ink2)}
-  .tr-serie-anterior{font-size:11.5px;color:var(--ink3);white-space:nowrap}
-  .tr-serie-kg,.tr-serie-reps{width:52px;padding:7px 3px;border-radius:9px;border:1px solid var(--hair);
-    font-size:15px;text-align:center;background:var(--fill2)}
-  .tr-serie-kg:focus,.tr-serie-reps:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:transparent}
-  .tr-serie-check{width:28px;height:28px;border-radius:50%;border:1px solid var(--hair);background:var(--fill2);
+  .tr-serie-cab{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+  .tr-serie-titulo{font-size:14.5px;font-weight:700;color:var(--azul);margin:0}
+  .tr-serie-menu-btn{flex-shrink:0;width:26px;height:26px;border-radius:8px;border:none;background:var(--fill);
+    color:var(--azul);font-size:14px;font-weight:800;line-height:1;cursor:pointer;letter-spacing:1px}
+  .tr-serie-nota{margin:-2px 0 10px;padding:8px 10px;border-radius:10px;background:#FFF6D8;color:#8A6D1A;
+    font-size:12.5px;line-height:1.4;white-space:pre-wrap}
+  .tr-serie-meta{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 10px}
+  .tr-meta-tag{font-size:10.5px;font-weight:500;padding:4px 9px;border-radius:8px;background:var(--fill);color:var(--ink2);white-space:nowrap}
+  .tr-meta-tag b{font-weight:700;color:var(--ink3);margin-right:4px;text-transform:uppercase;font-size:9.5px;letter-spacing:.02em}
+
+  .tr-serie-linhas{display:flex;flex-direction:column;gap:6px}
+  .tr-serie-header-row{display:grid;grid-template-columns:32px 1fr 52px 52px 32px;gap:6px;padding:0 2px 2px;
+    font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.02em}
+  .tr-serie-header-row span{text-align:center}
+  .tr-serie-header-row span:nth-child(2){text-align:left}
+
+  .tr-serie-linha-wrap{position:relative;border-radius:10px;overflow:hidden}
+  .tr-serie-excluir{position:absolute;top:0;right:0;bottom:0;width:76px;border:none;background:#FF3B30;color:#fff;
+    font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0}
+  .tr-serie-linha,.tr-aquecimento-linha{position:relative;display:grid;grid-template-columns:32px 1fr 52px 52px 32px;
+    gap:6px;align-items:center;padding:3px 2px;background:var(--card);touch-action:pan-y}
+  .tr-serie-linha.feita{background:var(--fill2);border-radius:8px}
+  .tr-serie-num{justify-self:center;min-width:26px;height:24px;padding:0 4px;border-radius:8px;background:var(--fill);
+    color:var(--ink2);font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .tr-aquecimento-linha .tr-serie-num{background:transparent;color:var(--ink3);font-size:9px;letter-spacing:.02em}
+  .tr-serie-anterior{font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tr-serie-kg,.tr-serie-reps{width:100%;padding:7px 3px;border-radius:10px;border:none;background:var(--fill);
+    font-size:15px;text-align:center;color:var(--ink)}
+  .tr-serie-kg:focus,.tr-serie-reps:focus{outline:2px solid var(--azul);outline-offset:1px}
+  .tr-serie-check{justify-self:center;width:28px;height:28px;border-radius:50%;border:none;background:var(--fill);
     color:var(--ink3);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0}
-  .tr-serie-check[aria-pressed="true"]{background:var(--azul);border-color:var(--azul);color:#fff}
+  .tr-serie-check[aria-pressed="true"]{background:var(--ink);color:#fff}
   .tr-serie-add{margin-top:6px;width:100%;padding:9px;border-radius:10px;border:1px dashed var(--hair);
     background:none;color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer}
+
+  /* menu "..." de opções por exercício + nota, no estilo cartão escuro do Strong */
+  .tr-menu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:80;display:flex;
+    align-items:flex-end;justify-content:center;padding:0 12px calc(16px + env(safe-area-inset-bottom,0px))}
+  .tr-menu-card{width:100%;max-width:420px;background:#2C2C2E;border-radius:16px;overflow:hidden;
+    box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  .tr-menu-item{display:block;width:100%;text-align:left;padding:14px 16px;border:none;border-top:1px solid rgba(255,255,255,.08);
+    background:none;color:#fff;font-size:14.5px;font-weight:600;cursor:pointer}
+  .tr-menu-item:first-child{border-top:none}
+  .tr-menu-item.perigo{color:#FF6B60}
+  .tr-menu-item.tr-menu-cancelar{text-align:center;color:#8E8E93;margin-top:2px}
+  .tr-nota-card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  .tr-nota-titulo{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px}
+  .tr-nota-input{width:100%;min-height:90px;border-radius:12px;border:1px solid var(--hair);background:var(--fill2);
+    padding:10px;font-size:14px;color:var(--ink);resize:vertical;font-family:inherit}
+  .tr-nota-botoes{display:flex;gap:8px;margin-top:12px}
+  .tr-nota-botoes .btn-pill{flex:1 1 0;margin-top:0;padding:10px}
+
+  .tr-descanso-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));
+    transform:translateX(-50%);z-index:85;background:#2C2C2E;color:#fff;border-radius:999px;
+    padding:10px 10px 10px 16px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  .tr-descanso-fechar{width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,255,255,.15);
+    color:#fff;font-size:12px;line-height:1;cursor:pointer}
   .pg-vazio{font-size:14px;color:var(--ink2);padding:8px 0}
   .tr-hist-linha{background:var(--card);border-radius:var(--rc);padding:10px 12px;margin-top:8px;box-shadow:var(--sh-min)}
   .tr-hist-linha:first-child{margin-top:0}
@@ -988,19 +1031,19 @@
 
 <nav class="tabbar" role="tablist" aria-label="Navegação principal">
   <button id="aba-diario" aria-pressed="true" class="tabbar-item">
-    <svg class="tabbar-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 9.5h16M8 3v3M16 3v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.5 14l2 2 4-4.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg class="tabbar-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 9.5h16M8 3v3M16 3v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8.5 14l2 2 4-4.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <span>Diário</span>
   </button>
   <button id="aba-plano" aria-pressed="false" class="tabbar-item">
-    <svg class="tabbar-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.2c-1.6-2.3-4.9-2.2-6.3-.3-1.7 2.3-1.2 6 .6 9C7.7 19 9 21 10.6 21c.7 0 1-.3 1.4-.3s.7.3 1.4.3c1.6 0 2.9-2 4.3-4.1 1.8-3 2.3-6.7.6-9-1.4-1.9-4.7-2-6.3.3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 8.2V5.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 5.3c.6-1.1 1.8-1.6 2.8-1.4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <svg class="tabbar-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.2c-1.6-2.3-4.9-2.2-6.3-.3-1.7 2.3-1.2 6 .6 9C7.7 19 9 21 10.6 21c.7 0 1-.3 1.4-.3s.7.3 1.4.3c1.6 0 2.9-2 4.3-4.1 1.8-3 2.3-6.7.6-9-1.4-1.9-4.7-2-6.3.3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 8.2V5.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 5.3c.6-1.1 1.8-1.6 2.8-1.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     <span>Dieta</span>
   </button>
   <button id="aba-treino" aria-pressed="false" class="tabbar-item">
-    <svg class="tabbar-ico" viewBox="-110 -110 732 732" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="49" stroke-linejoin="round" d="M476.867,203.8h-8.533v-42.667c0-33.28-26.453-59.733-59.733-59.733c-16.809,0-31.87,6.755-42.667,17.722v-9.189 c0-33.28-26.453-59.733-59.733-59.733c-16.809,0-31.87,6.755-42.667,17.722v-9.189C263.533,25.453,237.08-1,203.8-1 c-33.28,0-59.733,26.453-59.733,59.733V152.6H31.427c-12.8,0-23.893,11.093-23.893,23.893v157.013 c0,12.8,11.093,23.893,23.893,23.893h112.64v93.867c0,33.28,26.453,59.733,59.733,59.733c33.28,0,59.733-26.453,59.733-59.733 v-9.189C274.33,453.045,289.391,459.8,306.2,459.8c32.427,0,59.733-26.453,59.733-59.733v-9.189 C376.73,401.845,391.791,408.6,408.6,408.6c32.427,0,59.733-26.453,59.733-59.733v-51.2h8.533c13.653,0,25.6-11.093,25.6-25.6 V229.4C502.467,214.893,491.373,203.8,476.867,203.8z M31.427,340.333c-3.413,0-6.827-3.413-6.827-6.827v-10.24h34.133 c4.267,0,8.533-3.413,8.533-8.533s-3.413-8.533-8.533-8.533H24.6v-17.067h25.6c4.267,0,8.533-3.413,8.533-8.533 s-3.413-8.533-8.533-8.533H24.6V255h17.067c4.267,0,8.533-3.413,8.533-8.533s-3.413-8.533-8.533-8.533H24.6v-61.44 c0-3.413,3.413-6.827,6.827-6.827h112.64v170.667H31.427z M246.467,451.267c0,23.893-18.773,42.667-42.667,42.667 s-42.667-18.773-42.667-42.667v-102.4V161.133v-102.4c0-23.893,18.773-42.667,42.667-42.667c23.04,0,42.667,18.773,42.667,42.667 v51.2v290.133V451.267z M348.867,400.067c0,23.893-18.773,42.667-42.667,42.667s-42.667-18.773-42.667-42.667V109.933 c0-23.893,18.773-42.667,42.667-42.667c23.04,0,42.667,18.773,42.667,42.667v51.2v187.733V400.067z M451.267,348.867 c0,23.893-18.773,42.667-42.667,42.667c-23.893,0-42.667-18.773-42.667-42.667V161.133c0-23.893,18.773-42.667,42.667-42.667 c23.04,0,42.667,18.773,42.667,42.667v51.2v76.8V348.867z M485.4,272.067c0,5.12-3.413,8.533-8.533,8.533h-8.533v-59.733h8.533 c5.12,0,8.533,3.413,8.533,8.533V272.067z"/></svg>
+    <svg class="tabbar-ico" viewBox="-110 -110 732 732" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="55" stroke-linejoin="round" d="M476.867,203.8h-8.533v-42.667c0-33.28-26.453-59.733-59.733-59.733c-16.809,0-31.87,6.755-42.667,17.722v-9.189 c0-33.28-26.453-59.733-59.733-59.733c-16.809,0-31.87,6.755-42.667,17.722v-9.189C263.533,25.453,237.08-1,203.8-1 c-33.28,0-59.733,26.453-59.733,59.733V152.6H31.427c-12.8,0-23.893,11.093-23.893,23.893v157.013 c0,12.8,11.093,23.893,23.893,23.893h112.64v93.867c0,33.28,26.453,59.733,59.733,59.733c33.28,0,59.733-26.453,59.733-59.733 v-9.189C274.33,453.045,289.391,459.8,306.2,459.8c32.427,0,59.733-26.453,59.733-59.733v-9.189 C376.73,401.845,391.791,408.6,408.6,408.6c32.427,0,59.733-26.453,59.733-59.733v-51.2h8.533c13.653,0,25.6-11.093,25.6-25.6 V229.4C502.467,214.893,491.373,203.8,476.867,203.8z M31.427,340.333c-3.413,0-6.827-3.413-6.827-6.827v-10.24h34.133 c4.267,0,8.533-3.413,8.533-8.533s-3.413-8.533-8.533-8.533H24.6v-17.067h25.6c4.267,0,8.533-3.413,8.533-8.533 s-3.413-8.533-8.533-8.533H24.6V255h17.067c4.267,0,8.533-3.413,8.533-8.533s-3.413-8.533-8.533-8.533H24.6v-61.44 c0-3.413,3.413-6.827,6.827-6.827h112.64v170.667H31.427z M246.467,451.267c0,23.893-18.773,42.667-42.667,42.667 s-42.667-18.773-42.667-42.667v-102.4V161.133v-102.4c0-23.893,18.773-42.667,42.667-42.667c23.04,0,42.667,18.773,42.667,42.667 v51.2v290.133V451.267z M348.867,400.067c0,23.893-18.773,42.667-42.667,42.667s-42.667-18.773-42.667-42.667V109.933 c0-23.893,18.773-42.667,42.667-42.667c23.04,0,42.667,18.773,42.667,42.667v51.2v187.733V400.067z M451.267,348.867 c0,23.893-18.773,42.667-42.667,42.667c-23.893,0-42.667-18.773-42.667-42.667V161.133c0-23.893,18.773-42.667,42.667-42.667 c23.04,0,42.667,18.773,42.667,42.667v51.2v76.8V348.867z M485.4,272.067c0,5.12-3.413,8.533-8.533,8.533h-8.533v-59.733h8.533 c5.12,0,8.533,3.413,8.533,8.533V272.067z"/></svg>
     <span>Treino</span>
   </button>
   <button id="aba-progresso" aria-pressed="false" class="tabbar-item">
-    <svg class="tabbar-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="12" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="9" y="2" width="6" height="3" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 17v-4M12 17v-7M15 17v-10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    <svg class="tabbar-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="12" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="9" y="2" width="6" height="3" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 17v-4M12 17v-7M15 17v-10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     <span>Evolução</span>
   </button>
 </nav>
@@ -4807,6 +4850,10 @@ async function abrirSessaoTreino(){
 }
 function fecharSessaoTreino(){
   document.getElementById('tela-sessao-treino').hidden = true;
+  fecharMenuExercicio();
+  const toast = document.getElementById('tr-descanso-toast');
+  if(toast) toast.remove();
+  if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
   atualizarCardTreinoHoje();
 }
 document.getElementById('sessao-treino-fechar').onclick = fecharSessaoTreino;
@@ -4832,9 +4879,14 @@ function serieAnterior(nomeExercicio, idxSerie){
   }
   return null;
 }
+// nota livre por exercício (idx do exercício dentro do treino escolhido) -
+// vale só durante a sessão aberta agora (zera ao trocar de treino A/B/C/...
+// ou abrir a sessão de novo), igual ao "Adicionar Nota" do Strong.
+let sessaoTreinoNotas = {};
 function montarSessaoTreino(){
   const c = sessaoTreinoConteudo;
   const corpo = document.getElementById('sessao-treino-corpo');
+  sessaoTreinoNotas = {};
   const ordemUnica = [];
   (c.divisao.ordem||[]).forEach(function(d){ if(d!=='OFF' && ordemUnica.indexOf(d)===-1) ordemUnica.push(d); });
   Object.keys(c.treinos||{}).forEach(function(k){ if(ordemUnica.indexOf(k)===-1) ordemUnica.push(k); });
@@ -4845,38 +4897,51 @@ function montarSessaoTreino(){
   let corpoTreino = '';
   const t = sessaoTreinoChave && c.treinos[sessaoTreinoChave];
   if(t){
-    const linhas = (t.ex||[]).map(function(e){
-      return '<tr><td class="tr-ex-nome">'+e[0]+'</td><td class="tr-num">'+e[1]+'</td><td class="tr-num">'+e[2]+'</td><td class="tr-num">'+e[3]+'</td><td class="tr-num">'+e[4]+'</td></tr>';
-    }).join('');
     let core = '';
     if(c.core_por_treino && c.core_por_treino[sessaoTreinoChave]){
       core = '<div class="tr-core"><b>Core: </b>' + c.core_por_treino[sessaoTreinoChave].map(function(x){ return x[0]+' - '+x[1]; }).join(' · ') + '</div>';
     }
     const blocos = (t.ex||[]).map(function(e, idx){
       const nSeries = numSeriesPadrao(e[3]);
+      // colunas de referência do plano (aquecimento, teste de carga, alvo de
+      // séries e descanso) que antes ficavam só na tabela de cima - agora
+      // aparecem junto de cada exercício aqui embaixo, pra não precisar
+      // rolar pra cima e pra baixo o tempo todo durante o treino.
+      const metaPartes = [];
+      if(e[1]) metaPartes.push('<span class="tr-meta-tag"><b>Aquecimento</b>'+e[1]+'</span>');
+      if(e[2]) metaPartes.push('<span class="tr-meta-tag"><b>Teste de carga</b>'+e[2]+'</span>');
+      if(e[3]) metaPartes.push('<span class="tr-meta-tag"><b>Alvo</b>'+e[3]+'</span>');
+      if(e[4]) metaPartes.push('<span class="tr-meta-tag"><b>Descanso</b>'+e[4]+'</span>');
+      const meta = metaPartes.length ? '<div class="tr-serie-meta">'+metaPartes.join('')+'</div>' : '';
       let linhasSerie = '';
       for(let s=0; s<nSeries; s++){
         const ant = serieAnterior(e[0], s);
         const antTxt = ant ? (ant.kg!=null?fmtNum(ant.kg,1):'-')+' kg × '+(ant.reps!=null?ant.reps:'-') : '—';
         const kgVal = ant && ant.kg!=null ? ant.kg : '';
         const repsVal = ant && ant.reps!=null ? ant.reps : '';
-        linhasSerie += '<tr class="tr-serie-linha" data-serie="'+s+'">'
-          + '<td class="tr-serie-num">'+(s+1)+'</td>'
-          + '<td class="tr-serie-anterior">'+antTxt+'</td>'
-          + '<td><input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg" value="'+kgVal+'"></td>'
-          + '<td><input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="reps" value="'+repsVal+'"></td>'
-          + '<td><button type="button" class="tr-serie-check" aria-pressed="false">✓</button></td>'
-          + '</tr>';
+        linhasSerie += '<div class="tr-serie-linha-wrap">'
+          + '<button type="button" class="tr-serie-excluir">Excluir</button>'
+          + '<div class="tr-serie-linha" data-serie="'+s+'">'
+          + '<span class="tr-serie-num">'+(s+1)+'</span>'
+          + '<span class="tr-serie-anterior">'+antTxt+'</span>'
+          + '<input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg" value="'+kgVal+'">'
+          + '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="reps" value="'+repsVal+'">'
+          + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
+          + '</div></div>';
       }
       return '<div class="tr-serie-bloco" data-ex="'+idx+'">'
-        + '<div class="tr-serie-titulo">'+e[0]+'</div>'
-        + '<table class="tr-serie-tabela"><thead><tr><th>Série</th><th>Anterior</th><th>kg</th><th>Reps</th><th></th></tr></thead>'
-        + '<tbody>'+linhasSerie+'</tbody></table>'
+        + '<div class="tr-serie-cab"><span class="tr-serie-titulo">'+e[0]+'</span>'
+        + '<button type="button" class="tr-serie-menu-btn" data-ex="'+idx+'" aria-label="Opções do exercício">•••</button></div>'
+        + '<div class="tr-serie-nota" data-ex="'+idx+'" hidden></div>'
+        + meta
+        + '<div class="tr-serie-linhas">'
+        + '<div class="tr-serie-header-row"><span>Série</span><span>Anterior</span><span>kg</span><span>Reps</span><span></span></div>'
+        + linhasSerie
+        + '</div>'
         + '<button type="button" class="tr-serie-add" data-ex="'+idx+'">+ Adicionar série</button>'
         + '</div>';
     }).join('');
     corpoTreino = '<h4 style="margin-top:18px">Treino '+sessaoTreinoChave.replace('2','')+' - '+t.nome+'</h4>'
-      + '<div class="tr-tabela-wrap"><table class="tr-tabela"><thead><tr><th>Exercício</th><th>Aquecimento</th><th>Teste de carga</th><th>Séries válidas</th><th>Descanso</th></tr></thead><tbody>'+linhas+'</tbody></table></div>'
       + core
       + '<div class="tr-registro" id="sessao-treino-registro">'
       + '<div class="tr-registro-head"><span class="tr-registro-tit">Registro de hoje</span></div>'
@@ -4890,26 +4955,32 @@ function montarSessaoTreino(){
     b.onclick = function(){ sessaoTreinoChave = b.getAttribute('data-chave'); montarSessaoTreino(); };
   });
   Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-check'), function(b){
-    b.onclick = function(){ b.setAttribute('aria-pressed', b.getAttribute('aria-pressed')!=='true'); };
+    ligarCheckSerie(b);
+  });
+  Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-linha-wrap'), function(w){
+    ligarSwipeSerie(w);
+  });
+  Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-menu-btn'), function(b){
+    b.onclick = function(){ abrirMenuExercicio(parseInt(b.getAttribute('data-ex'),10)); };
   });
   Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-add'), function(b){
     b.onclick = function(){
       const bloco = corpo.querySelector('.tr-serie-bloco[data-ex="'+b.getAttribute('data-ex')+'"]');
-      const corpoTabela = bloco.querySelector('tbody');
-      const s = corpoTabela.querySelectorAll('.tr-serie-linha').length;
-      const linha = document.createElement('tr');
-      linha.className = 'tr-serie-linha';
-      linha.setAttribute('data-serie', s);
-      linha.innerHTML = '<td class="tr-serie-num">'+(s+1)+'</td>'
-        + '<td class="tr-serie-anterior">—</td>'
-        + '<td><input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg"></td>'
-        + '<td><input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="reps"></td>'
-        + '<td><button type="button" class="tr-serie-check" aria-pressed="false">✓</button></td>';
-      corpoTabela.appendChild(linha);
-      linha.querySelector('.tr-serie-check').onclick = function(){
-        const chk = linha.querySelector('.tr-serie-check');
-        chk.setAttribute('aria-pressed', chk.getAttribute('aria-pressed')!=='true');
-      };
+      const linhasBox = bloco.querySelector('.tr-serie-linhas');
+      const s = linhasBox.querySelectorAll('.tr-serie-linha').length;
+      const wrap = document.createElement('div');
+      wrap.className = 'tr-serie-linha-wrap';
+      wrap.innerHTML = '<button type="button" class="tr-serie-excluir">Excluir</button>'
+        + '<div class="tr-serie-linha" data-serie="'+s+'">'
+        + '<span class="tr-serie-num">'+(s+1)+'</span>'
+        + '<span class="tr-serie-anterior">—</span>'
+        + '<input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg">'
+        + '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="reps">'
+        + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
+        + '</div>';
+      linhasBox.appendChild(wrap);
+      ligarCheckSerie(wrap.querySelector('.tr-serie-check'));
+      ligarSwipeSerie(wrap);
     };
   });
   const btnSalvar = document.getElementById('sessao-treino-salvar');
@@ -4919,6 +4990,203 @@ function montarSessaoTreino(){
         .then(function(){ atualizarCardTreinoHoje(); });
     };
   }
+}
+// liga o toggle "feita" de uma série (botão de check) - marca também a linha
+// inteira (fundo levemente diferente), igual ao Strong.
+function ligarCheckSerie(btn){
+  if(!btn) return;
+  btn.onclick = function(){
+    const feita = btn.getAttribute('aria-pressed')!=='true';
+    btn.setAttribute('aria-pressed', feita);
+    const linha = btn.closest('.tr-serie-linha, .tr-aquecimento-linha');
+    if(linha) linha.classList.toggle('feita', feita);
+  };
+}
+// renumera visualmente as séries (1,2,3...) de um exercício depois de
+// excluir uma linha no meio - a série de aquecimento não entra nessa conta.
+function renumerarSeries(linhasBox){
+  if(!linhasBox) return;
+  let n = 1;
+  Array.prototype.forEach.call(linhasBox.querySelectorAll('.tr-serie-linha .tr-serie-num'), function(el){
+    el.textContent = n++;
+  });
+}
+// deslizar a linha da série pra esquerda revela o botão vermelho "Excluir",
+// igual ao gesto do Strong - usa Pointer Events (funciona em touch e mouse).
+function ligarSwipeSerie(wrapEl){
+  const linha = wrapEl.querySelector('.tr-serie-linha, .tr-aquecimento-linha');
+  const excluirBtn = wrapEl.querySelector('.tr-serie-excluir');
+  if(!linha) return;
+  const LARGURA_ABERTA = 76;
+  let startX = 0, startY = 0, dx = 0, aberto = false, arrastando = false, horizontal = null;
+  function setX(x){ linha.style.transform = x ? 'translateX('+x+'px)' : ''; }
+  linha.addEventListener('pointerdown', function(ev){
+    if(ev.target.closest('input,button')) { /* ainda pode iniciar o gesto pelo próprio campo */ }
+    startX = ev.clientX; startY = ev.clientY; dx = 0; arrastando = true; horizontal = null;
+    linha.style.transition = 'none';
+  });
+  linha.addEventListener('pointermove', function(ev){
+    if(!arrastando) return;
+    const mx = ev.clientX - startX, my = ev.clientY - startY;
+    if(horizontal===null){
+      if(Math.abs(mx)<6 && Math.abs(my)<6) return;
+      horizontal = Math.abs(mx) > Math.abs(my);
+      if(!horizontal){ arrastando = false; return; }
+      if(linha.setPointerCapture) try{ linha.setPointerCapture(ev.pointerId); }catch(e){}
+    }
+    ev.preventDefault();
+    dx = mx;
+    let x = (aberto ? -LARGURA_ABERTA : 0) + dx;
+    if(x>0) x=0; if(x<-LARGURA_ABERTA*1.25) x=-LARGURA_ABERTA*1.25;
+    setX(x);
+  });
+  function soltar(){
+    if(!arrastando) return;
+    arrastando = false;
+    linha.style.transition = 'transform .18s ease';
+    if(!horizontal) return;
+    const x = (aberto ? -LARGURA_ABERTA : 0) + dx;
+    if(x < -LARGURA_ABERTA*0.5){ setX(-LARGURA_ABERTA); aberto = true; }
+    else { setX(0); aberto = false; }
+  }
+  linha.addEventListener('pointerup', soltar);
+  linha.addEventListener('pointercancel', soltar);
+  if(excluirBtn){
+    excluirBtn.onclick = function(){
+      const linhasBox = wrapEl.closest('.tr-serie-linhas');
+      wrapEl.style.overflow = 'hidden';
+      wrapEl.style.maxHeight = wrapEl.offsetHeight+'px';
+      wrapEl.style.transition = 'opacity .16s ease, max-height .18s ease .02s';
+      requestAnimationFrame(function(){
+        wrapEl.style.opacity = '0';
+        wrapEl.style.maxHeight = '0px';
+      });
+      setTimeout(function(){ wrapEl.remove(); renumerarSeries(linhasBox); }, 220);
+    };
+  }
+}
+// menu "..." de opções por exercício (nota, aquecimento, descanso, remover
+// da sessão de hoje) - visual de cartão escuro igual ao do Strong.
+function fecharMenuExercicio(){
+  const el = document.getElementById('tr-menu-exercicio');
+  if(el) el.remove();
+}
+function abrirMenuExercicio(idx){
+  fecharMenuExercicio();
+  const t = sessaoTreinoConteudo.treinos[sessaoTreinoChave];
+  const e = (t && t.ex && t.ex[idx]) || [];
+  const descansoTxt = (e[4]||'').trim();
+  const wrap = document.createElement('div');
+  wrap.id = 'tr-menu-exercicio';
+  wrap.className = 'tr-menu-backdrop';
+  wrap.innerHTML = '<div class="tr-menu-card">'
+    + '<button type="button" class="tr-menu-item" data-acao="nota">Adicionar nota</button>'
+    + '<button type="button" class="tr-menu-item" data-acao="aquecimento">Adicionar série de aquecimento</button>'
+    + (descansoTxt ? '<button type="button" class="tr-menu-item" data-acao="descanso">Iniciar descanso ('+descansoTxt+')</button>' : '')
+    + '<button type="button" class="tr-menu-item perigo" data-acao="remover">Remover da sessão de hoje</button>'
+    + '</div>'
+    + '<div class="tr-menu-card" style="margin-top:8px">'
+    + '<button type="button" class="tr-menu-item tr-menu-cancelar" data-acao="cancelar">Cancelar</button>'
+    + '</div>';
+  document.body.appendChild(wrap);
+  wrap.addEventListener('click', function(ev){
+    if(ev.target===wrap){ fecharMenuExercicio(); return; }
+    const btn = ev.target.closest('.tr-menu-item');
+    if(!btn) return;
+    const acao = btn.getAttribute('data-acao');
+    fecharMenuExercicio();
+    if(acao==='nota') abrirNotaExercicio(idx);
+    else if(acao==='aquecimento') adicionarSerieAquecimento(idx);
+    else if(acao==='descanso') iniciarDescanso(descansoTxt);
+    else if(acao==='remover') removerExercicioDaSessao(idx);
+  });
+}
+// nota livre por exercício - edita direto no DOM (não chama montarSessaoTreino
+// de novo) pra não perder kg/reps que já estejam digitados e ainda não salvos.
+function abrirNotaExercicio(idx){
+  const atual = sessaoTreinoNotas[idx] || '';
+  const wrap = document.createElement('div');
+  wrap.className = 'tr-menu-backdrop';
+  wrap.innerHTML = '<div class="tr-nota-card">'
+    + '<div class="tr-nota-titulo">Nota do exercício</div>'
+    + '<textarea class="tr-nota-input" placeholder="Ex.: cotovelo doeu na última série...">'+atual.replace(/</g,'&lt;')+'</textarea>'
+    + '<div class="tr-nota-botoes"><button type="button" class="btn-pill" data-acao="cancelar">Cancelar</button>'
+    + '<button type="button" class="btn-pill primario" data-acao="salvar">Salvar</button></div>'
+    + '</div>';
+  document.body.appendChild(wrap);
+  const area = wrap.querySelector('.tr-nota-input');
+  wrap.addEventListener('click', function(ev){
+    if(ev.target===wrap){ wrap.remove(); return; }
+    const btn = ev.target.closest('button[data-acao]');
+    if(!btn) return;
+    if(btn.getAttribute('data-acao')==='salvar'){
+      const v = area.value.trim();
+      if(v) sessaoTreinoNotas[idx] = v; else delete sessaoTreinoNotas[idx];
+      const notaEl = document.querySelector('.tr-serie-nota[data-ex="'+idx+'"]');
+      if(notaEl){ notaEl.textContent = v; notaEl.hidden = !v; }
+    }
+    wrap.remove();
+  });
+}
+function adicionarSerieAquecimento(idx){
+  const bloco = document.querySelector('.tr-serie-bloco[data-ex="'+idx+'"]');
+  if(!bloco) return;
+  const linhasBox = bloco.querySelector('.tr-serie-linhas');
+  const header = linhasBox.querySelector('.tr-serie-header-row');
+  const wrap = document.createElement('div');
+  wrap.className = 'tr-serie-linha-wrap';
+  wrap.innerHTML = '<button type="button" class="tr-serie-excluir">Excluir</button>'
+    + '<div class="tr-aquecimento-linha">'
+    + '<span class="tr-serie-num">AQ</span>'
+    + '<span class="tr-serie-anterior">—</span>'
+    + '<input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg">'
+    + '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="reps">'
+    + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
+    + '</div>';
+  header.insertAdjacentElement('afterend', wrap);
+  ligarCheckSerie(wrap.querySelector('.tr-serie-check'));
+  ligarSwipeSerie(wrap);
+}
+function removerExercicioDaSessao(idx){
+  const bloco = document.querySelector('.tr-serie-bloco[data-ex="'+idx+'"]');
+  if(!bloco) return;
+  bloco.style.transition = 'opacity .16s ease';
+  bloco.style.opacity = '0';
+  setTimeout(function(){ bloco.remove(); }, 170);
+}
+// temporizador de descanso - lê o texto de "Descanso" do plano (ex.: "90s",
+// "1min", "60-90s") e conta regressivo numa pilulazinha flutuante.
+function parseDescansoSegundos(txt){
+  const s = String(txt||'');
+  const m = /(\d+)/.exec(s);
+  if(!m) return 60;
+  const n = parseInt(m[1],10);
+  return /min/i.test(s) ? n*60 : n;
+}
+let sessaoTreinoDescansoTimer = null;
+function iniciarDescanso(txt){
+  let restante = parseDescansoSegundos(txt);
+  const existente = document.getElementById('tr-descanso-toast');
+  if(existente) existente.remove();
+  if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
+  const el = document.createElement('div');
+  el.id = 'tr-descanso-toast';
+  el.className = 'tr-descanso-toast';
+  el.innerHTML = '<span class="tr-descanso-tempo"></span><button type="button" class="tr-descanso-fechar">✕</button>';
+  document.body.appendChild(el);
+  const tempoEl = el.querySelector('.tr-descanso-tempo');
+  function tick(){
+    if(restante<0){ clearInterval(sessaoTreinoDescansoTimer); el.remove(); return; }
+    const mm = Math.floor(restante/60), ss = restante%60;
+    tempoEl.textContent = 'Descanso ' + mm + ':' + (ss<10?'0':'') + ss;
+    restante--;
+  }
+  tick();
+  sessaoTreinoDescansoTimer = setInterval(tick, 1000);
+  el.querySelector('.tr-descanso-fechar').onclick = function(){
+    clearInterval(sessaoTreinoDescansoTimer);
+    el.remove();
+  };
 }
 
 /* --- abas e controles principais --- */
