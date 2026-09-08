@@ -453,7 +453,7 @@
   #tela-sessao-treino[hidden]{display:none}
   .sessao-treino-head{flex-shrink:0;display:flex;align-items:center;gap:12px;
     padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;
-    background:rgba(245,245,247,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);
+    background:rgba(249,249,247,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);
     backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid rgba(0,0,0,.08)}
   .sessao-treino-head button{width:32px;height:32px;flex-shrink:0;border-radius:50%;border:0;
     background:var(--fill);color:var(--ink);font-size:18px;line-height:1;cursor:pointer}
@@ -553,6 +553,11 @@
   .hoje-cartao-cta{margin-top:12px;width:100%;padding:10px 14px;border-radius:12px;border:0;
     background:var(--fill2);color:var(--azul);font-size:14px;font-weight:600;cursor:pointer}
   .hoje-cartao-nota{font-size:13px;color:var(--ink2);margin:0;line-height:1.4}
+  .hoje-treino-linha{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .hoje-treino-linha .hoje-cartao-nota{flex:1 1 auto}
+  .hoje-treino-trocar{flex-shrink:0;border:none;background:none;color:var(--azul);font-size:12.5px;
+    font-weight:700;cursor:pointer;padding:2px 0}
+  .hoje-treino-opcoes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
   .hb-bloco{margin-bottom:22px}
   .hb-bloco:last-child{margin-bottom:0}
   .hb-bloco-tit{font-size:16px;font-weight:600;margin:0 0 2px;letter-spacing:-.01em}
@@ -671,11 +676,12 @@
   .tr-serie-bloco:first-of-type{margin-top:14px}
   .tr-serie-cab{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
   .tr-serie-titulo-wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1 1 auto;min-width:0}
-  .tr-serie-titulo{font-size:14.5px;font-weight:700;color:var(--azul);margin:0}
+  .tr-serie-titulo{font-size:14.5px;font-weight:700;color:var(--azul);margin:0;
+    border:none;background:none;padding:0;font-family:inherit;text-align:left;cursor:pointer}
   .tr-tipo-badge{flex-shrink:0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
     padding:4px 9px;border-radius:8px}
-  .tr-tipo-badge.tr-tipo-ativacao{background:#2E4C6D;color:#fff}
-  .tr-tipo-badge.tr-tipo-isometrico{background:#9A4B00;color:#fff}
+  .tr-tipo-badge.tr-tipo-ativacao{background:#E4ECF3;color:#1F3A57}
+  .tr-tipo-badge.tr-tipo-isometrico{background:#F7E7D3;color:#7A4200}
   .tr-serie-menu-btn{flex-shrink:0;width:26px;height:26px;border-radius:8px;border:none;background:var(--fill);
     color:var(--azul);font-size:14px;font-weight:800;line-height:1;cursor:pointer;letter-spacing:1px}
   .tr-serie-nota{margin:-2px 0 10px;padding:8px 10px;border-radius:10px;background:#FFF6D8;color:#8A6D1A;
@@ -713,18 +719,44 @@
   .tr-linha-ativacao{grid-template-columns:32px 1fr 32px}
   .tr-serie-ativacao-label{font-size:13px;color:var(--ink2)}
   .tr-semana-faixa{margin:-6px 0 14px;font-size:12px;color:var(--ink2);line-height:1.4}
+  /* pré-série de aquecimento (ex.: "2x15" antes da carga que vale) - vira
+     checklist igual à ativação, em vez de só uma etiqueta informativa lá em
+     cima sem nada pra marcar. Fica fora de .tr-serie-linha de propósito:
+     não conta na numeração das séries que valem, não vira "Anterior" da
+     próxima vez e não é salva no registro (é só apoio durante o treino). */
+  .tr-preserie-bloco{display:flex;flex-direction:column;gap:5px;margin:-2px 0 10px}
+  .tr-preserie-titulo{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink3)}
+  .tr-preserie-linha{display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:6px 10px;border-radius:8px;background:var(--fill2)}
+  .tr-preserie-linha.feita{background:var(--fill)}
+  .tr-preserie-linha.feita .tr-serie-ativacao-label{color:var(--ink3)}
 
-  /* menu "..." de opções por exercício + nota, no estilo cartão escuro do Strong */
+  /* nota por exercício - modal central clássico (merece atenção total, por
+     isso continua com fundo escurecido e cartão centralizado). */
   .tr-menu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:120;display:flex;
     align-items:flex-end;justify-content:center;padding:0 12px calc(16px + env(safe-area-inset-bottom,0px))}
-  .tr-menu-card{width:100%;max-width:420px;background:#2C2C2E;border-radius:16px;overflow:hidden;
-    box-shadow:0 8px 30px rgba(0,0,0,.35)}
-  .tr-menu-item{display:block;width:100%;text-align:left;padding:14px 16px;border:none;border-top:1px solid rgba(255,255,255,.08);
-    background:none;color:#fff;font-size:14.5px;font-weight:600;cursor:pointer}
-  .tr-menu-item:first-child{border-top:none}
-  .tr-menu-item.perigo{color:#FF6B60}
-  .tr-menu-item.tr-menu-cancelar{text-align:center;color:#8E8E93;margin-top:2px}
+  /* menu "..." de opções por exercício - popover claro ancorado no próprio
+     botão que abriu (ver abrirMenuExercicio), não mais um cartão solto
+     embaixo da tela. Sem "Cancelar": clicar fora já fecha. */
+  .tr-opcoes-backdrop{position:fixed;inset:0;z-index:120;background:transparent}
+  .tr-opcoes-card{position:absolute;background:var(--card);border-radius:14px;overflow:hidden;
+    border:1px solid var(--hair);box-shadow:0 10px 30px rgba(0,0,0,.16)}
+  .tr-opcoes-item{display:block;width:100%;text-align:left;padding:12px 14px;border:none;
+    border-top:.5px solid var(--hair);background:none;color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
+  .tr-opcoes-item:first-child{border-top:none}
+  .tr-opcoes-item.perigo{color:var(--nao)}
   .tr-nota-card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  /* popup de explicação do exercício (figura padronizada + texto), aberto
+     ao tocar no nome do exercício - ver abrirExplicacaoExercicio. */
+  .tr-exp-card{position:relative;width:100%;max-width:340px;background:var(--card);border-radius:18px;
+    padding:22px 20px 18px;box-shadow:0 8px 30px rgba(0,0,0,.32)}
+  .tr-exp-fechar{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:none;
+    background:var(--fill);color:var(--ink2);font-size:16px;line-height:1;cursor:pointer}
+  .tr-exp-figura{width:128px;height:128px;margin:0 auto 12px;background:var(--fill2);border-radius:16px;
+    padding:12px;box-sizing:border-box}
+  .tr-exp-figura svg{width:100%;height:100%;display:block}
+  .tr-exp-titulo{font-size:16px;font-weight:700;color:var(--ink);text-align:center;margin-bottom:8px}
+  .tr-exp-texto{font-size:13.5px;color:var(--ink2);line-height:1.55;text-align:left}
   .tr-nota-titulo{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px}
   .tr-nota-input{width:100%;min-height:90px;border-radius:12px;border:1px solid var(--hair);background:var(--fill2);
     padding:10px;font-size:14px;color:var(--ink);resize:vertical;font-family:inherit}
@@ -732,11 +764,11 @@
   .tr-nota-botoes .btn-pill{flex:1 1 0;margin-top:0;padding:10px}
 
   .tr-descanso-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));
-    transform:translateX(-50%);z-index:120;background:#2C2C2E;color:#fff;border-radius:999px;
+    transform:translateX(-50%);z-index:120;background:var(--card);color:var(--ink);border-radius:999px;
     padding:10px 10px 10px 16px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;
-    box-shadow:0 8px 24px rgba(0,0,0,.35)}
-  .tr-descanso-fechar{width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,255,255,.15);
-    color:#fff;font-size:12px;line-height:1;cursor:pointer}
+    border:1px solid var(--hair);box-shadow:0 8px 24px rgba(0,0,0,.16)}
+  .tr-descanso-fechar{width:24px;height:24px;border-radius:50%;border:none;background:var(--fill);
+    color:var(--ink2);font-size:12px;line-height:1;cursor:pointer}
   .pg-vazio{font-size:14px;color:var(--ink2);padding:8px 0}
   .tr-hist-linha{background:var(--card);border-radius:var(--rc);padding:10px 12px;margin-top:8px;box-shadow:var(--sh-min)}
   .tr-hist-linha:first-child{margin-top:0}
@@ -873,7 +905,11 @@
         <span class="hoje-cartao-tit">Treino</span>
         <span class="hoje-cartao-num" id="hoje-treino-num"></span>
       </div>
-      <p class="hoje-cartao-nota" id="hoje-treino-nota"></p>
+      <div class="hoje-treino-linha">
+        <p class="hoje-cartao-nota" id="hoje-treino-nota"></p>
+        <button type="button" class="hoje-treino-trocar" id="hoje-treino-trocar" hidden>Trocar</button>
+      </div>
+      <div class="hoje-treino-opcoes" id="hoje-treino-opcoes" hidden></div>
       <button class="hoje-cartao-cta" id="hoje-ir-iniciar-treino">Iniciar treino</button>
     </div>
 
@@ -4179,34 +4215,92 @@ document.getElementById('hoje-ir-diario').onclick = function(){
   if(cal) cal.scrollIntoView({block:'start'});
 };
 document.getElementById('hoje-ir-habitos').onclick = function(){ abrirHabitosDlg(); };
-document.getElementById('hoje-ir-iniciar-treino').onclick = function(){ abrirSessaoTreino(); };
+document.getElementById('hoje-ir-iniciar-treino').onclick = function(){ abrirSessaoTreino(treinoHojeEscolhido); };
 
-/* Card "Treino" do resumo de hoje: mostra se já tem periodização, e se
-   algum treino já foi registrado hoje (treino_registros.dia === hoje) -
-   sem "adivinhar" qual treino é o de hoje (isso o Carlos escolhe na hora
-   de iniciar), só informa o que já foi feito. */
+// chaves únicas de treino (A/B/C/A2/D...) na ordem da divisão, sem "OFF" -
+// usada tanto pro seletor dentro da sessão quanto pra sugestão do card e
+// pro "Trocar" do Diário, todos com a mesma lista/ordem.
+function chavesTreinoUnicas(c){
+  const ordemUnica = [];
+  ((c && c.divisao && c.divisao.ordem)||[]).forEach(function(d){ if(d!=='OFF' && ordemUnica.indexOf(d)===-1) ordemUnica.push(d); });
+  Object.keys((c && c.treinos)||{}).forEach(function(k){ if(ordemUnica.indexOf(k)===-1) ordemUnica.push(k); });
+  return ordemUnica;
+}
+// próximo treino da sequência depois do último feito (ignora OFF - o
+// próprio plano já avisa que o descanso é por sensação, não por dia fixo).
+// Sem nenhum treino feito ainda, sugere o primeiro da sequência.
+function proximoTreinoSugerido(conteudo, ultimoFeito){
+  const seq = chavesTreinoUnicas(conteudo);
+  if(!seq.length) return null;
+  if(!ultimoFeito) return seq[0];
+  const i = seq.indexOf(ultimoFeito);
+  return i===-1 ? seq[0] : seq[(i+1) % seq.length];
+}
+
+/* Card "Treino" do resumo de hoje: além de mostrar o que já foi feito hoje,
+   já sugere qual é o treino de hoje (próximo da sequência, calculado pelo
+   último treino registrado) pra não precisar escolher A/B/C/A2/D toda vez -
+   "Trocar" deixa escolher outro só quando quiser. */
+let treinoHojeEscolhido = null;
+let treinoHojeEscolhidoDia = null;
+let treinoHojeConteudo = null;
 async function atualizarCardTreinoHoje(){
   const num = document.getElementById('hoje-treino-num');
   const nota = document.getElementById('hoje-treino-nota');
+  const trocarBtn = document.getElementById('hoje-treino-trocar');
+  const opcoesBox = document.getElementById('hoje-treino-opcoes');
   if(!num || !nota) return;
+  opcoesBox.hidden = true; opcoesBox.innerHTML = '';
   const uid = diario.perfil;
-  if(!db || !orgAtiva || !sessaoAtual || !uid){ num.textContent=''; nota.textContent=''; return; }
+  if(!db || !orgAtiva || !sessaoAtual || !uid){
+    num.textContent=''; nota.textContent=''; trocarBtn.hidden = true;
+    treinoHojeEscolhido = null; treinoHojeConteudo = null;
+    return;
+  }
   try{
     const plano = await buscarPlanoGenerico('planos_treino', uid);
-    if(!plano){ num.textContent = ''; nota.textContent = 'Ainda não tem periodização cadastrada.'; return; }
-    const hojeIso = iso(new Date());
-    const r = await db.from('treino_registros').select('treino_chave')
-      .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', hojeIso);
-    const feitos = (r && r.data) || [];
-    if(feitos.length){
-      num.textContent = feitos.length===1 ? '1 treino feito hoje' : feitos.length+' treinos feitos hoje';
-      nota.textContent = feitos.map(function(f){ return f.treino_chave; }).join(', ');
-    }else{
-      num.textContent = 'Nenhum treino hoje ainda';
-      nota.textContent = '';
+    if(!plano){
+      num.textContent = ''; nota.textContent = 'Ainda não tem periodização cadastrada.';
+      trocarBtn.hidden = true; treinoHojeEscolhido = null; treinoHojeConteudo = null;
+      return;
     }
-  }catch(e){ num.textContent = ''; nota.textContent = ''; }
+    treinoHojeConteudo = plano;
+    const hojeIso = iso(new Date());
+    if(treinoHojeEscolhidoDia !== hojeIso){ treinoHojeEscolhido = null; treinoHojeEscolhidoDia = hojeIso; }
+    const rHoje = await db.from('treino_registros').select('treino_chave')
+      .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', hojeIso);
+    const feitosHoje = (rHoje && rHoje.data) || [];
+    num.textContent = feitosHoje.length ? (feitosHoje.length===1 ? '1 feito hoje' : feitosHoje.length+' feitos hoje') : '';
+    if(!treinoHojeEscolhido){
+      const rUlt = await db.from('treino_registros').select('treino_chave,dia')
+        .eq('organization_id', orgAtiva.id).eq('user_id', uid)
+        .order('dia', { ascending:false }).limit(1);
+      const ultimo = rUlt && rUlt.data && rUlt.data[0] ? rUlt.data[0].treino_chave : null;
+      treinoHojeEscolhido = proximoTreinoSugerido(plano, ultimo);
+    }
+    const t = treinoHojeEscolhido && plano.treinos && plano.treinos[treinoHojeEscolhido];
+    nota.textContent = t ? ('Treino '+treinoHojeEscolhido+' · '+t.nome) : 'Nenhum treino cadastrado no plano.';
+    trocarBtn.hidden = !t;
+  }catch(e){ num.textContent = ''; nota.textContent = ''; trocarBtn.hidden = true; }
 }
+document.getElementById('hoje-treino-trocar').onclick = function(){
+  const opcoesBox = document.getElementById('hoje-treino-opcoes');
+  if(!opcoesBox.hidden){ opcoesBox.hidden = true; return; }
+  if(!treinoHojeConteudo) return;
+  const chaves = chavesTreinoUnicas(treinoHojeConteudo);
+  opcoesBox.innerHTML = chaves.map(function(k){
+    return '<button type="button" class="tr-chip-sel" data-chave="'+k+'" aria-pressed="'+(k===treinoHojeEscolhido)+'">'+k+'</button>';
+  }).join('');
+  opcoesBox.hidden = false;
+  Array.prototype.forEach.call(opcoesBox.querySelectorAll('.tr-chip-sel'), function(b){
+    b.onclick = function(){
+      treinoHojeEscolhido = b.getAttribute('data-chave');
+      opcoesBox.hidden = true;
+      const t = treinoHojeConteudo.treinos && treinoHojeConteudo.treinos[treinoHojeEscolhido];
+      document.getElementById('hoje-treino-nota').textContent = t ? ('Treino '+treinoHojeEscolhido+' · '+t.nome) : '';
+    };
+  });
+};
 
 /* --- aba Progresso --- */
 // ---------- aba Evolução (cartões com faixa + gráfico por medição real) ----------
@@ -4817,10 +4911,12 @@ async function salvarRegistroTreino(chave, c, box, btn){
    ver rodada de unificação Início->Diário / limpeza da aba Treino). */
 let sessaoTreinoConteudo = null;
 let sessaoTreinoChave = null;
+let sessaoTreinoChaveInicial = null;
 let sessaoTreinoRegistros = [];
-async function abrirSessaoTreino(){
+async function abrirSessaoTreino(chaveInicial){
   document.getElementById('tela-sessao-treino').hidden = false;
   sessaoTreinoChave = null;
+  sessaoTreinoChaveInicial = chaveInicial || null;
   const corpo = document.getElementById('sessao-treino-corpo');
   corpo.innerHTML = '<p class="pg-vazio">Carregando...</p>';
   const uid = diario.perfil;
@@ -4840,6 +4936,9 @@ async function abrirSessaoTreino(){
       return;
     }
     sessaoTreinoConteudo = linha.conteudo;
+    if(sessaoTreinoChaveInicial && sessaoTreinoConteudo.treinos && sessaoTreinoConteudo.treinos[sessaoTreinoChaveInicial]){
+      sessaoTreinoChave = sessaoTreinoChaveInicial;
+    }
     const semanas = sessaoTreinoConteudo.semanas || [];
     if(!semanas.some(function(s){ return s.n===treinoSemana; })) treinoSemana = semanas[0] ? semanas[0].n : 1;
     // histórico do usuário, pra saber o "Anterior" (kg x reps da última vez
@@ -4880,6 +4979,278 @@ function temValorPlano(v){
   const s = String(v||'').trim();
   return !!s && s!=='—' && s!=='-';
 }
+// pré-série de aquecimento (ex.: "2x15") - mesma leitura da ativação: N
+// séries com a meta de reps fixa, em formato de checklist, antes das
+// séries que valem. Fica fora de .tr-serie-linha de propósito, ver
+// comentário no CSS de .tr-preserie-bloco.
+function preSerieAquecimentoHtml(aquecimentoTxt){
+  const partes = /^(\d+)\s*x\s*(\d+)/i.exec(String(aquecimentoTxt||''));
+  const nSets = partes ? Math.max(1, parseInt(partes[1],10)) : 1;
+  const repsAlvo = partes ? partes[2] : '';
+  let linhas = '';
+  for(let s=0; s<nSets; s++){
+    linhas += '<div class="tr-preserie-linha" data-serie="'+s+'">'
+      + '<span class="tr-serie-ativacao-label">'+(repsAlvo?repsAlvo+' reps':'')+'</span>'
+      + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
+      + '</div>';
+  }
+  return '<div class="tr-preserie-bloco"><div class="tr-preserie-titulo">Aquecimento</div>' + linhas + '</div>';
+}
+
+/* --- figura padronizada por exercício ---------------------------------
+   Em vez de foto (que nunca fica padronizada entre exercícios diferentes),
+   desenha um boneco-palito por código: mesmo traço, mesma proporção, mesma
+   cor pra qualquer exercício - só muda a "pose" (ângulos das juntas) e o
+   "equip" (halter/barra/cabo/peso/parede/nada) escolhidos por exercício em
+   conteudo.biblioteca_exercicios. Ângulos em graus, 0=direita, -90=cima,
+   90=baixo, 180=esquerda (eixo y da tela cresce pra baixo). */
+const FIG = (function(){
+  function seg(x,y,ang,len){ const a=ang*Math.PI/180; return {x:x+len*Math.cos(a), y:y+len*Math.sin(a)}; }
+  function pontos(p){
+    const hip = {x:p.hipX, y:p.hipY};
+    const ombro = seg(hip.x,hip.y,p.torsoAngle,p.torsoLen);
+    const cabeca = seg(ombro.x,ombro.y,p.torsoAngle,p.headR+3);
+    const cotovelo = seg(ombro.x,ombro.y,p.armUpperAngle,p.armUpperLen);
+    const pulso = seg(cotovelo.x,cotovelo.y,p.armLowerAngle,p.armLowerLen);
+    const joelho = seg(hip.x,hip.y,p.legUpperAngle,p.legUpperLen);
+    const tornozelo = seg(joelho.x,joelho.y,p.legLowerAngle,p.legLowerLen);
+    const pe = seg(tornozelo.x,tornozelo.y,p.footAngle!=null?p.footAngle:0,p.footLen||8);
+    return { hip:hip, ombro:ombro, cabeca:cabeca, cotovelo:cotovelo, pulso:pulso, joelho:joelho, tornozelo:tornozelo, pe:pe };
+  }
+  function linha(a,b,cor,w){
+    return '<line x1="'+a.x.toFixed(1)+'" y1="'+a.y.toFixed(1)+'" x2="'+b.x.toFixed(1)+'" y2="'+b.y.toFixed(1)+'" stroke="'+(cor||'var(--ink)')+'" stroke-width="'+(w||4.2)+'" stroke-linecap="round"/>';
+  }
+  function circulo(c,r,cor,w){
+    return '<circle cx="'+c.x.toFixed(1)+'" cy="'+c.y.toFixed(1)+'" r="'+r+'" fill="none" stroke="'+(cor||'var(--ink)')+'" stroke-width="'+(w||3.4)+'"/>';
+  }
+  function boneco(pts,p){
+    return linha(pts.hip,pts.joelho) + linha(pts.joelho,pts.tornozelo) + linha(pts.tornozelo,pts.pe,'var(--ink)',3.6)
+      + linha(pts.hip,pts.ombro) + linha(pts.ombro,pts.cotovelo) + linha(pts.cotovelo,pts.pulso)
+      + circulo(pts.cabeca, p.headR);
+  }
+  function equipMaoSVG(equip, pts){
+    const EQ = 'var(--ink3)';
+    if(equip==='halter'){
+      const c = pts.pulso;
+      return linha({x:c.x-6,y:c.y},{x:c.x+6,y:c.y},EQ,3) + circulo({x:c.x-6,y:c.y},3,EQ,2.6) + circulo({x:c.x+6,y:c.y},3,EQ,2.6);
+    }
+    if(equip==='barra'){
+      const c = pts.pulso;
+      return linha({x:c.x-13,y:c.y},{x:c.x+13,y:c.y},EQ,3) + circulo({x:c.x-13,y:c.y},3.6,EQ,2.6) + circulo({x:c.x+13,y:c.y},3.6,EQ,2.6);
+    }
+    if(equip==='cabo'){
+      const c = pts.pulso;
+      return linha({x:c.x,y:4},{x:c.x,y:c.y},EQ,2.4) + circulo({x:c.x,y:4},2.6,EQ,2.2);
+    }
+    if(equip==='peso'){
+      return circulo(pts.pulso, 4.6, EQ, 2.8);
+    }
+    return '';
+  }
+  function svg(nomePose, equip){
+    const p = FIGURA_POSES[nomePose];
+    if(!p) return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"></svg>';
+    if(p.custom) return p.custom;
+    const pts = pontos(p);
+    const EQ = 'var(--ink3)';
+    let fundo = '';
+    if(equip==='parede') fundo += linha({x:14,y:12},{x:14,y:88},EQ,3);
+    if(p.assento){
+      const largo = p.assentoLargo||14;
+      const y = pts.hip.y + (p.assentoDy!=null?p.assentoDy:11);
+      fundo += '<rect x="'+(pts.hip.x-largo).toFixed(1)+'" y="'+(y-2).toFixed(1)+'" width="'+(largo*2).toFixed(1)+'" height="4" rx="1.5" fill="none" stroke="'+EQ+'" stroke-width="2.6"/>';
+    }
+    if(p.banco){
+      const xs = [pts.hip.x, pts.ombro.x, pts.cabeca.x, pts.joelho.x, pts.tornozelo.x];
+      const x1 = Math.min.apply(null, xs) - 6, x2 = Math.max.apply(null, xs) + 8;
+      fundo += '<rect x="'+x1.toFixed(1)+'" y="'+(pts.hip.y+8).toFixed(1)+'" width="'+(x2-x1).toFixed(1)+'" height="4" rx="1.5" fill="none" stroke="'+EQ+'" stroke-width="2.6"/>';
+    }
+    if(p.aparelho){
+      fundo += '<rect x="'+p.aparelho[0]+'" y="'+p.aparelho[1]+'" width="'+p.aparelho[2]+'" height="'+p.aparelho[3]+'" rx="2" fill="none" stroke="'+EQ+'" stroke-width="2.8"/>';
+    }
+    let frente = (equip==='peso' && p.pesoNoCorpo)
+      ? circulo({x:(pts.hip.x+pts.ombro.x)/2, y:(pts.hip.y+pts.ombro.y)/2 - 5}, 4.6, EQ, 2.8)
+      : equipMaoSVG(equip, pts);
+    return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'+fundo+boneco(pts,p)+frente+'</svg>';
+  }
+  return { svg: svg };
+})();
+
+// poses (geometria do boneco) - o "equip" é escolhido por exercício, não
+// pela pose, pra reaproveitar a mesma pose com halter, cabo ou máquina.
+const FIGURA_POSES = {
+  ativacao_parede: {
+    hipX:44, hipY:64, torsoAngle:-92, torsoLen:22, headR:7,
+    armUpperAngle:-145, armUpperLen:15, armLowerAngle:-55, armLowerLen:13,
+    legUpperAngle:88, legUpperLen:16, legLowerAngle:92, legLowerLen:15, footAngle:0, footLen:8
+  },
+  remada_sentada: {
+    hipX:38, hipY:62, torsoAngle:-95, torsoLen:20, headR:7,
+    armUpperAngle:5, armUpperLen:11, armLowerAngle:175, armLowerLen:11,
+    legUpperAngle:8, legUpperLen:17, legLowerAngle:95, legLowerLen:14, footAngle:0, footLen:8,
+    assento:true, assentoLargo:13
+  },
+  puxada_alta: {
+    hipX:40, hipY:66, torsoAngle:-85, torsoLen:20, headR:7,
+    armUpperAngle:-140, armUpperLen:12, armLowerAngle:-70, armLowerLen:11,
+    legUpperAngle:8, legUpperLen:16, legLowerAngle:95, legLowerLen:14, footAngle:0, footLen:8,
+    assento:true, assentoLargo:10
+  },
+  remada_unilateral: {
+    hipX:46, hipY:60, torsoAngle:-40, torsoLen:22, headR:7,
+    armUpperAngle:-70, armUpperLen:12, armLowerAngle:150, armLowerLen:11,
+    legUpperAngle:80, legUpperLen:15, legLowerAngle:95, legLowerLen:15, footAngle:5, footLen:8,
+    aparelho:[18,74,10,3]
+  },
+  elevacao_lateral: {
+    hipX:44, hipY:64, torsoAngle:-92, torsoLen:22, headR:7,
+    armUpperAngle:-8, armUpperLen:15, armLowerAngle:-5, armLowerLen:10,
+    legUpperAngle:88, legUpperLen:16, legLowerAngle:92, legLowerLen:15, footAngle:0, footLen:8
+  },
+  prancha: {
+    hipX:60, hipY:66, torsoAngle:180, torsoLen:30, headR:7,
+    armUpperAngle:-90, armUpperLen:14, armLowerAngle:0, armLowerLen:0,
+    legUpperAngle:0, legUpperLen:16, legLowerAngle:0, legLowerLen:0, footAngle:0, footLen:0,
+    pesoNoCorpo:true
+  },
+  abdominal_maquina: {
+    hipX:40, hipY:66, torsoAngle:-70, torsoLen:20, headR:7,
+    armUpperAngle:-95, armUpperLen:11, armLowerAngle:180, armLowerLen:9,
+    legUpperAngle:8, legUpperLen:16, legLowerAngle:95, legLowerLen:14, footAngle:0, footLen:8,
+    assento:true, assentoLargo:12
+  },
+  supino: {
+    hipX:30, hipY:76, torsoAngle:180, torsoLen:26, headR:7,
+    armUpperAngle:-90, armUpperLen:12, armLowerAngle:-95, armLowerLen:11,
+    legUpperAngle:60, legUpperLen:15, legLowerAngle:110, legLowerLen:13, footAngle:60, footLen:7,
+    banco:true
+  },
+  crucifixo: {
+    hipX:38, hipY:64, torsoAngle:-95, torsoLen:20, headR:7,
+    armUpperAngle:-15, armUpperLen:13, armLowerAngle:20, armLowerLen:10,
+    legUpperAngle:8, legUpperLen:17, legLowerAngle:95, legLowerLen:14, footAngle:0, footLen:8,
+    assento:true, assentoLargo:13
+  },
+  desenvolvimento: {
+    hipX:44, hipY:64, torsoAngle:-92, torsoLen:22, headR:7,
+    armUpperAngle:-95, armUpperLen:13, armLowerAngle:-88, armLowerLen:11,
+    legUpperAngle:88, legUpperLen:16, legLowerAngle:92, legLowerLen:15, footAngle:0, footLen:8
+  },
+  remada_alta: {
+    hipX:44, hipY:64, torsoAngle:-92, torsoLen:22, headR:7,
+    armUpperAngle:-130, armUpperLen:9, armLowerAngle:-60, armLowerLen:9,
+    legUpperAngle:88, legUpperLen:16, legLowerAngle:92, legLowerLen:15, footAngle:0, footLen:8
+  },
+  pallof: {
+    hipX:42, hipY:64, torsoAngle:-90, torsoLen:22, headR:7,
+    armUpperAngle:0, armUpperLen:10, armLowerAngle:0, armLowerLen:13,
+    legUpperAngle:82, legUpperLen:16, legLowerAngle:98, legLowerLen:15, footAngle:0, footLen:8
+  },
+  abdominal_solo: {
+    hipX:40, hipY:70, torsoAngle:-50, torsoLen:24, headR:7,
+    armUpperAngle:-40, armUpperLen:12, armLowerAngle:-40, armLowerLen:10,
+    legUpperAngle:-10, legUpperLen:15, legLowerAngle:100, legLowerLen:15, footAngle:100, footLen:7,
+    pesoNoCorpo:true
+  },
+  leg_press: {
+    hipX:35, hipY:65, torsoAngle:-110, torsoLen:20, headR:7,
+    armUpperAngle:160, armUpperLen:10, armLowerAngle:110, armLowerLen:8,
+    legUpperAngle:20, legUpperLen:14, legLowerAngle:-40, legLowerLen:16, footAngle:-40, footLen:7,
+    aparelho:[14,58,14,20]
+  },
+  agachamento: {
+    hipX:44, hipY:60, torsoAngle:-60, torsoLen:22, headR:7,
+    armUpperAngle:10, armUpperLen:12, armLowerAngle:10, armLowerLen:10,
+    legUpperAngle:25, legUpperLen:16, legLowerAngle:122, legLowerLen:16, footAngle:0, footLen:8
+  },
+  cadeira_extensora: {
+    hipX:36, hipY:58, torsoAngle:-90, torsoLen:20, headR:7,
+    armUpperAngle:150, armUpperLen:10, armLowerAngle:90, armLowerLen:8,
+    legUpperAngle:0, legUpperLen:17, legLowerAngle:-25, legLowerLen:16, footAngle:-25, footLen:7,
+    aparelho:[16,74,22,3]
+  },
+  cadeira_flexora: {
+    hipX:36, hipY:58, torsoAngle:-90, torsoLen:20, headR:7,
+    armUpperAngle:150, armUpperLen:10, armLowerAngle:90, armLowerLen:8,
+    legUpperAngle:0, legUpperLen:17, legLowerAngle:60, legLowerLen:16, footAngle:60, footLen:7,
+    aparelho:[16,74,22,3]
+  },
+  cadeira_abdutora: {
+    custom: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
+      + '<rect x="30" y="70" width="40" height="4" rx="1.5" fill="none" stroke="var(--ink3)" stroke-width="2.6"/>'
+      + '<line x1="24" y1="66" x2="24" y2="76" stroke="var(--ink3)" stroke-width="3"/>'
+      + '<line x1="76" y1="66" x2="76" y2="76" stroke="var(--ink3)" stroke-width="3"/>'
+      + '<line x1="50" y1="58" x2="34" y2="72" stroke="var(--ink)" stroke-width="4.2" stroke-linecap="round"/>'
+      + '<line x1="50" y1="58" x2="66" y2="72" stroke="var(--ink)" stroke-width="4.2" stroke-linecap="round"/>'
+      + '<line x1="50" y1="58" x2="50" y2="38" stroke="var(--ink)" stroke-width="4.2" stroke-linecap="round"/>'
+      + '<line x1="50" y1="41" x2="40" y2="51" stroke="var(--ink)" stroke-width="4.2" stroke-linecap="round"/>'
+      + '<line x1="50" y1="41" x2="60" y2="51" stroke="var(--ink)" stroke-width="4.2" stroke-linecap="round"/>'
+      + '<circle cx="50" cy="29" r="7" fill="none" stroke="var(--ink)" stroke-width="3.4"/>'
+      + '</svg>'
+  },
+  prancha_lateral: {
+    hipX:55, hipY:66, torsoAngle:180, torsoLen:30, headR:7,
+    armUpperAngle:-90, armUpperLen:14, armLowerAngle:0, armLowerLen:0,
+    legUpperAngle:0, legUpperLen:16, legLowerAngle:0, legLowerLen:0, footAngle:0, footLen:0
+  },
+  abdominal_remador: {
+    hipX:40, hipY:72, torsoAngle:-55, torsoLen:22, headR:7,
+    armUpperAngle:-15, armUpperLen:13, armLowerAngle:-15, armLowerLen:10,
+    legUpperAngle:-25, legUpperLen:15, legLowerAngle:15, legLowerLen:14, footAngle:15, footLen:7
+  },
+  canoa: {
+    hipX:40, hipY:72, torsoAngle:-140, torsoLen:22, headR:7,
+    armUpperAngle:-20, armUpperLen:12, armLowerAngle:-10, armLowerLen:10,
+    legUpperAngle:-10, legUpperLen:16, legLowerAngle:5, legLowerLen:15, footAngle:5, footLen:7
+  },
+  rosca_biceps: {
+    hipX:44, hipY:64, torsoAngle:-92, torsoLen:22, headR:7,
+    armUpperAngle:100, armUpperLen:13, armLowerAngle:10, armLowerLen:11,
+    legUpperAngle:88, legUpperLen:16, legLowerAngle:92, legLowerLen:15, footAngle:0, footLen:8
+  },
+  spider_curl: {
+    hipX:30, hipY:70, torsoAngle:-25, torsoLen:24, headR:7,
+    armUpperAngle:95, armUpperLen:13, armLowerAngle:60, armLowerLen:11,
+    legUpperAngle:80, legUpperLen:15, legLowerAngle:95, legLowerLen:14, footAngle:0, footLen:8,
+    aparelho:[14,58,10,26]
+  },
+  triceps_polia: {
+    hipX:44, hipY:64, torsoAngle:-85, torsoLen:22, headR:7,
+    armUpperAngle:100, armUpperLen:8, armLowerAngle:60, armLowerLen:11,
+    legUpperAngle:88, legUpperLen:16, legLowerAngle:92, legLowerLen:15, footAngle:0, footLen:8
+  },
+  triceps_overhead: {
+    hipX:44, hipY:64, torsoAngle:-90, torsoLen:22, headR:7,
+    armUpperAngle:-170, armUpperLen:11, armLowerAngle:-90, armLowerLen:10,
+    legUpperAngle:88, legUpperLen:16, legLowerAngle:92, legLowerLen:15, footAngle:0, footLen:8
+  },
+  triceps_testa: {
+    hipX:30, hipY:76, torsoAngle:180, torsoLen:26, headR:7,
+    armUpperAngle:-95, armUpperLen:12, armLowerAngle:120, armLowerLen:11,
+    legUpperAngle:60, legUpperLen:15, legLowerAngle:110, legLowerLen:13, footAngle:60, footLen:7,
+    banco:true
+  }
+};
+// nome do exercício (igual ao do plano) -> figura padronizada gerada por
+// código acima (não é foto, ver comentário do FIG). O texto de explicação
+// de cada um vem de conteudo.biblioteca_exercicios (banco de dados).
+function abrirExplicacaoExercicio(nome){
+  const c = sessaoTreinoConteudo;
+  const info = c && c.biblioteca_exercicios && c.biblioteca_exercicios[nome];
+  const wrap = document.createElement('div');
+  wrap.className = 'tr-menu-backdrop';
+  const figuraSvg = info ? FIG.svg(info.pose, info.equip) : '';
+  wrap.innerHTML = '<div class="tr-exp-card">'
+    + '<button type="button" class="tr-exp-fechar" aria-label="Fechar">×</button>'
+    + (figuraSvg ? '<div class="tr-exp-figura">'+figuraSvg+'</div>' : '')
+    + '<div class="tr-exp-titulo">'+nome+'</div>'
+    + '<div class="tr-exp-texto">'+((info && info.explicacao) || 'Ainda não tem explicação cadastrada pra esse exercício.')+'</div>'
+    + '</div>';
+  document.body.appendChild(wrap);
+  wrap.addEventListener('click', function(ev){
+    if(ev.target===wrap || ev.target.closest('.tr-exp-fechar')) wrap.remove();
+  });
+}
 // kg/reps da série `idxSerie` desse exercício na última vez (dia mais
 // recente, ignorando hoje) que esse treino foi registrado - ou null se
 // nunca foi feito antes.
@@ -4902,9 +5273,7 @@ function montarSessaoTreino(){
   const c = sessaoTreinoConteudo;
   const corpo = document.getElementById('sessao-treino-corpo');
   sessaoTreinoNotas = {};
-  const ordemUnica = [];
-  (c.divisao.ordem||[]).forEach(function(d){ if(d!=='OFF' && ordemUnica.indexOf(d)===-1) ordemUnica.push(d); });
-  Object.keys(c.treinos||{}).forEach(function(k){ if(ordemUnica.indexOf(k)===-1) ordemUnica.push(k); });
+  const ordemUnica = chavesTreinoUnicas(c);
   const chips = '<div class="tr-divisao">' + ordemUnica.map(function(k){
     return '<button type="button" class="tr-chip-sel" data-chave="'+k+'" aria-pressed="'+(k===sessaoTreinoChave)+'">'+k+'</button>';
   }).join('') + '</div>';
@@ -4926,17 +5295,22 @@ function montarSessaoTreino(){
     const blocos = (t.ex||[]).map(function(e, idx){
       const tipo = e[5] || 'normal';
       const badge = badgesTipo[tipo] ? '<span class="tr-tipo-badge tr-tipo-'+tipo+'">'+badgesTipo[tipo]+'</span>' : '';
-      // colunas de referência do plano (aquecimento, teste de carga, séries
-      // válidas e descanso) que antes ficavam só na tabela de cima - agora
-      // aparecem junto de cada exercício aqui embaixo, pra não precisar
-      // rolar pra cima e pra baixo o tempo todo durante o treino. "—" no
-      // plano significa "não se aplica", então não vira tag.
+      // colunas de referência do plano (teste de carga, séries válidas e
+      // descanso) que antes ficavam só na tabela de cima - agora aparecem
+      // junto de cada exercício aqui embaixo, pra não precisar rolar pra
+      // cima e pra baixo o tempo todo durante o treino. "—" no plano
+      // significa "não se aplica", então não vira tag. O aquecimento não
+      // entra aqui como tag: quando existe de verdade, ele já aparece
+      // embaixo como pré-série marcável (ver preSerieAquecimentoHtml).
       const metaPartes = [];
-      if(temValorPlano(e[1])) metaPartes.push('<span class="tr-meta-tag"><b>Aquecimento</b>'+e[1]+'</span>');
       if(temValorPlano(e[2])) metaPartes.push('<span class="tr-meta-tag"><b>Teste de carga</b>'+e[2]+'</span>');
       if(temValorPlano(e[3])) metaPartes.push('<span class="tr-meta-tag"><b>Séries válidas</b>'+e[3]+'</span>');
       if(temValorPlano(e[4])) metaPartes.push('<span class="tr-meta-tag"><b>Descanso</b>'+e[4]+'</span>');
       const meta = metaPartes.length ? '<div class="tr-serie-meta">'+metaPartes.join('')+'</div>' : '';
+      // pré-série de aquecimento: só faz sentido pros exercícios "normais" -
+      // ativação já É o aquecimento (vira o checklist principal dele) e os
+      // isométricos do plano nunca têm aquecimento prescrito à parte.
+      const preSerie = (tipo!=='ativacao' && temValorPlano(e[1])) ? preSerieAquecimentoHtml(e[1]) : '';
       let linhasSerie = '';
       let cabecalho = '';
       if(tipo==='ativacao'){
@@ -4977,10 +5351,11 @@ function montarSessaoTreino(){
         }
       }
       return '<div class="tr-serie-bloco" data-ex="'+idx+'" data-tipo="'+tipo+'">'
-        + '<div class="tr-serie-cab"><span class="tr-serie-titulo-wrap"><span class="tr-serie-titulo">'+e[0]+'</span>'+badge+'</span>'
+        + '<div class="tr-serie-cab"><span class="tr-serie-titulo-wrap"><button type="button" class="tr-serie-titulo" data-nome="'+e[0].replace(/"/g,'&quot;')+'">'+e[0]+'</button>'+badge+'</span>'
         + '<button type="button" class="tr-serie-menu-btn" data-ex="'+idx+'" aria-label="Opções do exercício">•••</button></div>'
         + '<div class="tr-serie-nota" data-ex="'+idx+'" hidden></div>'
         + meta
+        + preSerie
         + '<div class="tr-serie-linhas">'
         + cabecalho
         + linhasSerie
@@ -5009,7 +5384,10 @@ function montarSessaoTreino(){
     ligarSwipeSerie(w);
   });
   Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-menu-btn'), function(b){
-    b.onclick = function(){ abrirMenuExercicio(parseInt(b.getAttribute('data-ex'),10)); };
+    b.onclick = function(){ abrirMenuExercicio(parseInt(b.getAttribute('data-ex'),10), b); };
+  });
+  Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-titulo'), function(b){
+    b.onclick = function(){ abrirExplicacaoExercicio(b.getAttribute('data-nome')); };
   });
   Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-add'), function(b){
     b.onclick = function(){
@@ -5057,7 +5435,7 @@ function ligarCheckSerie(btn){
   btn.onclick = function(){
     const feita = btn.getAttribute('aria-pressed')!=='true';
     btn.setAttribute('aria-pressed', feita);
-    const linha = btn.closest('.tr-serie-linha, .tr-aquecimento-linha');
+    const linha = btn.closest('.tr-serie-linha, .tr-aquecimento-linha, .tr-preserie-linha');
     if(linha) linha.classList.toggle('feita', feita);
   };
 }
@@ -5130,27 +5508,42 @@ function fecharMenuExercicio(){
   const el = document.getElementById('tr-menu-exercicio');
   if(el) el.remove();
 }
-function abrirMenuExercicio(idx){
+function abrirMenuExercicio(idx, btnEl){
   fecharMenuExercicio();
   const t = sessaoTreinoConteudo.treinos[sessaoTreinoChave];
   const e = (t && t.ex && t.ex[idx]) || [];
   const descansoTxt = (e[4]||'').trim();
   const wrap = document.createElement('div');
   wrap.id = 'tr-menu-exercicio';
-  wrap.className = 'tr-menu-backdrop';
-  wrap.innerHTML = '<div class="tr-menu-card">'
-    + '<button type="button" class="tr-menu-item" data-acao="nota">Adicionar nota</button>'
-    + '<button type="button" class="tr-menu-item" data-acao="aquecimento">Adicionar série de aquecimento</button>'
-    + (descansoTxt ? '<button type="button" class="tr-menu-item" data-acao="descanso">Iniciar descanso ('+descansoTxt+')</button>' : '')
-    + '<button type="button" class="tr-menu-item perigo" data-acao="remover">Remover da sessão de hoje</button>'
-    + '</div>'
-    + '<div class="tr-menu-card" style="margin-top:8px">'
-    + '<button type="button" class="tr-menu-item tr-menu-cancelar" data-acao="cancelar">Cancelar</button>'
+  wrap.className = 'tr-opcoes-backdrop';
+  wrap.innerHTML = '<div class="tr-opcoes-card">'
+    + '<button type="button" class="tr-opcoes-item" data-acao="nota">Adicionar nota</button>'
+    + '<button type="button" class="tr-opcoes-item" data-acao="aquecimento">Adicionar série de aquecimento</button>'
+    + (descansoTxt ? '<button type="button" class="tr-opcoes-item" data-acao="descanso">Iniciar descanso ('+descansoTxt+')</button>' : '')
+    + '<button type="button" class="tr-opcoes-item perigo" data-acao="remover">Remover da sessão de hoje</button>'
     + '</div>';
   document.body.appendChild(wrap);
+  // o cartão nasce colado no botão "..." que foi clicado (canto direito,
+  // logo abaixo dele) em vez de flutuar solto no centro/embaixo da tela -
+  // fica claro que o menu "saiu" dali.
+  const card = wrap.querySelector('.tr-opcoes-card');
+  const cw = 236;
+  card.style.width = cw+'px';
+  if(btnEl){
+    const r = btnEl.getBoundingClientRect();
+    let left = r.right - cw;
+    if(left < 10) left = 10;
+    if(left + cw > window.innerWidth - 10) left = window.innerWidth - 10 - cw;
+    const ch = card.offsetHeight;
+    let top = r.bottom + 6;
+    if(top + ch > window.innerHeight - 10) top = r.top - ch - 6; // sem espaço embaixo, abre pra cima
+    if(top < 10) top = 10;
+    card.style.left = left+'px';
+    card.style.top = top+'px';
+  }
   wrap.addEventListener('click', function(ev){
     if(ev.target===wrap){ fecharMenuExercicio(); return; }
-    const btn = ev.target.closest('.tr-menu-item');
+    const btn = ev.target.closest('.tr-opcoes-item');
     if(!btn) return;
     const acao = btn.getAttribute('data-acao');
     fecharMenuExercicio();
