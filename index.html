@@ -355,6 +355,11 @@
   .ref .nm-btn{display:flex;align-items:center;gap:7px;text-align:left;background:none;border:0;
     padding:0;cursor:pointer;color:var(--ink);width:100%;min-width:0}
   .ref .nm-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  /* aviso de "comi algo a mais" na linha fechada da refeição: sem isso o
+     extra some dentro da refeição recolhida e as calorias do dia aparecem
+     sem nada marcado na tela. */
+  .ref .nm-extra{flex:0 0 auto;font-size:11px;font-weight:600;letter-spacing:.02em;
+    color:var(--ad);background:var(--ad-soft);border-radius:999px;padding:2px 7px;line-height:1.3}
   .ref .nm-btn::after{content:'';flex:0 0 auto;width:6px;height:6px;margin-top:-3px;
     border-right:1.6px solid var(--ink3);border-bottom:1.6px solid var(--ink3);transform:rotate(45deg)}
   .ref .nm-btn[aria-expanded="true"]::after{transform:rotate(-135deg);margin-top:3px}
@@ -1570,14 +1575,34 @@ async function carregarOrganizacaoAtiva(){
   var lista = await comTimeout(neon.organization.list(), 6000);
   var orgs = (lista && lista.data) || [];
   if(orgs.length === 0){
-    var nomeUser = (sessaoAtual && sessaoAtual.user && sessaoAtual.user.name) || 'Minha organização';
-    var slug = 'org-' + Math.random().toString(36).slice(2,8);
-    await comTimeout(neon.organization.create({ name: nomeUser, slug: slug }), 6000);
+    // Quem chega sem grupo nenhum ganha o seu. O nome é sempre "Dieta e
+    // treino" (e não o nome da pessoa): quando a Isabella se cadastrou sem
+    // passar pelo convite, este trecho criou uma organização chamada
+    // "Isabella" só dela - e como cada tela só enxerga a organização ativa,
+    // a dieta dela ficava invisível pra mim e ela aparecia na coluna do dono
+    // do grupo, ou seja, com o meu nome.
+    var slug = 'casal-' + Math.random().toString(36).slice(2,8);
+    await comTimeout(neon.organization.create({ name: 'Dieta e treino', slug: slug }), 6000);
     lista = await comTimeout(neon.organization.list(), 6000);
     orgs = (lista && lista.data) || [];
   }
+  // se por algum motivo a pessoa acabar em mais de um grupo, vale o que tem
+  // mais gente - é o grupo do casal, não o espaço solo criado sem querer.
+  var escolhida = orgs[0];
+  if(orgs.length > 1){
+    var melhor = -1;
+    for(var k = 0; k < orgs.length; k++){
+      var n = 0;
+      try{
+        var f = await comTimeout(neon.organization.getFullOrganization(
+          { query: { organizationId: orgs[k].id } }), 6000);
+        n = (f && f.data && f.data.members && f.data.members.length) || 0;
+      }catch(e){ n = 0; }
+      if(n > melhor){ melhor = n; escolhida = orgs[k]; }
+    }
+  }
   var full = await comTimeout(neon.organization.getFullOrganization(
-    orgs[0] ? { query: { organizationId: orgs[0].id } } : undefined
+    escolhida ? { query: { organizationId: escolhida.id } } : undefined
   ), 6000);
   orgAtiva = full && full.data;
   if(orgAtiva) await comTimeout(neon.organization.setActive({ organizationId: orgAtiva.id }), 6000);
@@ -2379,12 +2404,17 @@ async function salvarVigenciaEditada(btn){
     await db.from(tabela).update({ vigente_a_partir: novaData }).eq('id', id);
     btn.textContent = 'Salvo!';
     setTimeout(function(){ carregarVersoesHistorico(); }, 700);
-    if(tabela === 'planos_treino' && typeof renderTreino === 'function' && !document.getElementById('vista-treino').hidden){
+    // recarrega sempre, não só se a aba estiver aberta: mudar a data de
+    // início é justamente pra mudar o "Vigente desde", e antes isso só
+    // aparecia depois de fechar e abrir o app de novo.
+    if(tabela === 'planos_treino' && typeof renderTreino === 'function'){
       renderTreino();
     }
-    if(tabela === 'planos_dieta' && typeof carregarPlanoAtivo === 'function' && !document.getElementById('vista-plano').hidden){
-      carregarPlanoAtivo().then(render);
+    if(tabela === 'planos_dieta' && typeof carregarPlanoAtivo === 'function'){
+      await carregarPlanoAtivo();
+      if(typeof render === 'function') render();
     }
+    if(typeof renderDiario === 'function') renderDiario();
   }catch(e){
     mostrarErroAuth('vs-erro', 'Não deu pra salvar essa data agora.');
     btn.disabled = false; btn.textContent = orig;
@@ -2679,20 +2709,54 @@ async function carregar(){
    documentos mais recentes (um por integrante) e "junta" eles nesse formato pareado,
    só na hora de exibir — nunca no armazenamento. Layout pra 3+ pessoas fica pra uma
    rodada própria depois; por enquanto isso continua mostrando até 2 colunas, como já era. */
+/* Junta duas listas ordenadas casando pelo nome, não pela posição. Isso é o
+   que permite ter dois planos de verdade diferentes (a Isabella tem "Pós
+   treino líquido" e eu não; o almoço dela tem alimentos que o meu não tem):
+   o que os dois têm vira uma linha só com as duas colunas, e o que é só de
+   um aparece com a coluna do outro vazia. Casar por posição, como era antes,
+   embaralhava tudo assim que os dois planos tinham tamanhos diferentes. */
+function juntarPorNome(ax, cx, chaveDe){
+  ax = ax || []; cx = cx || [];
+  const usado = new Array(cx.length).fill(false);
+  const saida = [];
+  let pc = 0;
+  ax.forEach(function(a){
+    const k = chaveDe(a);
+    let j = -1;
+    for(let t = 0; t < cx.length; t++){
+      if(!usado[t] && chaveDe(cx[t]) === k){ j = t; break; }
+    }
+    if(j < 0){ saida.push({a:a, c:null}); return; }
+    // o que vem antes do par na lista dele entra primeiro, na ordem dele
+    for(; pc < j; pc++){
+      if(!usado[pc]){ usado[pc] = true; saida.push({a:null, c:cx[pc]}); }
+    }
+    usado[j] = true;
+    if(pc === j) pc++;
+    saida.push({a:a, c:cx[j]});
+  });
+  for(let t = 0; t < cx.length; t++){
+    if(!usado[t]) saida.push({a:null, c:cx[t]});
+  }
+  return saida;
+}
 function zipOpts(oI, oC){
-  const lista = oI || oC;
-  if(!lista) return undefined;
-  return lista.map(function(_, k){
-    const a = oI ? oI[k] : null, c = oC ? oC[k] : null;
+  if(!oI && !oC) return undefined;
+  return juntarPorNome(oI, oC, function(o){ return norm(o.n); }).map(function(par){
+    const a = par.a, c = par.c;
     return { n: (a||c).n, it: a ? a.t : null, ct: c ? c.t : null };
   });
 }
 function zipItem(a, c){
-  const ref = a || c;
+  const ref = c || a;                       // o dono da conta manda na grafia
+  const alt = a || c;
   const out = { n: ref.n, i: a ? a.v : null, c: c ? c.v : null };
-  if(ref.g !== undefined) out.g = ref.g;
-  if(ref.sub !== undefined) out.sub = ref.sub;
-  if(ref.livre !== undefined) out.livre = ref.livre;
+  const g = ref.g !== undefined ? ref.g : alt.g;
+  const sub = ref.sub !== undefined ? ref.sub : alt.sub;
+  const livre = ref.livre !== undefined ? ref.livre : alt.livre;
+  if(g !== undefined) out.g = g;
+  if(sub !== undefined) out.sub = sub;
+  if(livre !== undefined) out.livre = livre;
   const opts = zipOpts(a && a.opts, c && c.opts);
   if(opts !== undefined) out.opts = opts;
   return out;
@@ -2704,37 +2768,65 @@ function zipVersao(a, c){
   // roda e o app fica "sem perfil" - o que aparece como "Entre na conta"
   // nas abas Treino e Dieta mesmo com a pessoa logada.
   if(!ref) return { nome: 'Plano', itens: [] };
-  const out = { nome: ref.nome };
-  if(ref.nota !== undefined) out.nota = ref.nota;
-  out.itens = ref.itens.map(function(_, k){ return zipItem(a && a.itens[k], c && c.itens[k]); });
+  const out = { nome: (c || a).nome };
+  const nota = [c && c.nota, a && a.nota].filter(Boolean)[0];
+  if(nota !== undefined) out.nota = nota;
+  out.itens = juntarPorNome(a && a.itens, c && c.itens, function(i){ return norm(i.n); })
+    .map(function(par){ return zipItem(par.a, par.c); });
   return out;
 }
 function zipMeal(a, c){
   const ref = a || c;
   if(!ref) return { id: 'x', nome: '', versoes: [{ nome:'Plano', itens: [] }], hora:{i:null,c:null} };
-  const out = { id: ref.id, nome: ref.nome };
-  if(ref.curto !== undefined) out.curto = ref.curto;
+  // id e nome saem de quem já estava (o dono da conta) pra não trocar a chave
+  // que o diário usa quando a segunda pessoa entra com o plano dela.
+  const ident = c || a;
+  const out = { id: ident.id, nome: ident.nome };
+  if(ident.curto !== undefined) out.curto = ident.curto;
   out.hora = { i: a ? a.hora : null, c: c ? c.hora : null };
-  if(ref.nota !== undefined) out.nota = ref.nota;
-  out.versoes = ref.versoes.map(function(_, k){ return zipVersao(a && a.versoes[k], c && c.versoes[k]); });
+  const nota = [ident.nota, ref.nota].filter(Boolean)[0];
+  if(nota !== undefined) out.nota = nota;
+  // versões continuam casando por posição ("opção 1", "opção 2"), mas a lista
+  // mais longa manda - se um tem 2 opções e o outro 1, ninguém perde a sua.
+  const nv = Math.max(a ? a.versoes.length : 0, c ? c.versoes.length : 0) || 1;
+  out.versoes = [];
+  for(let k = 0; k < nv; k++){
+    out.versoes.push(zipVersao(a && a.versoes[k], c && c.versoes[k]));
+  }
   return out;
 }
 function zipPlano(docI, docC){
-  const ref = docI || docC;
-  if(!ref) return {semana:[], fds:[]};
-  return {
-    semana: ref.semana.map(function(_, k){ return zipMeal(docI && docI.semana[k], docC && docC.semana[k]); }),
-    fds: ref.fds.map(function(_, k){ return zipMeal(docI && docI.fds[k], docC && docC.fds[k]); })
-  };
+  if(!docI && !docC) return {semana:[], fds:[]};
+  function junta(campo){
+    return juntarPorNome(docI && docI[campo], docC && docC[campo],
+      function(m){ return norm(m.nome); })
+      .map(function(par){ return zipMeal(par.a, par.c); });
+  }
+  return { semana: junta('semana'), fds: junta('fds') };
+}
+/* Qual versão vale hoje. Regra: a mais recente que já começou. Se nenhuma
+   começou ainda (o plano foi cadastrado pra valer só daqui a alguns dias),
+   mostra a que está mais perto de começar em vez de deixar a tela vazia -
+   senão adiantar a data de início faria o plano sumir do app. */
+function escolherVigente(linhas){
+  const lista = (linhas||[]).filter(Boolean).slice().sort(function(a,b){
+    return String(b.vigente_a_partir).localeCompare(String(a.vigente_a_partir));
+  });
+  if(!lista.length) return null;
+  const hoje = iso(new Date());
+  const valendo = lista.filter(function(l){
+    return String(l.vigente_a_partir).slice(0,10) <= hoje;
+  });
+  return valendo[0] || lista[lista.length-1];
 }
 async function buscarPlanoDe(uid){
   if(!uid) return null;
   try{
     const r = await db.from('planos_dieta').select('conteudo,vigente_a_partir')
       .eq('organization_id', orgAtiva.id).eq('user_id', uid)
-      .lte('vigente_a_partir', iso(new Date()))
-      .order('vigente_a_partir', {ascending:false}).limit(1);
-    return (r && r.data && r.data[0]) ? r.data[0].conteudo : null;
+      .order('vigente_a_partir', {ascending:false}).limit(20);
+    const linha = escolherVigente(r && r.data);
+    return linha ? linha.conteudo : null;
   }catch(e){ return null; }
 }
 async function carregarPlanoAtivo(){
@@ -2887,15 +2979,15 @@ function render(){
     sec.className = 'meal';
     const horas = (meal.hora.i && meal.hora.c && meal.hora.i===meal.hora.c)
       ? '<span>'+meal.hora.i+'</span>'
-      : [meal.hora.i?'<span class="hi"><b>Isabella</b> '+meal.hora.i+'</span>':'',
-         meal.hora.c?'<span class="hc"><b>Carlos</b> '+meal.hora.c+'</span>':''].filter(Boolean).join(' &nbsp; ');
+      : [meal.hora.i?'<span class="hi"><b>'+nomeSlot('i')+'</b> '+meal.hora.i+'</span>':'',
+         meal.hora.c?'<span class="hc"><b>'+nomeSlot('c')+'</b> '+meal.hora.c+'</span>':''].filter(Boolean).join(' &nbsp; ');
     sec.innerHTML = '<div class="meal-head"><h2>'+meal.nome+'</h2><div class="horas">'+horas+'</div></div>';
 
     if(meal.versoes.length>1) sec.appendChild(blocoVersoes(meal, vIdx));
 
     if(versao.itens.length){
       const cols = document.createElement('div'); cols.className='cols';
-      cols.innerHTML = '<span></span><span class="ci">Isabella</span><span class="cc">Carlos</span><span>total</span>';
+      cols.innerHTML = '<span></span><span class="ci">'+nomeSlot('i')+'</span><span class="cc">'+nomeSlot('c')+'</span><span>total</span>';
       sec.appendChild(cols);
       const ul = document.createElement('ul'); ul.className='itens';
       versao.itens.forEach(function(item,iIdx){ ul.appendChild(linha(meal,vIdx,item,iIdx)); });
@@ -3043,8 +3135,8 @@ function linha(meal,vIdx,item,iIdx){
   li.appendChild(celula(vc,'c', temC?nomeC:null, base+'c'));
   li.appendChild(celulaTotal(vi,vc,nomeI,nomeC,temI,temC, base+'t'));
 
-  if(aberto===base+'i') pendente = {nome:nomeI, valor:vi, cls:'i', quem:'Isabella'};
-  if(aberto===base+'c') pendente = {nome:nomeC, valor:vc, cls:'c', quem:'Carlos'};
+  if(aberto===base+'i') pendente = {nome:nomeI, valor:vi, cls:'i', quem:nomeSlot('i')};
+  if(aberto===base+'c') pendente = {nome:nomeC, valor:vc, cls:'c', quem:nomeSlot('c')};
   if(aberto===base+'t') pendente = {nome:(temI?nomeI:nomeC), cls:'p',
     valor:totalTxt(vi,vc,nomeI,nomeC,temI,temC), quem:'Os dois juntos, na mesma panela'};
 
@@ -3065,7 +3157,7 @@ function linha(meal,vIdx,item,iIdx){
 function seletor(meal,vIdx,item,iIdx,p,lista,atual){
   const w = document.createElement('div'); w.className='tr '+p;
   const lab = document.createElement('label');
-  lab.textContent = p==='i' ? 'Isabella' : 'Carlos';
+  lab.textContent = nomeSlot(p);
   const id = 'sel-'+meal.id+'-'+vIdx+'-'+iIdx+'-'+p;
   lab.setAttribute('for', id);
   const sel = document.createElement('select'); sel.className='troca'; sel.id = id;
@@ -3269,16 +3361,16 @@ function textoCompleto(){
       if(meal.versoes.length>1) cab += ' - '+versao.nome+' ('+d+(d>1?' dias':' dia')+')';
       L.push(cab);
       if(meal.hora.i && meal.hora.c && meal.hora.i===meal.hora.c) L.push(meal.hora.i);
-      else L.push([meal.hora.i?'Isabella '+meal.hora.i:'', meal.hora.c?'Carlos '+meal.hora.c:''].filter(Boolean).join(' / '));
+      else L.push([meal.hora.i?nomeSlot('i')+' '+meal.hora.i:'', meal.hora.c?nomeSlot('c')+' '+meal.hora.c:''].filter(Boolean).join(' / '));
       versao.itens.forEach(function(item,iIdx){
         const temI = item.i!==null&&item.i!==undefined, temC = item.c!==null&&item.c!==undefined;
         const optI = optDe(meal,vIdx,item,iIdx,'i'), optC = optDe(meal,vIdx,item,iIdx,'c');
         const nI = optI.base?item.n:optI.n, nC = optC.base?item.n:optC.n;
         if(temI && temC && nI===nC){
-          L.push('- '+nI+': Isabella '+fmt(valorPara(item,optI,'i'))+' / Carlos '+fmt(valorPara(item,optC,'c')));
+          L.push('- '+nI+': '+nomeSlot('i')+' '+fmt(valorPara(item,optI,'i'))+' / '+nomeSlot('c')+' '+fmt(valorPara(item,optC,'c')));
         } else {
-          if(temI) L.push('- '+nI+' (Isabella): '+fmt(valorPara(item,optI,'i')));
-          if(temC) L.push('- '+nC+' (Carlos): '+fmt(valorPara(item,optC,'c')));
+          if(temI) L.push('- '+nI+' ('+nomeSlot('i')+'): '+fmt(valorPara(item,optI,'i')));
+          if(temC) L.push('- '+nC+' ('+nomeSlot('c')+'): '+fmt(valorPara(item,optC,'c')));
         }
       });
       if(versao.nota) L.push('('+versao.nota+')');
@@ -3416,6 +3508,18 @@ document.getElementById('dlg-x').onclick = fecharDlg;
 function abrirRefeicoesDlg(diaIso){
   const alvo = document.getElementById('dlg-refeicoes');
   if(diaIso) diario.sel = diaIso;
+  // caloria que aparece no card tem que ter onde ser vista: se o dia só tem
+  // "comi algo a mais" e nenhuma refeição marcada, abre já na refeição que
+  // guarda o extra, em vez de mostrar tudo recolhido e parecendo vazio.
+  try{
+    const reg = registro(diario.sel);
+    const nada = !Object.keys(reg.r||{}).length;
+    if(nada && !diario.aberta){
+      const meals = PLANO[fimDeSemana(deIso(diario.sel)) ? 'fds' : 'semana'] || [];
+      const comExtra = meals.filter(function(m){ return extrasDa(reg, m.id).length; })[0];
+      if(comExtra) diario.aberta = comExtra.id;
+    }
+  }catch(e){}
   renderDiario();
   if(alvo.showModal) alvo.showModal(); else alvo.setAttribute('open','');
 }
@@ -3893,18 +3997,18 @@ function nomesLiberadosPeloNutri(){
   _liberadosCache = saida;
   return saida;
 }
-/* A troca é "liberada pelo plano" quando o alimento escolhido é a
-   equivalência do próprio item ou está nas listas do nutricionista. */
+/* A troca é "liberada pelo plano" só quando o alimento escolhido é uma
+   equivalência DAQUELE item. Antes valia qualquer coisa que aparecesse em
+   alguma lista do nutricionista, e aí trocar arroz por agrião passava como
+   "seguiu o plano" - o que não faz sentido nenhum: cada lista dele é de um
+   grupo só (proteína com proteína, carboidrato com carboidrato). */
 function trocaLiberadaNoPlano(itemDoPlano, t){
   if(!t || !t.n || t.n===OUTRO) return false;
+  if(!itemDoPlano) return false;
   const alvo = norm(t.n);
-  if(itemDoPlano){
-    if(norm(itemDoPlano.n) === alvo) return true;
-    const opcoes = opcoesDo(itemDoPlano);
-    for(let k=0; k<opcoes.length; k++){ if(norm(opcoes[k].n) === alvo) return true; }
-  }
-  const lib = nomesLiberadosPeloNutri();
-  for(let k=0; k<lib.length; k++){ if(norm(lib[k]) === alvo) return true; }
+  if(norm(itemDoPlano.n) === alvo) return true;
+  const opcoes = opcoesDo(itemDoPlano);
+  for(let k=0; k<opcoes.length; k++){ if(norm(opcoes[k].n) === alvo) return true; }
   return false;
 }
 function trocaDoItem(reg, mealId, idx){
@@ -3920,6 +4024,18 @@ function extrasDa(reg, mealId){
 function setExtras(reg, mealId, lista){
   if(!reg.extras) reg.extras = {};
   reg.extras[mealId] = lista;
+  if(!lista.length) delete reg.extras[mealId];
+}
+/* Trava contra caloria fantasma: refeição com "comi algo a mais" dentro nunca
+   pode ficar sem marcação. Sem isso dá pra acabar com um dia somando calorias
+   e com todos os botões apagados na tela - foi o que aconteceu com o amendoim
+   guardado no jantar. Devolve true se precisou corrigir alguma coisa. */
+function normalizarExtras(reg, meals){
+  let mudou = false;
+  (meals||[]).forEach(function(m){
+    if(extrasDa(reg, m.id).length && !reg.r[m.id]){ reg.r[m.id] = 'ad'; mudou = true; }
+  });
+  return mudou;
 }
 function itensDaRefeicao(reg, meal){
   const v = versaoDoDia(reg, meal);
@@ -4050,22 +4166,22 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover){
     if(t.n===valor) o.selected = true;
     (grupoEl||sel).appendChild(o);
   }
-  // Três níveis, do mais "dentro do plano" pro mais fora:
-  //  1) equivalência do próprio item (o plano já converte a quantidade)
-  //  2) o resto das listas do nutricionista (outras tabelas de equivalência,
-  //     legumes e saladas liberados) - trocar por isso ainda é seguir
-  //  3) alimento qualquer - aí sim é adaptar / sair do plano
+  // Dois níveis só, e o primeiro é do MESMO grupo do alimento clicado:
+  //  1) o que a lista do nutricionista aceita no lugar desse item (proteína
+  //     por proteína, carboidrato por carboidrato) - continua seguindo o plano
+  //  2) alimento qualquer - aí sim é adaptar / sair do plano
+  // A lista geral misturada saiu daqui de propósito: clicar no ovo e poder
+  // trocar por agrião não ajudava em nada.
   const jaListado = {};
+  let temEquivalente = false;
   if(itemDoPlano){
-    const g1 = document.createElement('optgroup'); g1.label = 'Equivalente desse item';
+    const g1 = document.createElement('optgroup');
+    g1.label = 'Pode trocar por (lista do nutri)';
     opcoesDo(itemDoPlano).forEach(function(o){ jaListado[norm(o.n)] = 1; opt(o.n, o.n, g1); });
-    sel.appendChild(g1);
+    if(g1.children.length > 1){ sel.appendChild(g1); temEquivalente = true; }
   }
-  const liberados = nomesLiberadosPeloNutri();
-  const g2 = document.createElement('optgroup'); g2.label = 'Liberado pelo nutricionista';
-  liberados.forEach(function(n){ if(!jaListado[norm(n)]){ jaListado[norm(n)] = 1; opt(n, n, g2); } });
-  if(g2.children.length) sel.appendChild(g2);
-  const g3 = document.createElement('optgroup'); g3.label = 'Fora do plano';
+  const g3 = document.createElement('optgroup');
+  g3.label = temEquivalente ? 'Fora do plano' : 'Fora do plano (esse item não tem lista de troca)';
   FORA_NOMES.forEach(function(n){ if(!jaListado[norm(n)]) opt(n, n, g3); });
   sel.appendChild(g3);
   const g4 = document.createElement('optgroup'); g4.label = 'Não está na lista';
@@ -4153,13 +4269,16 @@ function renderDiaBox(){
   const d = deIso(diario.sel);
   const reg = registro(diario.sel);
   const meals = PLANO[fimDeSemana(d)?'fds':'semana'];
+  // conserta na hora qualquer dia antigo que tenha ficado com "a mais" solto
+  if(normalizarExtras(reg, meals)) salvarDiario();
 
   const box = document.createElement('div'); box.className='dia-box';
   const h = document.createElement('h3');
   h.textContent = formatarDataCabecalho(d);
   const sub = document.createElement('span'); sub.className='sub';
-  sub.textContent = (fimDeSemana(d)?'Cardápio de fim de semana':'Cardápio de segunda a sexta')+
-    ' - marcando como '+nomeDoPerfil(diario.perfil);
+  // sem "marcando como Fulano": quem está marcando é quem está logado, não
+  // precisa repetir isso em toda abertura do popup.
+  sub.textContent = fimDeSemana(d) ? 'Cardápio de fim de semana' : 'Cardápio de segunda a sexta';
   box.appendChild(h); box.appendChild(sub);
 
   meals.forEach(function(meal){
@@ -4170,6 +4289,14 @@ function renderDiaBox(){
     const nmTxt = document.createElement('span'); nmTxt.className='nm-txt';
     nmTxt.textContent = meal.curto || meal.nome;
     nmBtn.appendChild(nmTxt);
+    // se tem "algo a mais" guardado aqui dentro, avisa na linha fechada -
+    // senão as calorias aparecem no card do dia sem nada visível marcado.
+    const qExtras = extrasDa(reg, meal.id).length;
+    if(qExtras){
+      const chip = document.createElement('span'); chip.className='nm-extra';
+      chip.textContent = '+' + qExtras + ' a mais';
+      nmBtn.appendChild(chip);
+    }
     nmBtn.onclick = function(){
       diario.aberta = (diario.aberta===meal.id) ? null : meal.id;
       renderDiaBox();
@@ -4182,7 +4309,15 @@ function renderDiaBox(){
       b.setAttribute('data-e', e[0]);
       b.setAttribute('aria-pressed', reg.r[meal.id]===e[0] ? 'true':'false');
       b.onclick = function(){
-        if(reg.r[meal.id]===e[0]) delete reg.r[meal.id]; else reg.r[meal.id]=e[0];
+        // desmarcar de vez só é permitido se não sobrou nenhum "a mais" aqui
+        // dentro - senão as calorias dele ficariam contando sem nada aceso.
+        const limpando = reg.r[meal.id]===e[0];
+        if(limpando && extrasDa(reg, meal.id).length){
+          diario.aberta = meal.id;
+          renderDiaBox();
+          return;
+        }
+        if(limpando) delete reg.r[meal.id]; else reg.r[meal.id]=e[0];
         if(reg.itens) delete reg.itens[meal.id];   // volta ao padrão do novo estado
         salvarDiario(); renderDiario();
       };
@@ -5117,6 +5252,12 @@ function uidDoSlot(chave){
   const m = membrosDaOrg().find(function(x){ return chaveIC(x.uid)===chave; });
   return m ? m.uid : null;
 }
+/* Nome de quem ocupa cada coluna. Vem sempre da conta de verdade - nada de
+   nome fixo no código: quem entrar no grupo aparece com o nome que cadastrou. */
+function nomeSlot(chave){
+  const uid = uidDoSlot(chave);
+  return uid ? nomeDoPerfil(uid) : (chave === 'i' ? 'Convidada' : 'Você');
+}
 function nomeDoPerfil(uid){
   const m = membrosDaOrg().find(function(x){ return x.uid===uid; });
   return m ? m.nome : 'Integrante';
@@ -5145,9 +5286,8 @@ async function buscarPlanoGenerico(tabela, uid){
     const r = await db.from(tabela)
       .select('conteudo,vigente_a_partir,versao_label')
       .eq('organization_id', orgAtiva.id).eq('user_id', uid)
-      .lte('vigente_a_partir', iso(new Date()))
-      .order('vigente_a_partir', { ascending:false }).limit(1);
-    return (r && r.data && r.data[0]) || null;
+      .order('vigente_a_partir', { ascending:false }).limit(20);
+    return escolherVigente(r && r.data);
   }catch(e){ return null; }
 }
 
@@ -5269,9 +5409,8 @@ async function renderTreino(){
     const r = await db.from('planos_treino')
       .select('conteudo,vigente_a_partir,versao_label')
       .eq('organization_id', orgAtiva.id).eq('user_id', uid)
-      .lte('vigente_a_partir', iso(new Date()))
-      .order('vigente_a_partir', { ascending:false }).limit(1);
-    const linha = (r && r.data && r.data[0]) || null;
+      .order('vigente_a_partir', { ascending:false }).limit(20);
+    const linha = escolherVigente(r && r.data);
     if(!linha){
       const ehAdmin = papelAtual === 'owner' || papelAtual === 'admin';
       vazioTxt.textContent = ehAdmin
@@ -5341,8 +5480,12 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
   treinoConteudoAtual = c;   // pro popup de explicação achar a biblioteca
   document.getElementById('tr-titulo').textContent = versaoLabel || c.atualizacao || 'Periodização';
   const sub = document.getElementById('tr-sub');
+  // se a data de início ainda não chegou, o certo é dizer "começa em" - o
+  // plano aparece assim mesmo, pra dar pra conferir antes de entrar em vigor.
+  const aindaNaoComecou = String(vigenteA||'').slice(0,10) > iso(new Date());
   sub.textContent =
-    'Vigente desde ' + brData(vigenteA) + ' · ' + (c.periodo_semanas||4) + ' semanas' +
+    (aindaNaoComecou ? 'Começa em ' : 'Vigente desde ') + brData(vigenteA) +
+    ' · ' + (c.periodo_semanas||4) + ' semanas' +
     (c.data_avaliacao ? ' · avaliação de ' + brData(c.data_avaliacao) : '');
   // atalho pra corrigir a data de início direto daqui (quem pode editar é
   // admin; o campo em si fica no painel de versões).
@@ -5564,9 +5707,8 @@ async function abrirSessaoTreino(chaveInicial){
     const r = await db.from('planos_treino')
       .select('conteudo,vigente_a_partir,versao_label')
       .eq('organization_id', orgAtiva.id).eq('user_id', uid)
-      .lte('vigente_a_partir', iso(new Date()))
-      .order('vigente_a_partir', { ascending:false }).limit(1);
-    const linha = (r && r.data && r.data[0]) || null;
+      .order('vigente_a_partir', { ascending:false }).limit(20);
+    const linha = escolherVigente(r && r.data);
     if(!linha){
       corpo.innerHTML = '<p class="pg-vazio">Ainda não tem periodização cadastrada. Peça pro admin cadastrar em "Gerenciar versões de plano".</p>';
       return;
