@@ -87,15 +87,18 @@
 </script>
 <style>
   :root{
-    --bg:#F9F9F7; --card:#FFFFFF; --ink:#1D1D1F; --ink2:#6E6E73; --ink3:#A1A1A6;
-    --hair:#E9E9E5; --fill:#F0F0EE; --fill2:#F5F5F3;
+    /* paleta clara copiada do Pilotquest (fundo #FBFBFA, texto #111, cinzas
+       #666/#888, borda #E0E0E0, preenchimento #F0F0EE) - a única coisa que
+       não vem de lá é a cor de marca, que aqui é o vermelho da nossa logo. */
+    --bg:#FBFBFA; --card:#FFFFFF; --ink:#111111; --ink2:#666666; --ink3:#888888;
+    --hair:#E0E0E0; --fill:#F0F0EE; --fill2:#F7F7F5;
     --isa:#D63C71; --isa-soft:#FDF0F5; --car:#0A72C9; --car-soft:#EEF5FC;
     --ok:#2E9E52; --ad:#DE8C0A; --nao:#DB4436;
     --ok-soft:#E3F5E9; --ad-soft:#FCEEDA; --nao-soft:#FBE8E6;
     --pan:#3A3A3C; --azul:#AB181E; --azul-soft:#FBEAEB;
     --r:16px; --rc:11px;
-    --sh:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05);
-    --sh-min:0 1px 3px rgba(0,0,0,.10);
+    --sh:0 1px 4px rgba(0,0,0,.05);
+    --sh-min:0 1px 3px rgba(0,0,0,.06);
     --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -139,7 +142,7 @@
     padding:0 16px calc(var(--tabbar-h) + 8px)}
 
   /* ---------- topo ---------- */
-  header.top{flex-shrink:0;z-index:30;background:rgba(245,245,247,.82);
+  header.top{flex-shrink:0;z-index:30;background:rgba(251,251,250,.85);
     -webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
     border-bottom:.5px solid rgba(0,0,0,.08);padding:calc(env(safe-area-inset-top,0px) + 12px) 0 12px}
   .top-inner{max-width:720px;margin:0 auto;padding:0 16px;display:flex;flex-wrap:wrap;
@@ -160,6 +163,11 @@
   .switch-wrap{flex-wrap:wrap}
   .resumo .switch{display:flex;width:100%}
   .resumo .switch button{flex:1 1 0;text-align:center}
+  /* switch "Segunda a sexta / Fim de semana" no topo da aba Dieta: ocupa a
+     largura toda (meio a meio) e descola do cabeçalho, em vez de ficar
+     encolhido no canto esquerdo colado em cima. */
+  .switch-dia{display:flex;width:100%;margin-top:16px;margin-bottom:14px}
+  .switch-dia button{flex:1 1 0;text-align:center}
 
   /* ---------- abas ---------- */
   .abas{display:inline-flex;background:var(--fill);border-radius:12px;padding:2px;gap:2px;margin-top:16px}
@@ -287,6 +295,11 @@
     border-bottom:.5px solid var(--hair)}
   .dlg-head h3{font-size:17px;margin:0;font-weight:600;letter-spacing:-.015em}
   .dlg-head button{font-size:15px;font-weight:400;background:none;border:0;cursor:pointer;color:var(--azul)}
+  /* o <dialog> joga o foco no primeiro botão ao abrir, e o navegador pinta
+     o contorno azul de foco em volta do "Fechar". Como o popup já abre em
+     cima de tudo, esse contorno só polui - tira o anel nesse botão. */
+  .dlg-head button:focus{outline:none}
+  .dlg-head button:focus-visible{outline:none}
   .dlg-body{padding:16px 18px 20px;max-height:66vh;overflow:auto}
   .dlg-body textarea{width:100%;height:42vh;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:16px;
     line-height:1.5;border:0;border-radius:var(--rc);padding:12px;background:var(--fill);color:var(--ink);resize:vertical}
@@ -378,6 +391,14 @@
   .add-extra{margin-top:10px;font-size:14px;font-weight:500;color:var(--azul);background:none;
     border:0;padding:6px 0;cursor:pointer}
   .extra-linha{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 0;border-top:.5px solid var(--hair)}
+  /* extra já preenchido: vira uma linha só, igual às outras refeições */
+  .extra-resumo{flex:1 1 auto;min-width:0;display:flex;align-items:baseline;gap:8px;text-align:left;
+    background:none;border:0;padding:0;cursor:pointer;font-family:inherit}
+  .extra-resumo-txt{flex:1 1 auto;font-size:14px;color:var(--ink);line-height:1.35}
+  .extra-resumo-kcal{flex:0 0 auto;font-size:12.5px;color:var(--ink2)}
+  .extra-x{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:0;background:var(--fill);
+    color:var(--ink2);font-size:15px;line-height:1;cursor:pointer}
+  .extra-ok{flex:1 1 100%;margin-top:4px}
   .extra-linha .tag{font-size:11px;font-weight:600;color:var(--azul);background:var(--car-soft);
     border-radius:12px;padding:3px 9px}
   .rm{background:none;border:0;color:var(--nao);font-size:13px;cursor:pointer;padding:6px 8px;font-weight:500}
@@ -448,12 +469,14 @@
      Não é um dialog nem reaproveita .tela-cheia (que centraliza um cartão único) -
      aqui é página inteira mesmo, com cabeçalho fixo e corpo rolável, pro Carlos
      escolher o treino do dia e lançar a carga enquanto está na academia. */
-  #tela-sessao-treino{position:fixed;inset:0;z-index:110;background:var(--bg);
+  /* a sessão de treino é tela de trabalho (academia, muita linha e campo) -
+     fundo branco, mais claro que o resto do app, pra não pesar. */
+  #tela-sessao-treino{position:fixed;inset:0;z-index:110;background:var(--card);
     display:flex;flex-direction:column}
   #tela-sessao-treino[hidden]{display:none}
   .sessao-treino-head{flex-shrink:0;display:flex;align-items:center;gap:12px;
     padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;
-    background:rgba(249,249,247,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);
+    background:rgba(255,255,255,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);
     backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid rgba(0,0,0,.08)}
   .sessao-treino-head button{width:32px;height:32px;flex-shrink:0;border-radius:50%;border:0;
     background:var(--fill);color:var(--ink);font-size:18px;line-height:1;cursor:pointer}
@@ -517,6 +540,10 @@
   .conta-acao{display:block;width:100%;text-align:left;padding:12px 14px;border-radius:12px;
     border:0;background:var(--fill2);font-size:15px;color:var(--ink);cursor:pointer;margin-bottom:8px}
   .conta-acao.sair{color:var(--nao)}
+  .conv-intro{font-size:13.5px;color:var(--ink2);line-height:1.5;margin:0 0 16px}
+  .conv-passos{font-size:13px;color:var(--ink2);line-height:1.5;margin:14px 0 0}
+  .conv-passos b{color:var(--ink)}
+  .convite-link-box[hidden]{display:none}
   .convite-link-box{display:flex;gap:8px;align-items:center;background:var(--fill2);
     border-radius:12px;padding:10px 12px;margin:10px 0;word-break:break-all;font-size:13px}
   .convite-link-box button{flex:0 0 auto;width:auto;padding:8px 14px;margin:0}
@@ -553,11 +580,32 @@
   .hoje-cartao-cta{margin-top:12px;width:100%;padding:10px 14px;border-radius:12px;border:0;
     background:var(--fill2);color:var(--azul);font-size:14px;font-weight:600;cursor:pointer}
   .hoje-cartao-nota{font-size:13px;color:var(--ink2);margin:0;line-height:1.4}
-  .hoje-treino-linha{display:flex;align-items:center;justify-content:space-between;gap:8px}
-  .hoje-treino-linha .hoje-cartao-nota{flex:1 1 auto}
-  .hoje-treino-trocar{flex-shrink:0;border:none;background:none;color:var(--azul);font-size:12.5px;
-    font-weight:700;cursor:pointer;padding:2px 0}
-  .hoje-treino-opcoes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  /* calorias do dia dentro do card Dieta do Diário - o detalhe fica aqui na
+     tela inicial; marcar refeição em si é no popup. */
+  .hoje-kcal{margin-top:12px}
+  .hoje-kcal-linha{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+  .hoje-kcal-valor{font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+  .hoje-kcal-de{font-size:13px;color:var(--ink2)}
+  .hoje-kcal-macros{font-size:12px;color:var(--ink3);margin:4px 0 0;line-height:1.45}
+  .cal-palco{overflow:hidden;touch-action:pan-y}
+  /* treino do dia na mesma linha do título "Treino", do lado direito -
+     clicar abre o modal de troca (trocarTreinoDlg). */
+  .hoje-treino-chave{flex-shrink:0;border:none;cursor:pointer;font-family:inherit;
+    background:var(--azul-soft);color:var(--azul);font-size:13px;font-weight:700;
+    padding:5px 12px;border-radius:999px;display:flex;align-items:center;gap:5px}
+  .hoje-treino-chave::after{content:'›';font-size:15px;line-height:1;opacity:.75}
+  /* display:flex na classe passa por cima do [hidden] do navegador */
+  .hoje-treino-chave[hidden]{display:none}
+  .tr-troca-lista{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+  .tr-troca-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;
+    border:1px solid var(--hair);background:var(--card);border-radius:12px;padding:11px 13px;font-family:inherit}
+  .tr-troca-item[aria-pressed="true"]{border-color:var(--azul);background:var(--azul-soft)}
+  .tr-troca-chave{flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--fill);
+    color:var(--ink);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .tr-troca-item[aria-pressed="true"] .tr-troca-chave{background:var(--azul);color:#fff}
+  .tr-troca-nome{font-size:14px;color:var(--ink);font-weight:500;line-height:1.3}
+  .tr-troca-hoje{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;
+    margin-left:auto;flex-shrink:0}
   .hb-bloco{margin-bottom:22px}
   .hb-bloco:last-child{margin-bottom:0}
   .hb-bloco-tit{font-size:16px;font-weight:600;margin:0 0 2px;letter-spacing:-.01em}
@@ -883,12 +931,26 @@
   <div id="vista-diario">
     <section class="hoje-cabecalho">
       <h1 id="hoje-data"></h1>
-      <p class="hoje-sub">Resumo do dia</p>
     </section>
 
     <div class="perfil" id="hj-perfil-bloco">
       <span class="rot">Vendo</span>
       <div class="switch switch-wrap" role="group" aria-label="Perfil" id="hj-pf-lista"></div>
+    </div>
+
+    <div class="mes">
+      <h2 id="mes-nome"></h2>
+      <div class="nav">
+        <button id="mes-ant" aria-label="Mês anterior">‹</button>
+        <button id="mes-hoje">hoje</button>
+        <button id="mes-prox" aria-label="Próximo mês">›</button>
+      </div>
+    </div>
+    <div class="cal-palco" id="cal-palco"><div class="cal" id="cal"></div></div>
+    <div class="legenda">
+      <span><i class="b-ok"></i>seguiu à risca</span>
+      <span><i class="b-ad"></i>adaptou</span>
+      <span><i class="b-nao"></i>não fez</span>
     </div>
 
     <div class="hoje-cartao" id="hoje-dieta">
@@ -897,19 +959,22 @@
         <span class="hoje-cartao-num" id="hoje-dieta-num"></span>
       </div>
       <div class="hoje-cartao-barra"><div class="hoje-cartao-barra-fill" id="hoje-dieta-barra"></div></div>
+      <div class="hoje-kcal" id="hoje-dieta-kcal" hidden>
+        <div class="hoje-kcal-linha">
+          <span class="hoje-kcal-valor" id="hoje-kcal-comeu"></span>
+          <span class="hoje-kcal-de" id="hoje-kcal-plan"></span>
+        </div>
+        <p class="hoje-kcal-macros" id="hoje-kcal-macros"></p>
+      </div>
       <button class="hoje-cartao-cta" id="hoje-ir-diario">Marcar refeições de hoje</button>
     </div>
 
     <div class="hoje-cartao" id="hoje-treino">
       <div class="hoje-cartao-head">
         <span class="hoje-cartao-tit">Treino</span>
-        <span class="hoje-cartao-num" id="hoje-treino-num"></span>
+        <button type="button" class="hoje-treino-chave" id="hoje-treino-chave" hidden></button>
       </div>
-      <div class="hoje-treino-linha">
-        <p class="hoje-cartao-nota" id="hoje-treino-nota"></p>
-        <button type="button" class="hoje-treino-trocar" id="hoje-treino-trocar" hidden>Trocar</button>
-      </div>
-      <div class="hoje-treino-opcoes" id="hoje-treino-opcoes" hidden></div>
+      <p class="hoje-cartao-nota" id="hoje-treino-nota"></p>
       <button class="hoje-cartao-cta" id="hoje-ir-iniciar-treino">Iniciar treino</button>
     </div>
 
@@ -922,21 +987,6 @@
       <button class="hoje-cartao-cta" id="hoje-ir-habitos">Ver rotina e suplementação</button>
     </div>
 
-    <div class="mes">
-      <h2 id="mes-nome"></h2>
-      <div class="nav">
-        <button id="mes-ant" aria-label="Mês anterior">‹</button>
-        <button id="mes-hoje">hoje</button>
-        <button id="mes-prox" aria-label="Próximo mês">›</button>
-      </div>
-    </div>
-    <div class="cal" id="cal"></div>
-    <div class="legenda">
-      <span><i class="b-ok"></i>seguiu à risca</span>
-      <span><i class="b-ad"></i>adaptou</span>
-      <span><i class="b-nao"></i>não fez</span>
-    </div>
-    <div id="dia-box"></div>
     <section class="resumo">
       <h2>Relatório</h2>
       <div class="switch" role="group" aria-label="Período" style="margin-bottom:12px">
@@ -954,7 +1004,7 @@
   </div>
 
   <div id="vista-plano" hidden>
-  <div class="switch" role="group" aria-label="Dia" style="margin-bottom:14px">
+  <div class="switch switch-dia" role="group" aria-label="Dia">
     <button id="btn-semana" aria-pressed="true">Segunda a sexta</button>
     <button id="btn-fds" aria-pressed="false">Fim de semana</button>
   </div>
@@ -1123,6 +1173,13 @@
 <dialog id="dlg">
   <div class="dlg-head"><h3 id="dlg-tit"></h3><button id="dlg-x">Fechar</button></div>
   <div class="dlg-body" id="dlg-body"></div>
+</dialog>
+
+<!-- marcar refeições do dia: sai do meio da aba Diário e vira popup, aberto
+     pelo card "Dieta" ou clicando num dia do calendário. -->
+<dialog id="dlg-refeicoes">
+  <div class="dlg-head"><h3 id="dlg-refeicoes-tit">Marcar refeições</h3><button id="dlg-refeicoes-x">Fechar</button></div>
+  <div class="dlg-body"><div id="dia-box"></div></div>
 </dialog>
 
 <script>
@@ -1460,23 +1517,66 @@ document.getElementById('btn-sair').onclick = async function(){
   location.reload();
 };
 
-document.getElementById('btn-gerar-convite').onclick = async function(){
-  var b = this; b.disabled = true; b.textContent = 'Gerando...';
-  try{
-    var email = prompt('E-mail da pessoa que você quer convidar:');
-    if(!email){ return; }
-    var r = await neon.organization.inviteMember({ email: email.trim(), role: 'member' });
-    if(r.error){ alert('Não foi possível gerar o convite: ' + (r.error.message||'')); return; }
-    var inv = r.data;
-    var id = inv && (inv.id || (inv.invitation && inv.invitation.id));
-    var link = location.origin + location.pathname + '#convite=' + encodeURIComponent(id);
-    document.getElementById('convite-link-txt').textContent = link;
-    document.getElementById('convite-link-box').hidden = false;
-  }catch(e){
-    alert('Não foi possível gerar o convite agora.');
-  }finally{
-    b.disabled = false; b.textContent = 'Gerar link de convite';
-  }
+/* Convite pra outra pessoa entrar na mesma organização (o "grupo"): tudo em
+   modal do app, sem prompt/alert do navegador. Entra como admin de propósito
+   - assim ela consegue subir os PDFs dela sozinha em "Gerenciar versões de
+   plano", sem depender de ninguém. */
+document.getElementById('btn-gerar-convite').onclick = function(){
+  document.getElementById('dlg-conta').close();
+  document.getElementById('dlg-tit').textContent = 'Convidar pro grupo';
+  const body = document.getElementById('dlg-body');
+  body.innerHTML = '<p class="conv-intro">A pessoa entra na mesma organização que você: '
+    + 'cada um com a própria dieta, treino e registros, e os dois aparecendo no seletor de perfil. '
+    + 'Ela entra como administradora, então consegue subir os PDFs dela sozinha.</p>'
+    + '<div class="campo"><label for="conv-email">E-mail dela</label>'
+    + '<input type="email" id="conv-email" autocomplete="off" placeholder="nome@email.com"></div>'
+    + '<div class="erro-auth" id="conv-erro"></div>'
+    + '<button class="btn-pill primario" id="conv-gerar">Gerar link de convite</button>'
+    + '<div class="convite-link-box" id="conv-link-box" hidden>'
+    + '<span id="conv-link-txt" style="flex:1 1 auto"></span>'
+    + '<button class="btn-pill secundario" id="conv-copiar">Copiar</button></div>'
+    + '<p class="conv-passos" id="conv-passos" hidden>Manda esse link pra ela. Ela abre no celular dela, '
+    + 'cria a conta <b>com esse mesmo e-mail</b> e já entra no grupo. Depois é só ela ir em '
+    + '"Sua conta" (o botão lá em cima) e usar "Gerenciar versões de plano" pra subir os PDFs dela.</p>';
+  const erro = document.getElementById('conv-erro');
+  document.getElementById('conv-gerar').onclick = async function(){
+    const b = this;
+    const email = (document.getElementById('conv-email').value||'').trim();
+    erro.classList.remove('mostra');
+    if(!email || email.indexOf('@')<1){
+      erro.textContent = 'Escreve o e-mail dela primeiro.'; erro.classList.add('mostra'); return;
+    }
+    b.disabled = true; b.textContent = 'Gerando...';
+    try{
+      const r = await neon.organization.inviteMember({ email: email, role: 'admin' });
+      if(r.error){
+        erro.textContent = 'Não deu pra gerar o convite: ' + (r.error.message||'tente de novo em instantes.');
+        erro.classList.add('mostra');
+        return;
+      }
+      const inv = r.data;
+      const id = inv && (inv.id || (inv.invitation && inv.invitation.id));
+      const link = location.origin + location.pathname + '#convite=' + encodeURIComponent(id);
+      document.getElementById('conv-link-txt').textContent = link;
+      document.getElementById('conv-link-box').hidden = false;
+      document.getElementById('conv-passos').hidden = false;
+      b.textContent = 'Gerar outro link';
+    }catch(e){
+      erro.textContent = 'Não deu pra gerar o convite agora.'; erro.classList.add('mostra');
+    }finally{
+      b.disabled = false;
+      if(b.textContent==='Gerando...') b.textContent = 'Gerar link de convite';
+    }
+  };
+  document.getElementById('conv-copiar').onclick = function(){
+    const txt = document.getElementById('conv-link-txt').textContent;
+    const b = this;
+    navigator.clipboard.writeText(txt).then(function(){
+      const orig = b.textContent; b.textContent = 'Copiado!';
+      setTimeout(function(){ b.textContent = orig; }, 1500);
+    });
+  };
+  abrirDlg();
 };
 document.getElementById('btn-copiar-convite').onclick = function(){
   var txt = document.getElementById('convite-link-txt').textContent;
@@ -1952,7 +2052,7 @@ function atualizarNomePdfVersoes(){
    (ParserPDF) precisa continuar reconhecendo travessão longo, porque é assim
    que o Pedro escreve. Percorre string/array/objeto recursivamente. */
 function normalizarTravessoes(valor){
-  if(typeof valor === 'string') return valor.replace(/\s*—\s*/g, ' - ');
+  if(typeof valor === 'string') return valor.replace(/\s*—\s*/g, ' - ').replace(/–/g, '-');
   if(Array.isArray(valor)) return valor.map(normalizarTravessoes);
   if(valor && typeof valor === 'object'){
     var out = {};
@@ -2160,17 +2260,17 @@ const LEGUMES_PLANO = ['Tomate','Berinjela','Alho-poró','Maxixe','Brócolis','R
 const LIQUIDOS = [['Água (natural)','300 mL'],['Água com gás','300 mL'],
   ['Água saborizada sem açúcar (essência natural)','300 mL'],['Refrigerante zero (rotulagem 0 kcal)','350 mL (lata)'],
   ['Tônica zero (rotulagem 0 kcal)','350 mL (lata)'],['Energético zero (rotulagem 0 kcal)','250 mL (lata)'],
-  ['Chá preto, verde ou de ervas sem açúcar','200–300 mL'],['Café coado ou espresso sem açúcar','60–200 mL']];
+  ['Chá preto, verde ou de ervas sem açúcar','200-300 mL'],['Café coado ou espresso sem açúcar','60-200 mL']];
 
 const LIVRES = [
-  ['Pizza','4 fatias médias (100–120 g cada) + refrigerante zero','≈280–300 kcal por fatia'],
-  ['Hambúrguer com batata frita','Burger artesanal (180 g de carne) + pão + queijo + maionese + batata média (120 g)','Burger ≈850–900; batata ≈320–380'],
+  ['Pizza','4 fatias médias (100-120 g cada) + refrigerante zero','≈280-300 kcal por fatia'],
+  ['Hambúrguer com batata frita','Burger artesanal (180 g de carne) + pão + queijo + maionese + batata média (120 g)','Burger ≈850-900; batata ≈320-380'],
   ['Churrasco','Picanha 200 g + linguiça 100 g + arroz 100 g + farofa 30 g + vinagrete 100 g','Sem bebida'],
   ['Massas','Espaguete ao sugo 350 g + 1 colher de sopa de parmesão (10 g)','Sem creme nem queijos extras'],
-  ['Comida árabe','2 esfihas assadas de carne (70–80 g cada) + 1 kibe frito médio (80 g)',''],
-  ['Pastelaria','2 pastéis médios (carne ou queijo), sem caldo de cana','≈500–600 kcal cada'],
-  ['Cerveja','6 latas de 350 mL (pilsen)','≈145–150 kcal por lata'],
-  ['Vinho seco','1 garrafa de 750 mL','≈80–85 kcal por 100 mL'],
+  ['Comida árabe','2 esfihas assadas de carne (70-80 g cada) + 1 kibe frito médio (80 g)',''],
+  ['Pastelaria','2 pastéis médios (carne ou queijo), sem caldo de cana','≈500-600 kcal cada'],
+  ['Cerveja','6 latas de 350 mL (pilsen)','≈145-150 kcal por lata'],
+  ['Vinho seco','1 garrafa de 750 mL','≈80-85 kcal por 100 mL'],
   ['Destilados','4 doses (50 mL) de vodka ou gin + tônica zero','≈110 kcal por dose']
 ];
 
@@ -2192,7 +2292,7 @@ const G = {
     {n:'Iogurte natural desnatado',q:100},{n:'Creme de ricota light',q:35},{n:'Requeijão light',q:25},
     {n:'Ricota fresca',q:30},{n:'Minas frescal light',q:30},{n:'Muçarela',q:15},
     {n:'Leite em pó',q:12},{n:'Leite desnatado',q:130}]},
-  whey:{tipo:'fixo',titulo:'Equivalentes a 30–40 g de whey / True Beef Protein',
+  whey:{tipo:'fixo',titulo:'Equivalentes a 30-40 g de whey / True Beef Protein',
     aviso:'A tabela do plano cobre a faixa de 30 a 40 g de whey, então o valor é o mesmo para os dois.',opts:[
     {n:'Frango, peito grelhado',t:'100 g'},{n:'Peru, peito',t:'120 g'},
     {n:'Patinho magro cozido ou filé mignon',t:'80 g'},{n:'Coxão mole grelhado',t:'80 g'},
@@ -2201,8 +2301,8 @@ const G = {
     {n:'Clara de ovo líquida',t:'315 g (9 claras)'},{n:'Ovo inteiro com claras',t:'1 ovo + 3 claras'}]},
   pao:{tipo:'fixo',titulo:'Equivalentes a 1 pão francês',opts:[
     {n:'Pão francês',t:'1 un (60 g)'},{n:'Pão de forma',t:'2 fatias (50 g)'},
-    {n:'Tapioca (goma seca)',t:'40 g'},{n:'Biscoito de arroz grande',t:'4 un (36–40 g)'},
-    {n:'Magic Toast',t:'2 pacotes (25–30 g)'},{n:'Farelo de aveia',t:'30 g'}]},
+    {n:'Tapioca (goma seca)',t:'40 g'},{n:'Biscoito de arroz grande',t:'4 un (36-40 g)'},
+    {n:'Magic Toast',t:'2 pacotes (25-30 g)'},{n:'Farelo de aveia',t:'30 g'}]},
   fruta:{tipo:'igual',titulo:'Frutas indicadas (até 50 kcal por 100 g)',opts:FRUTAS.map(function(f){return {n:f};})}
 };
 
@@ -3127,6 +3227,21 @@ const dlg = document.getElementById('dlg');
 function abrirDlg(){ if(dlg.showModal) dlg.showModal(); else dlg.setAttribute('open',''); }
 function fecharDlg(){ if(dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
 document.getElementById('dlg-x').onclick = fecharDlg;
+
+/* popup "Marcar refeições": o quadro de marcar refeição por refeição saiu do
+   meio da aba Diário e virou popup - abre pelo card Dieta (sempre no dia de
+   hoje) ou clicando num dia do calendário (aquele dia). */
+function abrirRefeicoesDlg(diaIso){
+  const alvo = document.getElementById('dlg-refeicoes');
+  if(diaIso) diario.sel = diaIso;
+  renderDiario();
+  if(alvo.showModal) alvo.showModal(); else alvo.setAttribute('open','');
+}
+function fecharRefeicoesDlg(){
+  const alvo = document.getElementById('dlg-refeicoes');
+  if(alvo.close) alvo.close(); else alvo.removeAttribute('open');
+}
+document.getElementById('dlg-refeicoes-x').onclick = fecharRefeicoesDlg;
 function abrirLegumes(tipo){
   document.getElementById('dlg-tit').textContent = tipo==='salada' ? 'Salada e verduras cruas' : 'Legumes variados';
   document.getElementById('dlg-body').innerHTML = htmlLegumes();
@@ -3570,6 +3685,9 @@ function trocaDoItem(reg, mealId, idx){
   const m = marcaItem(reg, mealId, idx);
   return (m && typeof m==='object') ? m : null;
 }
+// qual extra está aberto pra edição (mealId:índice). Fica fora do `diario`
+// de propósito: é estado de tela, não vai pro armazenamento.
+let extraAbertoChave = null;
 function extrasDa(reg, mealId){
   return (reg.extras && reg.extras[mealId]) || [];
 }
@@ -3681,7 +3799,7 @@ function renderCalendario(){
       });
       b.appendChild(barra);
     }
-    b.onclick = function(){ diario.sel = s; renderDiario(); };
+    b.onclick = function(){ abrirRefeicoesDlg(s); };
     grade.appendChild(b);
     if(grade.children.length===7){ cal.appendChild(grade); grade=document.createElement('div'); grade.className='sem'; }
   }
@@ -3882,18 +4000,50 @@ function renderDiaBox(){
         }
         cx.appendChild(li);
       });
+      // extra ("comi algo a mais"): enquanto está sendo preenchido mostra o
+      // editor inteiro com um "OK"; depois de pronto colapsa numa linha só,
+      // junto das outras refeições, com a etiqueta "a mais". Tocar na linha
+      // abre pra editar de novo.
       extrasDa(reg, meal.id).forEach(function(ex, k){
+        const chave = meal.id+':'+k;
         const li = document.createElement('div'); li.className='extra-linha';
         const tag = document.createElement('span'); tag.className='tag'; tag.textContent='a mais';
         li.appendChild(tag);
-        li.appendChild(editorTroca(ex, null, function(soSalvar){
-          salvarDiario();
-          if(soSalvar) atualizaBalanco(); else renderDiario();
-        }, function(){
+        function removerExtra(){
           const lista = extrasDa(reg, meal.id).slice();
           lista.splice(k,1); setExtras(reg, meal.id, lista);
+          if(extraAbertoChave===chave) extraAbertoChave = null;
           salvarDiario(); renderDiario();
-        }));
+        }
+        const mt = macrosDaTroca(ex);
+        if(mt && extraAbertoChave !== chave){
+          const resumo = document.createElement('button');
+          resumo.type='button'; resumo.className='extra-resumo';
+          resumo.innerHTML = '<span class="extra-resumo-txt"></span><span class="extra-resumo-kcal"></span>';
+          resumo.querySelector('.extra-resumo-txt').textContent = rotuloTroca(ex);
+          resumo.querySelector('.extra-resumo-kcal').textContent = fmtKcal(mt.k)+' kcal';
+          resumo.onclick = function(){ extraAbertoChave = chave; renderDiario(); };
+          li.appendChild(resumo);
+          const x = document.createElement('button');
+          x.type='button'; x.className='extra-x'; x.setAttribute('aria-label','Tirar esse item');
+          x.textContent = '×';
+          x.onclick = removerExtra;
+          li.appendChild(x);
+        }else{
+          const ok = document.createElement('button');
+          ok.type='button'; ok.className='btn-pill primario extra-ok';
+          ok.textContent = 'OK';
+          ok.disabled = !mt;
+          ok.onclick = function(){ extraAbertoChave = null; salvarDiario(); renderDiario(); };
+          li.appendChild(editorTroca(ex, null, function(soSalvar){
+            salvarDiario();
+            // digitar a quantidade não re-renderiza (senão o campo perde o
+            // foco no meio da digitação), então o OK é religado na mão.
+            if(soSalvar){ atualizaBalanco(); ok.disabled = !macrosDaTroca(ex); }
+            else renderDiario();
+          }, removerExtra));
+          li.appendChild(ok);
+        }
         cx.appendChild(li);
       });
       const add = document.createElement('button');
@@ -3903,6 +4053,7 @@ function renderDiaBox(){
         const lista = extrasDa(reg, meal.id).slice();
         lista.push({n:'', q:'', u:'g'});
         setExtras(reg, meal.id, lista);
+        extraAbertoChave = meal.id+':'+(lista.length-1);
         if(!reg.r[meal.id]) reg.r[meal.id]='ad';
         salvarDiario(); renderDiario();
       };
@@ -4203,16 +4354,35 @@ function renderResumoHoje(){
   const total = meals.length;
   document.getElementById('hoje-dieta-num').textContent = feitas+'/'+total+' refeições';
   document.getElementById('hoje-dieta-barra').style.width = (total ? Math.round(feitas/total*100) : 0)+'%';
+
+  // calorias do dia direto no card, sem precisar abrir o popup de marcar:
+  // enquanto nada foi marcado mostra só o planejado, depois mostra o que
+  // realmente entrou contra o planejado.
+  const kcalBox = document.getElementById('hoje-dieta-kcal');
+  if(kcalBox){
+    try{
+      const c = contasDoDia(diaIso);
+      document.getElementById('hoje-kcal-comeu').textContent =
+        (c.marcou ? fmtKcal(c.real.k) : fmtKcal(c.plan.k)) + ' kcal';
+      document.getElementById('hoje-kcal-plan').textContent =
+        c.marcou ? ('de ' + fmtKcal(c.plan.k) + ' planejadas') : 'planejadas para hoje';
+      document.getElementById('hoje-kcal-macros').textContent = c.marcou
+        ? ('Proteína ' + Math.round(c.real.p) + ' g de ' + Math.round(c.plan.p) +
+           ' · Carboidrato ' + Math.round(c.real.c) + ' g de ' + Math.round(c.plan.c) +
+           ' · Gordura ' + Math.round(c.real.g) + ' g de ' + Math.round(c.plan.g))
+        : ('Proteína ' + Math.round(c.plan.p) + ' g · Carboidrato ' + Math.round(c.plan.c) +
+           ' g · Gordura ' + Math.round(c.plan.g) + ' g');
+      kcalBox.hidden = false;
+    }catch(e){ kcalBox.hidden = true; }
+  }
+
   atualizarCardHabitos();
   atualizarCardTreinoHoje();
 }
 document.getElementById('hoje-ir-diario').onclick = function(){
   const hj = new Date();
   diario.mes = new Date(hj.getFullYear(), hj.getMonth(), 1);
-  diario.sel = iso(hj);
-  renderDiario();
-  const cal = document.querySelector('.mes');
-  if(cal) cal.scrollIntoView({block:'start'});
+  abrirRefeicoesDlg(iso(hj));
 };
 document.getElementById('hoje-ir-habitos').onclick = function(){ abrirHabitosDlg(); };
 document.getElementById('hoje-ir-iniciar-treino').onclick = function(){ abrirSessaoTreino(treinoHojeEscolhido); };
@@ -4245,23 +4415,24 @@ let treinoHojeEscolhido = null;
 let treinoHojeEscolhidoDia = null;
 let treinoHojeConteudo = null;
 async function atualizarCardTreinoHoje(){
-  const num = document.getElementById('hoje-treino-num');
+  const chaveBtn = document.getElementById('hoje-treino-chave');
   const nota = document.getElementById('hoje-treino-nota');
-  const trocarBtn = document.getElementById('hoje-treino-trocar');
-  const opcoesBox = document.getElementById('hoje-treino-opcoes');
-  if(!num || !nota) return;
-  opcoesBox.hidden = true; opcoesBox.innerHTML = '';
+  if(!chaveBtn || !nota) return;
   const uid = diario.perfil;
   if(!db || !orgAtiva || !sessaoAtual || !uid){
-    num.textContent=''; nota.textContent=''; trocarBtn.hidden = true;
+    chaveBtn.hidden = true; nota.textContent = '';
     treinoHojeEscolhido = null; treinoHojeConteudo = null;
     return;
   }
   try{
-    const plano = await buscarPlanoGenerico('planos_treino', uid);
+    const linha = await buscarPlanoGenerico('planos_treino', uid);
+    // buscarPlanoGenerico devolve a LINHA do banco ({conteudo, vigente_a_partir,
+    // versao_label}) - o plano em si é o conteudo dela.
+    const plano = linha && linha.conteudo;
     if(!plano){
-      num.textContent = ''; nota.textContent = 'Ainda não tem periodização cadastrada.';
-      trocarBtn.hidden = true; treinoHojeEscolhido = null; treinoHojeConteudo = null;
+      chaveBtn.hidden = true;
+      nota.textContent = 'Ainda não tem periodização cadastrada.';
+      treinoHojeEscolhido = null; treinoHojeConteudo = null;
       return;
     }
     treinoHojeConteudo = plano;
@@ -4270,7 +4441,6 @@ async function atualizarCardTreinoHoje(){
     const rHoje = await db.from('treino_registros').select('treino_chave')
       .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', hojeIso);
     const feitosHoje = (rHoje && rHoje.data) || [];
-    num.textContent = feitosHoje.length ? (feitosHoje.length===1 ? '1 feito hoje' : feitosHoje.length+' feitos hoje') : '';
     if(!treinoHojeEscolhido){
       const rUlt = await db.from('treino_registros').select('treino_chave,dia')
         .eq('organization_id', orgAtiva.id).eq('user_id', uid)
@@ -4279,28 +4449,53 @@ async function atualizarCardTreinoHoje(){
       treinoHojeEscolhido = proximoTreinoSugerido(plano, ultimo);
     }
     const t = treinoHojeEscolhido && plano.treinos && plano.treinos[treinoHojeEscolhido];
-    nota.textContent = t ? ('Treino '+treinoHojeEscolhido+' · '+t.nome) : 'Nenhum treino cadastrado no plano.';
-    trocarBtn.hidden = !t;
-  }catch(e){ num.textContent = ''; nota.textContent = ''; trocarBtn.hidden = true; }
+    if(t){
+      chaveBtn.textContent = 'Treino ' + treinoHojeEscolhido;
+      chaveBtn.hidden = false;
+      nota.textContent = feitosHoje.length
+        ? (t.nome + ' · ' + (feitosHoje.length===1 ? '1 treino já feito hoje' : feitosHoje.length+' treinos já feitos hoje'))
+        : t.nome;
+    }else{
+      chaveBtn.hidden = true;
+      nota.textContent = 'Nenhum treino cadastrado no plano.';
+    }
+  }catch(e){ chaveBtn.hidden = true; nota.textContent = ''; }
 }
-document.getElementById('hoje-treino-trocar').onclick = function(){
-  const opcoesBox = document.getElementById('hoje-treino-opcoes');
-  if(!opcoesBox.hidden){ opcoesBox.hidden = true; return; }
+/* modal de troca do treino do dia - lista os treinos da divisão com o nome
+   de cada um, marca o escolhido e só aplica quando confirma. */
+function abrirTrocaTreinoDlg(){
   if(!treinoHojeConteudo) return;
   const chaves = chavesTreinoUnicas(treinoHojeConteudo);
-  opcoesBox.innerHTML = chaves.map(function(k){
-    return '<button type="button" class="tr-chip-sel" data-chave="'+k+'" aria-pressed="'+(k===treinoHojeEscolhido)+'">'+k+'</button>';
-  }).join('');
-  opcoesBox.hidden = false;
-  Array.prototype.forEach.call(opcoesBox.querySelectorAll('.tr-chip-sel'), function(b){
-    b.onclick = function(){
-      treinoHojeEscolhido = b.getAttribute('data-chave');
-      opcoesBox.hidden = true;
-      const t = treinoHojeConteudo.treinos && treinoHojeConteudo.treinos[treinoHojeEscolhido];
-      document.getElementById('hoje-treino-nota').textContent = t ? ('Treino '+treinoHojeEscolhido+' · '+t.nome) : '';
+  let escolhido = treinoHojeEscolhido;
+  const sugerido = treinoHojeEscolhido;
+  document.getElementById('dlg-tit').textContent = 'Treino de hoje';
+  const body = document.getElementById('dlg-body');
+  function desenhar(){
+    body.innerHTML = '<div class="tr-troca-lista">' + chaves.map(function(k){
+      const t = treinoHojeConteudo.treinos[k] || {};
+      return '<button type="button" class="tr-troca-item" data-chave="'+k+'" aria-pressed="'+(k===escolhido)+'">'
+        + '<span class="tr-troca-chave">'+k+'</span>'
+        + '<span class="tr-troca-nome">'+(t.nome||'')+'</span>'
+        + (k===sugerido ? '<span class="tr-troca-hoje">sugerido</span>' : '')
+        + '</button>';
+    }).join('') + '</div>'
+    + '<button type="button" class="btn-pill primario" id="tr-troca-confirmar" style="margin-top:14px">Confirmar troca</button>';
+    Array.prototype.forEach.call(body.querySelectorAll('.tr-troca-item'), function(b){
+      b.onclick = function(){ escolhido = b.getAttribute('data-chave'); desenhar(); };
+    });
+    document.getElementById('tr-troca-confirmar').onclick = function(){
+      treinoHojeEscolhido = escolhido;
+      treinoHojeEscolhidoDia = iso(new Date());
+      const t = treinoHojeConteudo.treinos[escolhido] || {};
+      document.getElementById('hoje-treino-chave').textContent = 'Treino ' + escolhido;
+      document.getElementById('hoje-treino-nota').textContent = t.nome || '';
+      fecharDlg();
     };
-  });
-};
+  }
+  desenhar();
+  abrirDlg();
+}
+document.getElementById('hoje-treino-chave').onclick = abrirTrocaTreinoDlg;
 
 /* --- aba Progresso --- */
 // ---------- aba Evolução (cartões com faixa + gráfico por medição real) ----------
@@ -5336,7 +5531,7 @@ function montarSessaoTreino(){
         cabecalho = '<div class="tr-serie-header-row"><span>Série</span><span>Anterior</span><span>kg</span><span>'+repsLabel+'</span><span></span></div>';
         for(let s=0; s<nSeries; s++){
           const ant = serieAnterior(e[0], s);
-          const antTxt = ant ? (ant.kg!=null?fmtNum(ant.kg,1):'-')+' kg × '+(ant.reps!=null?ant.reps:'-') : '—';
+          const antTxt = ant ? (ant.kg!=null?fmtNum(ant.kg,1):'-')+' kg × '+(ant.reps!=null?ant.reps:'-') : '-';
           const kgVal = ant && ant.kg!=null ? ant.kg : '';
           const repsVal = ant && ant.reps!=null ? ant.reps : '';
           linhasSerie += '<div class="tr-serie-linha-wrap">'
@@ -5409,7 +5604,7 @@ function montarSessaoTreino(){
         wrap.innerHTML = '<button type="button" class="tr-serie-excluir">Excluir</button>'
           + '<div class="tr-serie-linha" data-serie="'+s+'">'
           + '<span class="tr-serie-num">'+(s+1)+'</span>'
-          + '<span class="tr-serie-anterior">—</span>'
+          + '<span class="tr-serie-anterior">-</span>'
           + '<input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg">'
           + '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="'+repsPlaceholder+'">'
           + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
@@ -5590,7 +5785,7 @@ function adicionarSerieAquecimento(idx){
   wrap.innerHTML = '<button type="button" class="tr-serie-excluir">Excluir</button>'
     + '<div class="tr-aquecimento-linha">'
     + '<span class="tr-serie-num">AQ</span>'
-    + '<span class="tr-serie-anterior">—</span>'
+    + '<span class="tr-serie-anterior">-</span>'
     + '<input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg">'
     + '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="reps">'
     + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
@@ -5675,16 +5870,94 @@ function setPerfil(p){
   const vistaTreino = document.getElementById('vista-treino');
   if(vistaTreino && !vistaTreino.hidden) renderTreino();
 }
-document.getElementById('mes-ant').onclick = function(){
-  diario.mes = new Date(diario.mes.getFullYear(), diario.mes.getMonth()-1, 1); renderDiario();
-};
-document.getElementById('mes-prox').onclick = function(){
-  diario.mes = new Date(diario.mes.getFullYear(), diario.mes.getMonth()+1, 1); renderDiario();
-};
+/* Troca de mês do calendário com transição suave (o mês sai deslizando pro
+   lado e o novo entra do lado oposto, em vez de trocar cortado), usada tanto
+   pelas setas ‹ › quanto pelo gesto de arrastar o calendário com o dedo. */
+let calAnimando = false;
+function trocarMes(delta){
+  if(calAnimando || !delta) return;
+  const cal = document.getElementById('cal');
+  const nome = document.getElementById('mes-nome');
+  calAnimando = true;
+  const saiPara = delta > 0 ? -1 : 1;   // avançar mês: conteúdo sai pra esquerda
+  cal.style.transition = 'transform .17s ease-in, opacity .17s ease-in';
+  cal.style.transform = 'translateX('+(saiPara*26)+'%)';
+  cal.style.opacity = '0';
+  if(nome) nome.style.opacity = '0';
+  setTimeout(function(){
+    diario.mes = new Date(diario.mes.getFullYear(), diario.mes.getMonth()+delta, 1);
+    const nomeMes = MESES[diario.mes.getMonth()];
+    if(nome) nome.textContent = nomeMes.charAt(0).toUpperCase()+nomeMes.slice(1)+' de '+diario.mes.getFullYear();
+    renderCalendario();
+    cal.style.transition = 'none';
+    cal.style.transform = 'translateX('+(-saiPara*26)+'%)';
+    requestAnimationFrame(function(){
+      cal.style.transition = 'transform .2s ease-out, opacity .2s ease-out';
+      cal.style.transform = '';
+      cal.style.opacity = '1';
+      if(nome){ nome.style.transition = 'opacity .2s ease-out'; nome.style.opacity = '1'; }
+      setTimeout(function(){ calAnimando = false; }, 210);
+    });
+  }, 170);
+}
+/* arrastar o calendário de um lado pro outro troca o mês - o calendário
+   acompanha o dedo enquanto arrasta e só "vira" a partir de 1/4 da largura,
+   senão volta pro lugar. Pointer Events pra funcionar em dedo e mouse. */
+let calArrastou = false;
+(function ligarSwipeCalendario(){
+  const palco = document.getElementById('cal-palco');
+  const cal = document.getElementById('cal');
+  if(!palco || !cal) return;
+  let startX = 0, startY = 0, dx = 0, arrastando = false, horizontal = null;
+  palco.addEventListener('pointerdown', function(ev){
+    if(calAnimando) return;
+    startX = ev.clientX; startY = ev.clientY; dx = 0;
+    arrastando = true; horizontal = null; calArrastou = false;
+    cal.style.transition = 'none';
+  });
+  palco.addEventListener('pointermove', function(ev){
+    if(!arrastando) return;
+    const mx = ev.clientX - startX, my = ev.clientY - startY;
+    if(horizontal===null){
+      if(Math.abs(mx)<8 && Math.abs(my)<8) return;
+      horizontal = Math.abs(mx) > Math.abs(my);
+      if(!horizontal){ arrastando = false; return; }
+      calArrastou = true;
+      if(palco.setPointerCapture) try{ palco.setPointerCapture(ev.pointerId); }catch(e){}
+    }
+    ev.preventDefault();
+    dx = mx;
+    cal.style.transform = 'translateX('+(dx*0.55)+'px)';
+    cal.style.opacity = Math.max(0.45, 1 - Math.abs(dx)/palco.offsetWidth).toFixed(2);
+  });
+  function soltar(){
+    if(!arrastando) return;
+    arrastando = false;
+    if(!horizontal) return;
+    const limite = Math.max(46, palco.offsetWidth*0.22);
+    if(Math.abs(dx) > limite){
+      cal.style.transition = 'none';
+      cal.style.transform = '';
+      cal.style.opacity = '1';
+      trocarMes(dx < 0 ? 1 : -1);   // arrastou pra esquerda: próximo mês
+    }else{
+      cal.style.transition = 'transform .18s ease, opacity .18s ease';
+      cal.style.transform = '';
+      cal.style.opacity = '1';
+    }
+    setTimeout(function(){ calArrastou = false; }, 60);
+  }
+  palco.addEventListener('pointerup', soltar);
+  palco.addEventListener('pointercancel', soltar);
+})();
+document.getElementById('mes-ant').onclick = function(){ trocarMes(-1); };
+document.getElementById('mes-prox').onclick = function(){ trocarMes(1); };
 document.getElementById('mes-hoje').onclick = function(){
   const h = new Date();
-  diario.mes = new Date(h.getFullYear(), h.getMonth(), 1);
-  diario.sel = iso(h); renderDiario();
+  const delta = (h.getFullYear()-diario.mes.getFullYear())*12 + (h.getMonth()-diario.mes.getMonth());
+  diario.sel = iso(h);
+  if(delta) trocarMes(delta);
+  else renderDiario();
 };
 [['per-7',7],['per-30',30],['per-mes','mes']].forEach(function(x){
   document.getElementById(x[0]).onclick = function(){
