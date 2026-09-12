@@ -1872,15 +1872,25 @@ var ParserPDF = (function(){
   function montarListaParesTr(linhas){ return (linhas||[]).filter(ehBulletTr).map(semBulletTr).map(parPorTraco); }
   function parsearDivisaoTreino(linhas){
     var ordem = [], nota = '', vistos = {};
+    function registrar(letra){
+      letra = letra.toUpperCase();
+      if(letra!=='OFF' && vistos[letra]){ ordem.push(letra+'2'); }
+      else{ ordem.push(letra); if(letra!=='OFF') vistos[letra]=true; }
+    }
     (linhas||[]).filter(ehBulletTr).map(semBulletTr).forEach(function(l){
-      var m = l.match(/^([A-Za-zÀ-ú]+)\s*(?:—\s*(.*))?$/);
-      if(m && /^(OFF|[A-Z])$/i.test(m[1])){
-        var letra = m[1].toUpperCase();
-        if(letra!=='OFF' && vistos[letra]){ ordem.push(letra+'2'); }
-        else{ ordem.push(letra); if(letra!=='OFF') vistos[letra]=true; }
-      }else{
-        nota = nota ? nota + ' ' + l : l;
+      // Formato 1 (plano da Isabela): a divisão inteira numa linha só,
+      // "A - B - Off - C - D - Off - Off."
+      var limpa = l.replace(/[.\s]+$/, '').trim();
+      var pedacos = limpa.split(/\s*[—–-]\s*/).map(function(x){ return x.trim(); }).filter(Boolean);
+      if(pedacos.length > 1 && pedacos.every(function(x){ return /^(OFF|[A-Z])$/i.test(x); })){
+        pedacos.forEach(registrar);
+        return;
       }
+      // Formato 2 (plano do Carlos): uma letra por linha, podendo ter o
+      // nome do treino depois de um travessão.
+      var m = l.match(/^([A-Za-zÀ-ú]+)\s*(?:[—–-]\s*(.*))?$/);
+      if(m && /^(OFF|[A-Z])$/i.test(m[1])){ registrar(m[1]); }
+      else{ nota = nota ? nota + ' ' + l : l; }
     });
     return { ordem: ordem, nota: nota };
   }
@@ -1895,7 +1905,10 @@ var ParserPDF = (function(){
         if(primeiraSemanaNum===null) primeiraSemanaNum = semanaAtual;
         i++;
         var infoLinha = (linhas[i]||'').trim();
-        var mInfo = infoLinha.match(/S[ée]ries\s+v[áa]lidas:\s*(.*?)\s*\|\s*Intensidade:\s*(.*?)\s*\|\s*Intervalos?:\s*(.*)$/i);
+        // "Intensidade:" pode não vir escrito (o plano da Isabela traz só
+        // "≈3 RIR") e o terceiro campo aparece como "Intervalos:" num plano
+        // e "Descanso:" no outro - os dois querem dizer a mesma coisa.
+        var mInfo = infoLinha.match(/S[ée]ries\s+v[áa]lidas:\s*([^|]*?)\s*\|\s*(?:Intensidade:\s*)?([^|]*?)\s*\|\s*(?:Intervalos?|Descanso)s?:\s*(.*)$/i);
         semanas.push({ n: semanaAtual, reps: mInfo?mInfo[1].trim():'', rir: mInfo?mInfo[2].trim():'', intervalo: mInfo?mInfo[3].trim():'' });
         i++;
         continue;
@@ -2278,24 +2291,35 @@ async function carregarVersoesHistorico(){
   alvo.innerHTML = '<p class="pg-vazio">Carregando...</p>';
   try{
     if(!db || !orgAtiva){ alvo.innerHTML = '<p class="pg-vazio">Entre na conta pra ver as versões.</p>'; return; }
-    var uid = (sessaoAtual && sessaoAtual.user && sessaoAtual.user.id) || versoesEstado.pessoa;
-    if(!uid){ alvo.innerHTML = '<p class="pg-vazio">Entre na conta pra ver os planos.</p>'; return; }
+    var meuUid = (sessaoAtual && sessaoAtual.user && sessaoAtual.user.id) || versoesEstado.pessoa;
+    if(!meuUid){ alvo.innerHTML = '<p class="pg-vazio">Entre na conta pra ver os planos.</p>'; return; }
+    // Envio é sempre pra quem está logado (não tem como errar de perfil),
+    // mas aqui na lista o admin enxerga os planos de todo mundo do grupo,
+    // pra poder corrigir a data ou apagar um envio errado de qualquer um.
+    var ehAdmin = papelAtual === 'owner' || papelAtual === 'admin';
+    var pessoas = ehAdmin ? membrosDaOrg() : [{uid: meuUid, nome: 'Você'}];
+    if(!pessoas.length) pessoas = [{uid: meuUid, nome: 'Você'}];
     // Mostra os quatro tipos juntos, sem precisar ficar trocando de aba -
     // cada linha diz o que é, deixa corrigir a data de início e apagar.
     var todos = [];
-    for(var k=0; k<VS_TABELAS.length; k++){
-      var tb = VS_TABELAS[k].chave;
-      var r = await db.from(tb)
-        .select('id,versao_label,vigente_a_partir,criado_em')
-        .eq('organization_id', orgAtiva.id).eq('user_id', uid)
-        .order('vigente_a_partir', { ascending:false }).limit(20);
-      ((r && r.data) || []).forEach(function(l){ l.__tabela = tb; todos.push(l); });
+    for(var pi=0; pi<pessoas.length; pi++){
+      for(var k=0; k<VS_TABELAS.length; k++){
+        var tb = VS_TABELAS[k].chave;
+        var r = await db.from(tb)
+          .select('id,versao_label,vigente_a_partir,criado_em')
+          .eq('organization_id', orgAtiva.id).eq('user_id', pessoas[pi].uid)
+          .order('vigente_a_partir', { ascending:false }).limit(20);
+        (function(tabela, dono){
+          ((r && r.data) || []).forEach(function(l){ l.__tabela = tabela; l.__dono = dono; todos.push(l); });
+        })(tb, pessoas[pi]);
+      }
     }
     if(!todos.length){ alvo.innerHTML = '<p class="pg-vazio">Nenhum plano enviado ainda.</p>'; return; }
     todos.sort(function(a,b){ return String(b.criado_em||'') < String(a.criado_em||'') ? -1 : 1; });
     alvo.innerHTML = todos.map(function(l){
+      var dono = (l.__dono && pessoas.length > 1) ? '<span class="vs-dono">'+l.__dono.nome+'</span>' : '';
       return '<div class="vs-linha-editavel">'
-        + '<span class="vs-tipo">'+rotuloDaTabela(l.__tabela)+'</span>'
+        + '<span class="vs-tipo">'+rotuloDaTabela(l.__tabela)+'</span>' + dono
         + '<input type="date" class="vs-vigente-edit" data-id="'+l.id+'" data-tabela="'+l.__tabela+'" value="'+String(l.vigente_a_partir).slice(0,10)+'">'
         + '<button type="button" class="vs-btn-mini vs-salvar-vigente" data-id="'+l.id+'" data-tabela="'+l.__tabela+'">Salvar</button>'
         + '<button type="button" class="vs-btn-mini perigo vs-apagar" data-id="'+l.id+'" data-tabela="'+l.__tabela+'">Apagar</button>'
@@ -2675,6 +2699,11 @@ function zipItem(a, c){
 }
 function zipVersao(a, c){
   const ref = a || c;
+  // uma versão quebrada (null) não pode derrubar o app inteiro: sem isso,
+  // carregarPlanoAtivo estoura, o montarSwitchesPerfil logo abaixo nunca
+  // roda e o app fica "sem perfil" - o que aparece como "Entre na conta"
+  // nas abas Treino e Dieta mesmo com a pessoa logada.
+  if(!ref) return { nome: 'Plano', itens: [] };
   const out = { nome: ref.nome };
   if(ref.nota !== undefined) out.nota = ref.nota;
   out.itens = ref.itens.map(function(_, k){ return zipItem(a && a.itens[k], c && c.itens[k]); });
@@ -2682,6 +2711,7 @@ function zipVersao(a, c){
 }
 function zipMeal(a, c){
   const ref = a || c;
+  if(!ref) return { id: 'x', nome: '', versoes: [{ nome:'Plano', itens: [] }], hora:{i:null,c:null} };
   const out = { id: ref.id, nome: ref.nome };
   if(ref.curto !== undefined) out.curto = ref.curto;
   out.hora = { i: a ? a.hora : null, c: c ? c.hora : null };
@@ -6398,8 +6428,20 @@ async function iniciarApp(){
   try{
     await carregar();
     await carregarDiario();
-    await carregarPlanoAtivo();
+    // o perfil tem que ser montado ANTES do cardápio: ele só depende da
+    // organização, e se o plano falhar por qualquer motivo o app não pode
+    // ficar sem perfil (era isso que fazia Treino e Dieta dizerem "Entre na
+    // conta" mesmo com a pessoa logada, enquanto Evolução funcionava).
     montarSwitchesPerfil();
+    try{
+      await carregarPlanoAtivo();
+    }catch(ePlano){
+      PLANO = {semana:[], fds:[]};
+      const aviso = document.getElementById('plano-vazio');
+      const avisoTxt = document.getElementById('plano-vazio-texto');
+      if(aviso) aviso.hidden = false;
+      if(avisoTxt) avisoTxt.textContent = 'Não deu pra montar o cardápio com o plano atual. O resto do app continua funcionando.';
+    }
     renderListas();
     render();
     setAba('diario');
