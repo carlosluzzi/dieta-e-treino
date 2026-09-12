@@ -725,7 +725,7 @@
   /* topo da aba Treino: nome da periodização em destaque, centralizado, com
      a vigência logo abaixo. */
   .tr-cabecalho{text-align:center;padding:22px 8px 6px}
-  .tr-cabecalho h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+  .tr-cabecalho h2{font-size:15.5px;font-weight:800;text-transform:uppercase;letter-spacing:.11em;
     color:var(--azul);margin:0 0 8px}
   .tr-sub{font-size:13px;color:var(--ink2);margin:0;line-height:1.5}
   .tr-sub.editavel{cursor:pointer;text-decoration:underline;text-decoration-color:var(--hair);
@@ -751,13 +751,7 @@
     border:1px solid var(--hair)}
   .dica.abaixo .dica-seta{top:-6px;border-right:0;border-bottom:0}
   .dica.acima .dica-seta{bottom:-6px;border-left:0;border-top:0}
-  /* a observação da divisão (ex.: descanso obrigatório) vira um aviso, não
-     mais uma linha solta perdida embaixo dos chips. */
-  .tr-nota{font-size:12.5px;color:var(--ink2);margin:10px 0 0;line-height:1.45;
-    background:var(--fill2);border-radius:11px;padding:9px 12px}
-  #tr-divisao-nota::before{content:'!';display:inline-flex;align-items:center;justify-content:center;
-    width:15px;height:15px;border-radius:50%;background:var(--ad);color:#fff;font-size:10px;
-    font-weight:800;margin-right:7px;vertical-align:-2px}
+  .tr-nota{font-size:12.5px;color:var(--ink2);margin:8px 0 0;line-height:1.4}
   .tr-divisao{display:flex;gap:6px;flex-wrap:wrap}
   #tr-divisao{flex-wrap:nowrap}
   #tr-divisao .tr-chip{flex:1 1 0}
@@ -855,11 +849,18 @@
   /* lista de exercícios da aba Treino: cada um num bloco, nome ocupando a
      linha inteira e os números do plano como etiquetas embaixo (a tabela
      antiga espremia o nome em 3-4 linhas e cortava as últimas colunas). */
-  .tr-ex-lista{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+  .tr-ex-lista{display:flex;flex-direction:column;gap:24px;margin-top:16px}
   .tr-ex-cab{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
   .tr-ex-titulo{font-size:14.5px;font-weight:700;color:var(--azul);border:0;background:none;padding:0;
     margin:0;font-family:inherit;text-align:left;cursor:pointer;line-height:1.3}
   .tr-ex-item .tr-serie-meta{margin:0}
+  /* tipo do exercício na aba Treino: legenda miúda embaixo do nome, sem
+     fundo colorido - só a bolinha separa ativação de isométrico. */
+  .tr-ex-tipo{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:600;
+    text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin:-3px 0 7px}
+  .tr-ex-tipo::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+  .tr-ex-tipo-ativacao::before{background:#2E4C6D}
+  .tr-ex-tipo-isometrico::before{background:#9A4B00}
   /* números do plano em duas colunas alinhadas, embaixo do nome */
   .tr-ex-grade{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
   .tr-ex-campo{display:flex;align-items:baseline;justify-content:space-between;gap:8px;min-width:0;
@@ -5356,7 +5357,12 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
     const badgesTipo = { ativacao:'Ativação', isometrico:'Isométrico' };
     const linhas = (t.ex||[]).map(function(e){
       const tipo = e[5] || 'normal';
-      const badge = badgesTipo[tipo] ? '<span class="tr-tipo-badge tr-tipo-'+tipo+'">'+badgesTipo[tipo]+'</span>' : '';
+      // aqui na aba Treino o tipo não vira pílula colorida (ficava pesado
+      // demais ao lado do nome): é uma legenda miúda embaixo do título, só
+      // com uma bolinha pra diferenciar ativação de isométrico.
+      const legendaTipo = badgesTipo[tipo]
+        ? '<div class="tr-ex-tipo tr-ex-tipo-'+tipo+'">'+badgesTipo[tipo]+'</div>'
+        : '';
       // meio-termo entre a planilha antiga (tudo lado a lado, ilegível no
       // celular) e etiqueta solta: o nome fica numa linha só dele e os
       // números vêm alinhados embaixo, em duas colunas de rótulo/valor.
@@ -5372,7 +5378,8 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
       return '<div class="tr-ex-item">'
         + '<div class="tr-ex-cab">'
         + '<button type="button" class="tr-ex-titulo" data-nome="'+String(e[0]).replace(/"/g,'&quot;')+'">'+e[0]+'</button>'
-        + badge + '</div>'
+        + '</div>'
+        + legendaTipo
         + (grade ? '<div class="tr-ex-grade">'+grade+'</div>' : '')
         + '</div>';
     }).join('');
