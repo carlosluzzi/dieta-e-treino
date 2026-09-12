@@ -416,6 +416,17 @@
 
   .obs{padding:14px 16px;border-top:.5px solid var(--hair)}
   .obs label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px}
+  .obs > summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;
+    font-size:13px;font-weight:600;color:var(--ink2)}
+  .obs > summary::-webkit-details-marker{display:none}
+  .obs > summary > span:first-child{flex:1 1 auto}
+  .obs-marca{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--azul);background:var(--azul-soft);
+    padding:2px 7px;border-radius:7px}
+  .obs > summary::after{content:'';flex:0 0 auto;width:7px;height:7px;
+    border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);
+    transform:rotate(45deg) translate(-2px,-2px);transition:transform .18s ease}
+  .obs[open] > summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+  .obs[open] textarea{margin-top:8px}
   .obs textarea{width:100%;min-height:70px;font-size:16px;line-height:1.45;border:0;border-radius:var(--rc);
     padding:11px;background:var(--fill);color:var(--ink);resize:vertical}
   .obs textarea:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
@@ -711,8 +722,42 @@
   .tr-secao{margin-top:18px}
   .tr-secao h2{font-size:20px;font-weight:700;letter-spacing:-.02em;margin:0 0 4px}
   .tr-secao h3{font-size:13px;font-weight:600;letter-spacing:.01em;margin:0 0 8px;color:var(--ink2);text-transform:uppercase}
-  .tr-sub{font-size:13px;color:var(--ink2);margin:0}
-  .tr-nota{font-size:12.5px;color:var(--ink2);margin:8px 0 0;line-height:1.4}
+  /* topo da aba Treino: nome da periodização em destaque, centralizado, com
+     a vigência logo abaixo. */
+  .tr-cabecalho{text-align:center;padding:22px 8px 6px}
+  .tr-cabecalho h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+    color:var(--azul);margin:0 0 8px}
+  .tr-sub{font-size:13px;color:var(--ink2);margin:0;line-height:1.5}
+  .tr-sub.editavel{cursor:pointer;text-decoration:underline;text-decoration-color:var(--hair);
+    text-underline-offset:3px}
+  /* prescrição da semana em três células, com a dica do RIR */
+  .switch-semana{display:flex;width:100%}
+  .switch-semana button{flex:1 1 0;text-align:center;padding:8px 6px}
+  .tr-semana-cartao{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:12px;
+    background:var(--fill);border-radius:14px;overflow:hidden}
+  .tr-sem-celula{display:flex;flex-direction:column;align-items:center;gap:3px;
+    background:var(--card);padding:12px 6px;min-width:0}
+  .tr-sem-rot{display:flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:var(--ink3);
+    text-transform:uppercase;letter-spacing:.03em;text-align:center;line-height:1.2}
+  .tr-sem-val{font-size:13.5px;font-weight:700;color:var(--ink);text-align:center;line-height:1.25}
+  .tr-dica-btn{width:15px;height:15px;flex-shrink:0;border:0;border-radius:50%;background:var(--azul-soft);
+    color:var(--azul);font-size:10px;font-weight:800;line-height:1;cursor:pointer;padding:0;
+    display:flex;align-items:center;justify-content:center;font-family:inherit}
+  .dica{position:absolute;z-index:130;width:270px;max-width:calc(100vw - 24px);background:var(--card);
+    border-radius:13px;box-shadow:0 10px 34px rgba(0,0,0,.2);border:1px solid var(--hair);padding:12px 14px}
+  .dica b{display:block;font-size:13px;color:var(--ink);margin-bottom:4px}
+  .dica p{margin:0;font-size:12.5px;color:var(--ink2);line-height:1.5}
+  .dica-seta{position:absolute;width:11px;height:11px;background:var(--card);transform:rotate(45deg);
+    border:1px solid var(--hair)}
+  .dica.abaixo .dica-seta{top:-6px;border-right:0;border-bottom:0}
+  .dica.acima .dica-seta{bottom:-6px;border-left:0;border-top:0}
+  /* a observação da divisão (ex.: descanso obrigatório) vira um aviso, não
+     mais uma linha solta perdida embaixo dos chips. */
+  .tr-nota{font-size:12.5px;color:var(--ink2);margin:10px 0 0;line-height:1.45;
+    background:var(--fill2);border-radius:11px;padding:9px 12px}
+  #tr-divisao-nota::before{content:'!';display:inline-flex;align-items:center;justify-content:center;
+    width:15px;height:15px;border-radius:50%;background:var(--ad);color:#fff;font-size:10px;
+    font-weight:800;margin-right:7px;vertical-align:-2px}
   .tr-divisao{display:flex;gap:6px;flex-wrap:wrap}
   #tr-divisao{flex-wrap:nowrap}
   #tr-divisao .tr-chip{flex:1 1 0}
@@ -720,6 +765,16 @@
   .tr-chip.off{background:transparent;color:var(--ink3);border:1px dashed var(--hair)}
   .tr-treino-card{background:var(--card);border-radius:var(--r);padding:16px;margin-top:12px;box-shadow:var(--sh)}
   .tr-treino-card h4{font-size:16px;font-weight:700;letter-spacing:-.01em;margin:0 0 12px}
+  /* cada treino é um card que abre e fecha - fechado por padrão, com a
+     setinha à direita. */
+  .tr-treino-card > summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none}
+  .tr-treino-card > summary::-webkit-details-marker{display:none}
+  .tr-treino-nome{flex:1 1 auto;font-size:15.5px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+  .tr-treino-qtd{flex:0 0 auto;font-size:12px;color:var(--ink3)}
+  .tr-treino-card > summary::after{content:'';flex:0 0 auto;width:8px;height:8px;margin-left:2px;
+    border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);
+    transform:rotate(45deg) translate(-2px,-2px);transition:transform .18s ease}
+  .tr-treino-card[open] > summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
   .tr-tabela-wrap{overflow-x:auto}
   .tr-tabela{width:100%;border-collapse:collapse;font-size:12.5px;min-width:460px}
   .tr-tabela th{text-align:left;font-weight:500;color:var(--ink3);font-size:10.5px;text-transform:uppercase;
@@ -800,11 +855,18 @@
   /* lista de exercícios da aba Treino: cada um num bloco, nome ocupando a
      linha inteira e os números do plano como etiquetas embaixo (a tabela
      antiga espremia o nome em 3-4 linhas e cortava as últimas colunas). */
-  .tr-ex-lista{display:flex;flex-direction:column;gap:16px;margin-top:14px}
-  .tr-ex-cab{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+  .tr-ex-lista{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+  .tr-ex-cab{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
   .tr-ex-titulo{font-size:14.5px;font-weight:700;color:var(--azul);border:0;background:none;padding:0;
     margin:0;font-family:inherit;text-align:left;cursor:pointer;line-height:1.3}
   .tr-ex-item .tr-serie-meta{margin:0}
+  /* números do plano em duas colunas alinhadas, embaixo do nome */
+  .tr-ex-grade{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
+  .tr-ex-campo{display:flex;align-items:baseline;justify-content:space-between;gap:8px;min-width:0;
+    border-bottom:1px dotted var(--hair);padding-bottom:2px}
+  .tr-ex-rot{font-size:11px;color:var(--ink3);white-space:nowrap}
+  .tr-ex-val{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap}
+  @media(max-width:359px){ .tr-ex-grade{grid-template-columns:1fr} }
   .tr-linha-ativacao{grid-template-columns:32px 1fr 32px}
   .tr-serie-ativacao-label{font-size:13px;color:var(--ink2)}
   .tr-semana-faixa{margin:-6px 0 14px;font-size:12px;color:var(--ink2);line-height:1.4}
@@ -1121,7 +1183,7 @@
     </div>
 
     <div id="tr-conteudo" hidden>
-      <section class="tr-secao">
+      <section class="tr-cabecalho">
         <h2 id="tr-titulo"></h2>
         <p class="tr-sub" id="tr-sub"></p>
       </section>
@@ -1134,8 +1196,8 @@
 
       <section class="tr-secao">
         <h3>Semana</h3>
-        <div class="switch" role="group" aria-label="Semana" id="tr-semanas"></div>
-        <p class="tr-nota" id="tr-semana-info"></p>
+        <div class="switch switch-semana" role="group" aria-label="Semana" id="tr-semanas"></div>
+        <div class="tr-semana-cartao" id="tr-semana-info"></div>
       </section>
 
       <div id="tr-treinos"></div>
@@ -4208,15 +4270,24 @@ function renderDiaBox(){
     }
   });
 
-  const obs = document.createElement('div'); obs.className='obs';
-  const lab = document.createElement('label');
-  lab.setAttribute('for','obs-txt');
-  lab.textContent = 'O que mudou nesse dia';
+  // "O que mudou nesse dia" nasce fechado: só ocupa espaço quando o Carlos
+  // realmente quer escrever (abre no toque, sem popup).
+  const obs = document.createElement('details'); obs.className='obs';
+  if(reg.obs) obs.open = true;
+  const resumo = document.createElement('summary');
+  const resumoTxt = document.createElement('span');
+  resumoTxt.textContent = 'O que mudou nesse dia';
+  resumo.appendChild(resumoTxt);
+  if(reg.obs){
+    const marca = document.createElement('span'); marca.className='obs-marca';
+    marca.textContent = 'anotado';
+    resumo.appendChild(marca);
+  }
   const ta = document.createElement('textarea');
   ta.id='obs-txt'; ta.value = reg.obs||'';
   ta.placeholder = 'Ex.: jantei fora e não pesei a carne.';
   ta.oninput = function(){ reg.obs = ta.value; salvarDiario(); };
-  obs.appendChild(lab); obs.appendChild(ta);
+  obs.appendChild(resumo); obs.appendChild(ta);
   box.appendChild(obs);
 
   const bal = document.createElement('div'); bal.className='balanco'; bal.id='balanco';
@@ -4603,9 +4674,12 @@ async function atualizarCardTreinoHoje(diaSel){
     const hojeIso = iso(new Date());
     const diaIso = diaSel || diario.sel || hojeIso;
     const ehHoje = diaIso === hojeIso;
-    // a sessão de treino sempre grava no dia de hoje, então em outro dia o
-    // botão some (o card vira só consulta do que foi feito).
-    if(btnIniciar) btnIniciar.hidden = !ehHoje;
+    // a sessão de treino sempre grava no dia de hoje. O botão nunca some
+    // (sumir confunde); olhando outro dia, o texto deixa isso claro.
+    if(btnIniciar){
+      btnIniciar.hidden = false;
+      btnIniciar.textContent = ehHoje ? 'Iniciar treino' : 'Iniciar treino de hoje';
+    }
 
     const rDia = await db.from('treino_registros').select('treino_chave')
       .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', diaIso);
@@ -5169,14 +5243,64 @@ async function renderTreino(){
   }
 }
 
+/* Balãozinho de explicação (ex.: o que é RIR). É separado do balão da aba
+   Dieta de propósito: aquele é preso ao estado do cardápio e se fecha
+   redesenhando a tela toda; esse aqui é só um aviso solto que fecha ao
+   tocar em qualquer lugar fora dele. */
+function fecharDica(){
+  const d = document.getElementById('dica');
+  if(d && d.parentNode) d.parentNode.removeChild(d);
+  document.removeEventListener('click', fecharDicaFora, true);
+  window.removeEventListener('resize', fecharDica);
+}
+function fecharDicaFora(ev){
+  const d = document.getElementById('dica');
+  if(d && !d.contains(ev.target)) fecharDica();
+}
+function abrirDica(alvoEl, titulo, texto){
+  fecharDica();
+  const bal = document.createElement('div');
+  bal.className = 'dica'; bal.id = 'dica'; bal.setAttribute('role','dialog');
+  const seta = document.createElement('div'); seta.className = 'dica-seta';
+  const tit = document.createElement('b'); tit.textContent = titulo;
+  const p = document.createElement('p'); p.textContent = texto;
+  bal.appendChild(seta); bal.appendChild(tit); bal.appendChild(p);
+  document.body.appendChild(bal);
+
+  const r = alvoEl.getBoundingClientRect();
+  const larg = bal.offsetWidth, alt = bal.offsetHeight;
+  const centro = r.left + r.width/2;
+  const esq = Math.max(10, Math.min(centro - larg/2, document.documentElement.clientWidth - larg - 10));
+  const cabeAbaixo = (r.bottom + alt + 14) < window.innerHeight || r.top < alt + 14;
+  bal.classList.add(cabeAbaixo ? 'abaixo' : 'acima');
+  bal.style.left = esq + 'px';
+  bal.style.top = (cabeAbaixo ? r.bottom + window.pageYOffset + 9
+                              : r.top + window.pageYOffset - alt - 9) + 'px';
+  seta.style.left = Math.max(10, Math.min(centro - esq - 6, larg - 22)) + 'px';
+  setTimeout(function(){
+    document.addEventListener('click', fecharDicaFora, true);
+    window.addEventListener('resize', fecharDica);
+  }, 0);
+}
+
 let treinoConteudoAtual = null;
 function montarTreino(c, versaoLabel, vigenteA, registros){
   registros = registros || [];
   treinoConteudoAtual = c;   // pro popup de explicação achar a biblioteca
   document.getElementById('tr-titulo').textContent = versaoLabel || c.atualizacao || 'Periodização';
-  document.getElementById('tr-sub').textContent =
+  const sub = document.getElementById('tr-sub');
+  sub.textContent =
     'Vigente desde ' + brData(vigenteA) + ' · ' + (c.periodo_semanas||4) + ' semanas' +
     (c.data_avaliacao ? ' · avaliação de ' + brData(c.data_avaliacao) : '');
+  // atalho pra corrigir a data de início direto daqui (quem pode editar é
+  // admin; o campo em si fica no painel de versões).
+  const podeEditar = papelAtual === 'owner' || papelAtual === 'admin';
+  sub.classList.toggle('editavel', podeEditar);
+  sub.onclick = podeEditar ? function(){
+    versoesEstado.tabela = 'planos_treino';
+    versoesEstado.pessoa = diario.perfil || versoesEstado.pessoa;
+    abrirVersoes();
+  } : null;
 
   const divBox = document.getElementById('tr-divisao');
   divBox.innerHTML = (c.divisao.ordem||[]).map(function(d){
@@ -5195,10 +5319,29 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
   Array.prototype.forEach.call(semBox.querySelectorAll('button'), function(btn){
     btn.onclick = function(){ treinoSemana = parseInt(btn.getAttribute('data-sem'),10); montarTreino(c, versaoLabel, vigenteA, registros); };
   });
+  // A prescrição da semana (reps, intensidade e intervalo) vale pro treino
+  // todo, então ganha destaque próprio em três células, com uma dica
+  // explicando o que é RIR.
   const semAtual = semanas.find(function(sm){ return sm.n===treinoSemana; }) || semanas[0];
-  document.getElementById('tr-semana-info').textContent = semAtual
-    ? 'Séries válidas: ' + semAtual.reps + ' · Intensidade: ' + semAtual.rir + ' · Intervalo: ' + semAtual.intervalo
-    : '';
+  const cartaoSem = document.getElementById('tr-semana-info');
+  if(semAtual){
+    cartaoSem.innerHTML =
+        '<div class="tr-sem-celula"><span class="tr-sem-rot">Séries válidas</span>'
+      + '<span class="tr-sem-val">'+semAtual.reps+'</span></div>'
+      + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intensidade'
+      + '<button type="button" class="tr-dica-btn" id="tr-dica-rir" aria-label="O que é RIR">?</button>'
+      + '</span><span class="tr-sem-val">'+semAtual.rir+'</span></div>'
+      + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intervalo</span>'
+      + '<span class="tr-sem-val">'+semAtual.intervalo+'</span></div>';
+    const bt = document.getElementById('tr-dica-rir');
+    if(bt) bt.onclick = function(ev){
+      ev.stopPropagation();
+      abrirDica(bt, 'RIR: repetições na reserva',
+        'É quanto ainda sobraria no tanque quando você encerra a série. ~3 RIR quer dizer parar três repetições antes da falha: se daria pra fazer mais três com boa execução, o peso está no ponto. Quanto menor o RIR, mais perto da falha.');
+    };
+  }else{
+    cartaoSem.innerHTML = '';
+  }
 
   const ordemUnica = [];
   (c.divisao.ordem||[]).forEach(function(d){ if(d!=='OFF' && ordemUnica.indexOf(d)===-1) ordemUnica.push(d); });
@@ -5214,27 +5357,37 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
     const linhas = (t.ex||[]).map(function(e){
       const tipo = e[5] || 'normal';
       const badge = badgesTipo[tipo] ? '<span class="tr-tipo-badge tr-tipo-'+tipo+'">'+badgesTipo[tipo]+'</span>' : '';
-      const tags = [];
-      if(temValorPlano(e[1])) tags.push('<span class="tr-meta-tag"><b>Aquecimento</b>'+e[1]+'</span>');
-      if(temValorPlano(e[2])) tags.push('<span class="tr-meta-tag"><b>Teste de carga</b>'+e[2]+'</span>');
-      if(temValorPlano(e[3])) tags.push('<span class="tr-meta-tag"><b>Séries válidas</b>'+e[3]+'</span>');
-      if(temValorPlano(e[4])) tags.push('<span class="tr-meta-tag"><b>Descanso</b>'+e[4]+'</span>');
+      // meio-termo entre a planilha antiga (tudo lado a lado, ilegível no
+      // celular) e etiqueta solta: o nome fica numa linha só dele e os
+      // números vêm alinhados embaixo, em duas colunas de rótulo/valor.
+      const campos = [];
+      if(temValorPlano(e[1])) campos.push(['Aquecimento', e[1]]);
+      if(temValorPlano(e[2])) campos.push(['Teste de carga', e[2]]);
+      if(temValorPlano(e[3])) campos.push(['Séries válidas', e[3]]);
+      if(temValorPlano(e[4])) campos.push(['Descanso', e[4]]);
+      const grade = campos.map(function(par){
+        return '<div class="tr-ex-campo"><span class="tr-ex-rot">'+par[0]+'</span>'
+          + '<span class="tr-ex-val">'+par[1]+'</span></div>';
+      }).join('');
       return '<div class="tr-ex-item">'
         + '<div class="tr-ex-cab">'
         + '<button type="button" class="tr-ex-titulo" data-nome="'+String(e[0]).replace(/"/g,'&quot;')+'">'+e[0]+'</button>'
         + badge + '</div>'
-        + (tags.length ? '<div class="tr-serie-meta">'+tags.join('')+'</div>' : '')
+        + (grade ? '<div class="tr-ex-grade">'+grade+'</div>' : '')
         + '</div>';
     }).join('');
     let core = '';
     if(c.core_por_treino && c.core_por_treino[k]){
       core = '<div class="tr-core"><b>Core: </b>' + c.core_por_treino[k].map(function(x){ return x[0]+' - '+x[1]; }).join(' · ') + '</div>';
     }
-    return '<div class="tr-treino-card">'
-      + '<h4>Treino '+k+(ehBonus?' · bônus':'')+' - '+t.nome+'</h4>'
+    // cada treino fica fechado, abre no toque (o handler global de <summary>
+    // cuida de abrir/fechar sem pular a rolagem).
+    return '<details class="tr-treino-card">'
+      + '<summary><span class="tr-treino-nome">Treino '+k+(ehBonus?' · bônus':'')+' - '+t.nome+'</span>'
+      + '<span class="tr-treino-qtd">'+(t.ex||[]).length+((t.ex||[]).length===1?' exercício':' exercícios')+'</span></summary>'
       + '<div class="tr-ex-lista">'+linhas+'</div>'
       + core
-      + '</div>';
+      + '</details>';
   }).join('');
   Array.prototype.forEach.call(document.getElementById('tr-treinos').querySelectorAll('.tr-ex-titulo'), function(b){
     b.onclick = function(){ abrirExplicacaoExercicio(b.getAttribute('data-nome')); };
