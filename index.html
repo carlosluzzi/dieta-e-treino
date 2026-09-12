@@ -2446,7 +2446,16 @@ const G = {
     {n:'Pão francês',t:'1 un (60 g)'},{n:'Pão de forma',t:'2 fatias (50 g)'},
     {n:'Tapioca (goma seca)',t:'40 g'},{n:'Biscoito de arroz grande',t:'4 un (36-40 g)'},
     {n:'Magic Toast',t:'2 pacotes (25-30 g)'},{n:'Farelo de aveia',t:'30 g'}]},
-  fruta:{tipo:'igual',titulo:'Frutas indicadas (até 50 kcal por 100 g)',opts:FRUTAS.map(function(f){return {n:f};})}
+  fruta:{tipo:'igual',titulo:'Frutas indicadas (até 50 kcal por 100 g)',opts:FRUTAS.map(function(f){return {n:f};})},
+  /* A lista de "legumes variados" do Pedro não traz conversão de gramas:
+     são todos liberados na mesma quantidade, por isso tipo 'igual'. */
+  legumes:{tipo:'igual',titulo:'Legumes variados liberados na dieta',
+    opts:Object.keys(LEGUMES).reduce(function(acc, cat){
+      LEGUMES[cat].forEach(function(n){ acc.push({n:n}); });
+      return acc;
+    }, [])},
+  salada:{tipo:'igual',titulo:'Folhosas e verduras cruas liberadas',
+    opts:LEGUMES['Vegetais tipo A/B'].map(function(n){ return {n:n}; })}
 };
 
 /* =========================================================
