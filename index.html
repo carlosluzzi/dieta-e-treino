@@ -683,7 +683,24 @@
     border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--sh-min)}
   .pg-linha .pg-data{font-size:13px;color:var(--ink2)}
   .pg-linha .pg-vals{font-size:14px;font-weight:600;text-align:right}
-  .vs-linha-editavel{flex-wrap:wrap;gap:8px;align-items:center}
+  /* painel de enviar plano: escolher PDF e pronto */
+  .hidden{display:none !important}
+  .vs-intro{font-size:13.5px;color:var(--ink2);line-height:1.5;margin:0 0 16px}
+  .vs-status{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+  .vs-item{display:flex;align-items:baseline;gap:8px;font-size:13px;padding:9px 11px;
+    border-radius:10px;background:var(--fill2)}
+  .vs-item-nome{flex:1 1 auto;min-width:0;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .vs-item-res{flex:0 0 auto;font-weight:600;color:var(--ink2)}
+  .vs-item.ok{background:var(--ok-soft)} .vs-item.ok .vs-item-res{color:#1B6B36}
+  .vs-item.falhou{background:var(--ad-soft)} .vs-item.falhou .vs-item-res{color:#8A5600}
+  .vs-tipo{flex:0 0 auto;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
+    color:var(--ink2);background:var(--fill);padding:4px 8px;border-radius:7px;min-width:74px;text-align:center}
+  .vs-btn-mini{flex:0 0 auto;border:0;background:var(--fill);color:var(--ink2);font-family:inherit;
+    font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:8px;cursor:pointer}
+  .vs-btn-mini.perigo{color:var(--nao)}
+  .vs-linha-editavel{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 0;
+    border-bottom:.5px solid var(--hair)}
+  .vs-linha-editavel:last-child{border-bottom:0}
   .vs-linha-editavel .vs-vigente-edit{font-size:14px;padding:6px 8px;border-radius:8px;
     border:1px solid var(--hair);background:var(--fill2);flex:0 0 auto}
   .vs-linha-editavel .pg-vals{flex:1 1 auto;text-align:left}
@@ -2118,66 +2135,125 @@ function abrirVersoes(){
       ? proprio
       : (membros[0] ? membros[0].uid : null);
   }
-  document.getElementById('dlg-tit').textContent = 'Versões de plano';
+  document.getElementById('dlg-tit').textContent = 'Enviar plano';
   document.getElementById('dlg-body').innerHTML = htmlVersoesPainel();
   ligarVersoesPainel();
   carregarVersoesHistorico();
   abrirDlg();
 }
 
+/* Enviar plano: escolher o(s) PDF(s) e pronto. O app descobre sozinho se
+   cada arquivo é treino, dieta, hábitos ou suplementação, e salva sempre
+   pra pessoa que está logada (antes tinha seletor de pessoa e o padrão
+   podia ficar em outra pessoa - foi o que fez o plano da Isabela cair no
+   perfil errado). Nada de JSON na tela: essa conferência não era usada. */
 function htmlVersoesPainel(){
-  var botsTabela = VS_TABELAS.map(function(t){
-    return '<button type="button" data-tabela="'+t.chave+'" aria-pressed="'+(t.chave===versoesEstado.tabela)+'">'+t.label+'</button>';
-  }).join('');
-  var botsPessoa = membrosDaOrg().map(function(m){
-    return '<button type="button" data-uid="'+m.uid+'" aria-pressed="'+(m.uid===versoesEstado.pessoa)+'">'+m.nome+'</button>';
-  }).join('');
   return ''
-    + '<div class="campo"><label>Conteúdo</label><div class="switch switch-wrap" role="group" aria-label="Conteúdo" id="vs-sw-tabela">'+botsTabela+'</div></div>'
-    + '<div class="campo"><label>Pessoa</label><div class="switch switch-wrap" role="group" aria-label="Pessoa" id="vs-sw-pessoa">'+botsPessoa+'</div></div>'
-    + '<div class="campo"><label>Versões existentes</label><div id="vs-historico"><p class="pg-vazio">Carregando...</p></div></div>'
-    + '<div class="campo"><label for="vs-label">Rótulo da nova versão</label><input type="text" id="vs-label" placeholder="Ex.: Atualização 2"></div>'
-    + '<div class="campo"><label for="vs-vigente">Vigente a partir de</label><input type="date" id="vs-vigente"></div>'
-    + '<div class="campo"><label>Extrair de um PDF do Pedro (opcional)</label>'
-    + '<input type="file" id="vs-pdf-arquivo" accept="application/pdf" class="hidden" onchange="atualizarNomePdfVersoes()">'
-    + '<button type="button" class="btn-pill secundario" id="vs-pdf-escolher">Escolher PDF</button>'
-    + '<div id="vs-pdf-nome" style="color:#888;font-size:13px;margin:8px 0">Nenhum arquivo selecionado</div>'
-    + '<button type="button" class="btn-pill secundario" id="vs-pdf-extrair">Extrair pro campo abaixo</button>'
-    + '<div id="vs-pdf-status" style="margin-top:8px"></div></div>'
-    + '<div class="campo"><label for="vs-json">Conteúdo (JSON)</label><textarea id="vs-json" placeholder="Cole aqui o conteúdo estruturado desta versão"></textarea></div>'
-    + '<div class="acoes"><button class="btn-pill secundario" id="vs-usar-atual" type="button">Usar a versão vigente como ponto de partida</button></div>'
-    + '<div class="acoes"><button class="btn-pill primario" id="vs-salvar" type="button">Salvar nova versão</button></div>'
-    + '<p class="erro-auth" id="vs-erro"></p>';
+    + '<p class="vs-intro">Escolhe os PDFs que o Pedro mandou. Dá pra mandar vários de uma vez - '
+    + 'o app reconhece sozinho o que é treino, dieta, hábitos e suplementação.</p>'
+    + '<div class="campo"><label for="vs-vigente">Começa a valer em</label>'
+    + '<input type="date" id="vs-vigente"></div>'
+    + '<input type="file" id="vs-pdf-arquivo" accept="application/pdf" multiple class="hidden">'
+    + '<button type="button" class="btn-pill primario" id="vs-pdf-escolher">Escolher PDFs e salvar</button>'
+    + '<div id="vs-pdf-status" class="vs-status"></div>'
+    + '<p class="erro-auth" id="vs-erro"></p>'
+    + '<div class="campo" style="margin-top:22px"><label>Planos já enviados</label>'
+    + '<div id="vs-historico"><p class="pg-vazio">Carregando...</p></div></div>';
 }
 
 function ligarVersoesPainel(){
   document.getElementById('vs-vigente').value = iso(new Date());
-  Array.prototype.forEach.call(document.getElementById('vs-sw-tabela').querySelectorAll('button'), function(b){
-    b.onclick = function(){
-      versoesEstado.tabela = b.getAttribute('data-tabela');
-      Array.prototype.forEach.call(b.parentNode.querySelectorAll('button'), function(x){ x.setAttribute('aria-pressed', x===b); });
-      carregarVersoesHistorico();
-    };
-  });
-  Array.prototype.forEach.call(document.getElementById('vs-sw-pessoa').querySelectorAll('button'), function(b){
-    b.onclick = function(){
-      versoesEstado.pessoa = b.getAttribute('data-uid');
-      Array.prototype.forEach.call(b.parentNode.querySelectorAll('button'), function(x){ x.setAttribute('aria-pressed', x===b); });
-      carregarVersoesHistorico();
-    };
-  });
-  document.getElementById('vs-usar-atual').onclick = usarVersaoAtualComoBase;
-  document.getElementById('vs-salvar').onclick = salvarNovaVersaoPlano;
-  document.getElementById('vs-pdf-escolher').onclick = function(){ document.getElementById('vs-pdf-arquivo').click(); };
-  document.getElementById('vs-pdf-extrair').onclick = extrairPdfParaVersoes;
+  const entrada = document.getElementById('vs-pdf-arquivo');
+  document.getElementById('vs-pdf-escolher').onclick = function(){ entrada.value = ''; entrada.click(); };
+  entrada.onchange = function(){ enviarPdfsDoPlano(entrada.files); };
 }
 
-function atualizarNomePdfVersoes(){
-  var input = document.getElementById('vs-pdf-arquivo');
-  var el = document.getElementById('vs-pdf-nome');
-  el.textContent = (input.files && input.files[0]) ? input.files[0].name : 'Nenhum arquivo selecionado';
-  document.getElementById('vs-pdf-status').innerHTML = '';
+/* Descobre o tipo do PDF pelo texto. Os documentos do Pedro têm cabeçalhos
+   bem característicos, então a checagem é por marca no texto, do mais
+   específico pro mais genérico. */
+function detectarTipoPdf(texto){
+  const t = String(texto||'');
+  if(/PERIODIZA[ÇC][ÃA]O\s+DE\s+TREINO/i.test(t)) return 'planos_treino';
+  if(/SEMANA\s+\d/i.test(t) && /Treino\s+[A-Z]\s*[—–-]/i.test(t)) return 'planos_treino';
+  if(/Dieta\s+dia\s+de\s+Semana/i.test(t)) return 'planos_dieta';
+  if(/Pese\s+os\s+alimentos/i.test(t)) return 'planos_dieta';
+  if(/Seg\s+a\s+Sex/i.test(t) && /Orienta[çc][õo]es/i.test(t)) return 'planos_dieta';
+  const marcasSup = (t.match(/creatina|whey|[ôo]mega\s*3|vitamina\s*d3|magn[ée]sio|melatonina|ashwagandha|picolinato|taurina/gi)||[]).length;
+  if(/suplementa[çc][ãa]o/i.test(t) || marcasSup >= 3) return 'planos_suplementacao';
+  if(/higiene\s+do\s+sono/i.test(t) || /ao\s+acordar/i.test(t) || /h[áa]bitos/i.test(t)) return 'planos_habitos';
+  return null;
 }
+function rotuloDaTabela(tabela){
+  const achado = VS_TABELAS.find(function(x){ return x.chave===tabela; });
+  return achado ? achado.label : tabela;
+}
+
+async function enviarPdfsDoPlano(arquivos){
+  limparErroAuth('vs-erro');
+  const status = document.getElementById('vs-pdf-status');
+  const btn = document.getElementById('vs-pdf-escolher');
+  if(!arquivos || !arquivos.length) return;
+  if(!db || !orgAtiva || !sessaoAtual){
+    mostrarErroAuth('vs-erro', 'Entre na conta primeiro.'); return;
+  }
+  // sempre a pessoa logada - é o plano dela que está sendo enviado
+  const uid = sessaoAtual.user.id;
+  const vigente = document.getElementById('vs-vigente').value || iso(new Date());
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Lendo...';
+  status.innerHTML = '';
+  let salvos = 0;
+
+  for(let i=0; i<arquivos.length; i++){
+    const arq = arquivos[i];
+    const linha = document.createElement('div');
+    linha.className = 'vs-item';
+    linha.innerHTML = '<span class="vs-item-nome"></span><span class="vs-item-res">lendo...</span>';
+    linha.querySelector('.vs-item-nome').textContent = arq.name;
+    status.appendChild(linha);
+    const res = linha.querySelector('.vs-item-res');
+    try{
+      const texto = await ParserPDF.extrairTextoDoArquivo(arq);
+      const tabela = detectarTipoPdf(texto);
+      if(!tabela){
+        linha.classList.add('falhou');
+        res.textContent = 'não reconheci o tipo';
+        continue;
+      }
+      let conteudo;
+      if(tabela === 'planos_dieta') conteudo = ParserPDF.parsearPdfDieta(texto);
+      else if(tabela === 'planos_treino') conteudo = ParserPDF.parsearPdfTreino(texto);
+      else conteudo = ParserPDF.parsearPdfHabitosOuSuplementacao(texto);
+      conteudo = normalizarTravessoes(conteudo);
+      const label = (conteudo && conteudo.atualizacao) || 'Atualização';
+      const dataPlano = (conteudo && conteudo.data_avaliacao) || vigente;
+      await db.from(tabela).insert({
+        organization_id: orgAtiva.id,
+        user_id: uid,
+        conteudo: conteudo,
+        vigente_a_partir: vigente || dataPlano,
+        versao_label: label,
+        criado_por: sessaoAtual.user.id
+      });
+      salvos++;
+      linha.classList.add('ok');
+      res.textContent = rotuloDaTabela(tabela) + ' · salvo';
+    }catch(e){
+      linha.classList.add('falhou');
+      res.textContent = 'não deu pra ler esse arquivo';
+    }
+  }
+
+  btn.disabled = false; btn.textContent = orig;
+  if(salvos){
+    carregarVersoesHistorico();
+    if(typeof renderTreino === 'function' && !document.getElementById('vista-treino').hidden) renderTreino();
+    if(typeof carregarPlanoAtivo === 'function' && !document.getElementById('vista-plano').hidden) carregarPlanoAtivo().then(render);
+    if(typeof renderDiario === 'function' && !document.getElementById('vista-diario').hidden) renderDiario();
+  }
+}
+
+
 
 /* Troca travessão longo (—) por travessão curto (-) em qualquer texto vindo de
    fora (PDF/texto colado) antes de esse conteúdo entrar no app — o Carlos não
@@ -2195,71 +2271,74 @@ function normalizarTravessoes(valor){
   return valor;
 }
 
-async function extrairPdfParaVersoes(){
-  var input = document.getElementById('vs-pdf-arquivo');
-  var status = document.getElementById('vs-pdf-status');
-  if(!input.files || !input.files.length){
-    status.innerHTML = '<p class="erro-auth mostra">Escolha um PDF primeiro.</p>';
-    return;
-  }
-  var btn = document.getElementById('vs-pdf-extrair');
-  var orig = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Lendo o PDF...';
-  status.innerHTML = '<p style="color:#888;font-size:13px">Extraindo texto do PDF, um instante...</p>';
-  try{
-    var texto = await ParserPDF.extrairTextoDoArquivo(input.files[0]);
-    var resultado;
-    if(versoesEstado.tabela === 'planos_dieta') resultado = ParserPDF.parsearPdfDieta(texto);
-    else if(versoesEstado.tabela === 'planos_treino') resultado = ParserPDF.parsearPdfTreino(texto);
-    else resultado = ParserPDF.parsearPdfHabitosOuSuplementacao(texto);
-    // O PDF do Pedro costuma vir com travessão longo (—); o app inteiro exibe só
-    // travessão curto, então normaliza aqui, no resultado já extraído, uma vez só
-    // — a extração em si (ParserPDF) continua reconhecendo travessão longo no
-    // texto original, porque é assim que ele aparece na fonte.
-    resultado = normalizarTravessoes(resultado);
-    document.getElementById('vs-json').value = JSON.stringify(resultado, null, 2);
-    if(resultado.data_avaliacao && !document.getElementById('vs-vigente').value){
-      document.getElementById('vs-vigente').value = resultado.data_avaliacao;
-    }
-    if(resultado.atualizacao && !document.getElementById('vs-label').value){
-      document.getElementById('vs-label').value = resultado.atualizacao;
-    }
-    status.innerHTML = '<p style="color:#1B5E20;font-size:13px">Extraído! Essa leitura é automática (sem revisão de IA) - confira o JSON abaixo com calma antes de salvar, principalmente as quantidades e os itens sem valor reconhecido.</p>';
-  }catch(e){
-    status.innerHTML = '<p class="erro-auth mostra">Não consegui ler esse PDF: ' + (e && e.message ? e.message : e) + '</p>';
-  }finally{
-    btn.disabled = false; btn.textContent = orig;
-  }
-}
+
 
 async function carregarVersoesHistorico(){
   var alvo = document.getElementById('vs-historico');
   alvo.innerHTML = '<p class="pg-vazio">Carregando...</p>';
   try{
     if(!db || !orgAtiva){ alvo.innerHTML = '<p class="pg-vazio">Entre na conta pra ver as versões.</p>'; return; }
-    var uid = versoesEstado.pessoa;
-    if(!uid){ alvo.innerHTML = '<p class="pg-vazio">Escolha uma pessoa.</p>'; return; }
-    var r = await db.from(versoesEstado.tabela)
-      .select('id,versao_label,vigente_a_partir,criado_em')
-      .eq('organization_id', orgAtiva.id).eq('user_id', uid)
-      .order('vigente_a_partir', { ascending:false }).limit(20);
-    var linhas = (r && r.data) || [];
-    if(!linhas.length){ alvo.innerHTML = '<p class="pg-vazio">Nenhuma versão cadastrada ainda.</p>'; return; }
-    // A data "vigente a partir de" pode ser corrigida direto aqui, sem
-    // precisar recadastrar a versão inteira - o Carlos pediu isso porque
-    // às vezes só erra a data na hora de cadastrar.
-    alvo.innerHTML = linhas.map(function(l){
-      return '<div class="pg-linha vs-linha-editavel">'
-        + '<input type="date" class="vs-vigente-edit" data-id="'+l.id+'" value="'+l.vigente_a_partir+'">'
-        + '<span class="pg-vals">'+(l.versao_label || '-')+'</span>'
-        + '<button type="button" class="btn-pill secundario vs-salvar-vigente" data-id="'+l.id+'">Salvar data</button>'
+    var uid = (sessaoAtual && sessaoAtual.user && sessaoAtual.user.id) || versoesEstado.pessoa;
+    if(!uid){ alvo.innerHTML = '<p class="pg-vazio">Entre na conta pra ver os planos.</p>'; return; }
+    // Mostra os quatro tipos juntos, sem precisar ficar trocando de aba -
+    // cada linha diz o que é, deixa corrigir a data de início e apagar.
+    var todos = [];
+    for(var k=0; k<VS_TABELAS.length; k++){
+      var tb = VS_TABELAS[k].chave;
+      var r = await db.from(tb)
+        .select('id,versao_label,vigente_a_partir,criado_em')
+        .eq('organization_id', orgAtiva.id).eq('user_id', uid)
+        .order('vigente_a_partir', { ascending:false }).limit(20);
+      ((r && r.data) || []).forEach(function(l){ l.__tabela = tb; todos.push(l); });
+    }
+    if(!todos.length){ alvo.innerHTML = '<p class="pg-vazio">Nenhum plano enviado ainda.</p>'; return; }
+    todos.sort(function(a,b){ return String(b.criado_em||'') < String(a.criado_em||'') ? -1 : 1; });
+    alvo.innerHTML = todos.map(function(l){
+      return '<div class="vs-linha-editavel">'
+        + '<span class="vs-tipo">'+rotuloDaTabela(l.__tabela)+'</span>'
+        + '<input type="date" class="vs-vigente-edit" data-id="'+l.id+'" data-tabela="'+l.__tabela+'" value="'+String(l.vigente_a_partir).slice(0,10)+'">'
+        + '<button type="button" class="vs-btn-mini vs-salvar-vigente" data-id="'+l.id+'" data-tabela="'+l.__tabela+'">Salvar</button>'
+        + '<button type="button" class="vs-btn-mini perigo vs-apagar" data-id="'+l.id+'" data-tabela="'+l.__tabela+'">Apagar</button>'
         + '</div>';
     }).join('');
     Array.prototype.forEach.call(alvo.querySelectorAll('.vs-salvar-vigente'), function(btn){
       btn.onclick = function(){ salvarVigenciaEditada(btn); };
     });
+    Array.prototype.forEach.call(alvo.querySelectorAll('.vs-apagar'), function(btn){
+      btn.onclick = function(){
+        // dois toques de propósito: apagar plano não tem volta
+        if(btn.getAttribute('data-confirmar') !== '1'){
+          btn.setAttribute('data-confirmar','1');
+          btn.textContent = 'Confirmar';
+          setTimeout(function(){
+            if(btn.getAttribute('data-confirmar')==='1'){ btn.removeAttribute('data-confirmar'); btn.textContent = 'Apagar'; }
+          }, 4000);
+          return;
+        }
+        apagarVersaoPlano(btn);
+      };
+    });
   }catch(e){
     alvo.innerHTML = '<p class="pg-vazio">Não deu pra carregar as versões agora.</p>';
+  }
+}
+
+/* Apagar um plano enviado por engano (o envio automático pode gerar linha
+   vazia se o PDF vier num formato que o leitor não entende). Sem volta, por
+   isso o botão pede confirmação antes de chegar aqui. */
+async function apagarVersaoPlano(btn){
+  limparErroAuth('vs-erro');
+  var id = btn.getAttribute('data-id');
+  var tabela = btn.getAttribute('data-tabela');
+  btn.disabled = true; btn.textContent = 'Apagando...';
+  try{
+    await db.from(tabela).delete().eq('id', id);
+    carregarVersoesHistorico();
+    if(tabela === 'planos_treino' && typeof renderTreino === 'function' && !document.getElementById('vista-treino').hidden) renderTreino();
+    if(tabela === 'planos_dieta' && typeof carregarPlanoAtivo === 'function' && !document.getElementById('vista-plano').hidden) carregarPlanoAtivo().then(render);
+  }catch(e){
+    mostrarErroAuth('vs-erro', 'Não deu pra apagar agora.');
+    btn.disabled = false; btn.textContent = 'Apagar';
   }
 }
 
@@ -2269,16 +2348,17 @@ async function salvarVigenciaEditada(btn){
   var input = document.querySelector('.vs-vigente-edit[data-id="'+id+'"]');
   var novaData = input.value;
   if(!novaData){ mostrarErroAuth('vs-erro', 'Escolha uma data.'); return; }
+  var tabela = btn.getAttribute('data-tabela') || versoesEstado.tabela;
   var orig = btn.textContent;
   btn.disabled = true; btn.textContent = 'Salvando...';
   try{
-    await db.from(versoesEstado.tabela).update({ vigente_a_partir: novaData }).eq('id', id);
+    await db.from(tabela).update({ vigente_a_partir: novaData }).eq('id', id);
     btn.textContent = 'Salvo!';
     setTimeout(function(){ carregarVersoesHistorico(); }, 700);
-    if(versoesEstado.tabela === 'planos_treino' && typeof renderTreino === 'function' && !document.getElementById('vista-treino').hidden){
+    if(tabela === 'planos_treino' && typeof renderTreino === 'function' && !document.getElementById('vista-treino').hidden){
       renderTreino();
     }
-    if(versoesEstado.tabela === 'planos_dieta' && typeof carregarPlanoAtivo === 'function' && !document.getElementById('vista-plano').hidden){
+    if(tabela === 'planos_dieta' && typeof carregarPlanoAtivo === 'function' && !document.getElementById('vista-plano').hidden){
       carregarPlanoAtivo().then(render);
     }
   }catch(e){
@@ -2287,79 +2367,9 @@ async function salvarVigenciaEditada(btn){
   }
 }
 
-async function usarVersaoAtualComoBase(){
-  limparErroAuth('vs-erro');
-  var btn = document.getElementById('vs-usar-atual');
-  var orig = btn.textContent; btn.disabled = true; btn.textContent = 'Buscando...';
-  try{
-    var uid = versoesEstado.pessoa;
-    if(!uid){ mostrarErroAuth('vs-erro', 'Escolha uma pessoa.'); return; }
-    var r = await db.from(versoesEstado.tabela)
-      .select('conteudo,versao_label,vigente_a_partir')
-      .eq('organization_id', orgAtiva.id).eq('user_id', uid)
-      .lte('vigente_a_partir', iso(new Date()))
-      .order('vigente_a_partir', { ascending:false }).limit(1);
-    var linha = r && r.data && r.data[0];
-    if(!linha){ mostrarErroAuth('vs-erro', 'Não tem nenhuma versão vigente ainda pra usar de base - comece do zero.'); return; }
-    document.getElementById('vs-json').value = JSON.stringify(linha.conteudo, null, 2);
-    if(!document.getElementById('vs-label').value) document.getElementById('vs-label').value = linha.versao_label || '';
-  }catch(e){
-    mostrarErroAuth('vs-erro', 'Não deu pra buscar a versão vigente agora.');
-  }finally{
-    btn.disabled = false; btn.textContent = orig;
-  }
-}
 
-async function salvarNovaVersaoPlano(){
-  limparErroAuth('vs-erro');
-  if(!(papelAtual === 'owner' || papelAtual === 'admin')){ mostrarErroAuth('vs-erro', 'Só administrador pode salvar uma versão nova.'); return; }
-  var uid = versoesEstado.pessoa;
-  if(!uid){ mostrarErroAuth('vs-erro', 'Escolha uma pessoa.'); return; }
-  var vigente = document.getElementById('vs-vigente').value;
-  if(!vigente){ mostrarErroAuth('vs-erro', 'Escolha a data de vigência.'); return; }
-  var label = document.getElementById('vs-label').value.trim();
-  var conteudo;
-  try{
-    conteudo = JSON.parse(document.getElementById('vs-json').value);
-  }catch(e){
-    mostrarErroAuth('vs-erro', 'O conteúdo não é um JSON válido: ' + (e.message || e));
-    return;
-  }
-  var btn = document.getElementById('vs-salvar');
-  var orig = btn.textContent; btn.disabled = true; btn.textContent = 'Salvando...';
-  try{
-    await db.from(versoesEstado.tabela).insert({
-      organization_id: orgAtiva.id,
-      user_id: uid,
-      conteudo: conteudo,
-      vigente_a_partir: vigente,
-      versao_label: label || null,
-      criado_por: sessaoAtual.user.id
-    });
-    btn.textContent = 'Salvo!';
-    document.getElementById('vs-json').value = '';
-    document.getElementById('vs-label').value = '';
-    carregarVersoesHistorico();
-    if(versoesEstado.tabela === 'planos_treino' && typeof renderTreino === 'function' && !document.getElementById('vista-treino').hidden){
-      renderTreino();
-    }
-    if(versoesEstado.tabela === 'planos_dieta' && typeof carregarPlanoAtivo === 'function' && !document.getElementById('vista-plano').hidden){
-      carregarPlanoAtivo().then(render);
-    }
-    if((versoesEstado.tabela === 'planos_habitos' || versoesEstado.tabela === 'planos_suplementacao') && typeof atualizarCardHabitos === 'function' && !document.getElementById('vista-diario').hidden){
-      atualizarCardHabitos();
-    }
-    if(versoesEstado.tabela === 'planos_treino' && typeof atualizarCardTreinoHoje === 'function' && !document.getElementById('vista-diario').hidden){
-      atualizarCardTreinoHoje();
-    }
-    setTimeout(function(){ btn.textContent = orig; }, 1500);
-  }catch(e){
-    mostrarErroAuth('vs-erro', 'Não deu pra salvar agora. Confira o JSON e tente de novo.');
-    btn.textContent = orig;
-  }finally{
-    btn.disabled = false;
-  }
-}
+
+
 
 /* =========================================================
    0.4 PONTO DE PARTIDA
