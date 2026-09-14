@@ -6550,10 +6550,10 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
       // celular) e etiqueta solta: o nome fica numa linha só dele e os
       // números vêm alinhados embaixo, em duas colunas de rótulo/valor.
       const campos = [];
-      if(temValorPlano(e[1])) campos.push(['Aquecimento', e[1]]);
-      if(temValorPlano(e[2])) campos.push(['Teste de carga', e[2]]);
-      if(temValorPlano(e[3])) campos.push(['Séries válidas', e[3]]);
-      if(temValorPlano(e[4])) campos.push(['Descanso', e[4]]);
+      if(temValorPlano(e[1])) campos.push(['Aquecimento', comSinalDeVezes(e[1])]);
+      if(temValorPlano(e[2])) campos.push(['Teste de carga', comSinalDeVezes(e[2])]);
+      if(temValorPlano(e[3])) campos.push(['Séries válidas', comSinalDeVezes(e[3])]);
+      if(temValorPlano(e[4])) campos.push(['Descanso', comSinalDeVezes(e[4])]);
       const grade = campos.map(function(par){
         return '<div class="tr-ex-campo"><span class="tr-ex-rot">'+par[0]+'</span>'
           + '<span class="tr-ex-val">'+par[1]+'</span></div>';
@@ -6755,6 +6755,11 @@ function temValorPlano(v){
    ("repetições" sozinho já estoura a célula) e quebrava em duas linhas,
    desalinhando o cartão inteiro. Aqui as palavras longas viram a abreviação
    que todo mundo usa na academia - o sentido é o mesmo. */
+/* "1x10-12" fica ilegível grudado. O × ganha ar dos dois lados e vira o mesmo
+   sinal que a coluna "Anterior" já usa ("40 kg × 10"). */
+function comSinalDeVezes(txt){
+  return String(txt == null ? '' : txt).replace(/(\d)\s*[x×]\s*(\d)/gi, '$1 × $2');
+}
 function valorCurtoSemana(txt){
   return String(txt == null ? '' : txt)
     .replace(/repetiç(ões|ao|ão)/gi, 'reps')
@@ -7034,9 +7039,9 @@ function montarSessaoTreino(){
       // mesmo formato da aba Treino: rótulo e valor alinhados em duas
       // colunas, em vez de pílulas soltas.
       const campos = [];
-      if(temValorPlano(e[2])) campos.push(['Teste de carga', e[2]]);
-      if(temValorPlano(e[3])) campos.push(['Séries válidas', e[3]]);
-      if(temValorPlano(e[4])) campos.push(['Descanso', e[4]]);
+      if(temValorPlano(e[2])) campos.push(['Teste de carga', comSinalDeVezes(e[2])]);
+      if(temValorPlano(e[3])) campos.push(['Séries válidas', comSinalDeVezes(e[3])]);
+      if(temValorPlano(e[4])) campos.push(['Descanso', comSinalDeVezes(e[4])]);
       const meta = campos.length
         ? '<div class="tr-ex-grade tr-ex-grade-sessao">' + campos.map(function(par){
             return '<div class="tr-ex-campo"><span class="tr-ex-rot">'+par[0]+'</span>'
