@@ -1011,9 +1011,23 @@
   .tr-desc-btn{flex:1 1 0;padding:11px;border-radius:var(--rc);border:1px solid var(--hair);
     background:var(--card);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
   .tr-desc-btn.forte{background:var(--ink);color:#fff;border-color:var(--ink)}
-  .tr-descanso-fechar{width:26px;height:26px;border-radius:50%;border:none;background:var(--fill);
-    color:var(--ink2);font-size:12px;line-height:1;cursor:pointer;flex-shrink:0;
+  .tr-desc-topo-btns{display:flex;align-items:center;gap:6px;flex-shrink:0}
+  .tr-descanso-min,.tr-desc-som{width:26px;height:26px;border-radius:50%;border:none;background:var(--fill);
+    color:var(--ink2);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;padding:0}
+  .tr-descanso-min{font-size:17px;font-weight:700;padding-bottom:3px}
+  .ico-sino{width:15px;height:15px;display:block}
+  /* encolhido: pilulazinha só com o tempo, tocar nela abre de novo. O
+     descanso continua correndo - encolher não é cancelar. */
+  .tr-descanso-toast.minimizado{width:auto;border-radius:999px;padding:10px 16px;cursor:pointer;
+    box-shadow:0 8px 24px rgba(0,0,0,.18)}
+  .tr-descanso-toast.minimizado .tr-desc-ex,
+  .tr-descanso-toast.minimizado .tr-desc-trilho,
+  .tr-descanso-toast.minimizado .tr-desc-acoes,
+  .tr-descanso-toast.minimizado .tr-descanso-min{display:none}
+  .tr-descanso-toast.minimizado .tr-desc-topo{gap:10px}
+  .tr-descanso-toast.minimizado .tr-desc-tempo{font-size:20px;margin:0;text-align:left}
+  .tr-descanso-toast.minimizado{display:flex;align-items:center;gap:10px}
   .pg-vazio{font-size:14px;color:var(--ink2);padding:8px 0}
   .tr-hist-linha{background:var(--card);border-radius:var(--rc);padding:10px 12px;margin-top:8px;box-shadow:var(--sh-min)}
   .tr-hist-linha:first-child{margin-top:0}
@@ -1205,7 +1219,16 @@
         <span class="hoje-cartao-num" id="hoje-habitos-num"></span>
       </div>
       <div class="hoje-cartao-barra"><div class="hoje-cartao-barra-fill" id="hoje-habitos-barra"></div></div>
-      <button class="hoje-cartao-cta" id="hoje-ir-habitos">Ver rotina e suplementação</button>
+      <button class="hoje-cartao-cta" id="hoje-ir-habitos">Ver rotina do dia</button>
+    </div>
+
+    <div class="hoje-cartao" id="hoje-suplementacao">
+      <div class="hoje-cartao-head">
+        <span class="hoje-cartao-tit">Suplementação</span>
+        <span class="hoje-cartao-num" id="hoje-sup-num"></span>
+      </div>
+      <div class="hoje-cartao-barra"><div class="hoje-cartao-barra-fill" id="hoje-sup-barra"></div></div>
+      <button class="hoje-cartao-cta" id="hoje-ir-suplementacao">Ver suplementação</button>
     </div>
 
     <section class="resumo">
@@ -4955,7 +4978,8 @@ document.getElementById('hoje-ir-diario').onclick = function(){
   // calendário), não necessariamente hoje.
   abrirRefeicoesDlg(diario.sel || iso(new Date()));
 };
-document.getElementById('hoje-ir-habitos').onclick = function(){ abrirHabitosDlg(); };
+document.getElementById('hoje-ir-habitos').onclick = function(){ abrirHabitosDlg('habitos'); };
+document.getElementById('hoje-ir-suplementacao').onclick = function(){ abrirHabitosDlg('suplementacao'); };
 document.getElementById('hoje-ir-iniciar-treino').onclick = function(){ abrirSessaoTreino(treinoHojeEscolhido); };
 
 // chaves únicas de treino (A/B/C/A2/D...) na ordem da divisão, sem "OFF" -
@@ -5478,36 +5502,51 @@ async function buscarRegistroDia(tabela, uid, dia){
   }catch(e){ return []; }
 }
 
+/* Hábitos e suplementação são dois cartões separados na tela inicial: são
+   coisas diferentes (rotina de sono/água x o que tomar), vêm de PDFs
+   diferentes do nutricionista e cada uma tem o seu próprio progresso do dia.
+   Antes os dois iam somados num contador só, e não dava pra saber qual
+   estava em atraso sem abrir. */
 async function atualizarCardHabitos(diaSel){
-  const num = document.getElementById('hoje-habitos-num');
-  const barra = document.getElementById('hoje-habitos-barra');
-  if(!num || !barra) return;
+  const alvos = [
+    { num:'hoje-habitos-num', barra:'hoje-habitos-barra',
+      plano:'planos_habitos', registro:'habitos_registros' },
+    { num:'hoje-sup-num', barra:'hoje-sup-barra',
+      plano:'planos_suplementacao', registro:'suplementacao_registros' }
+  ];
   const uid = diario.perfil;
-  if(!db || !orgAtiva || !sessaoAtual || !uid){ num.textContent=''; barra.style.width='0%'; return; }
-  try{
-    const hojeIso = diaSel || diario.sel || iso(new Date());
-    const r = await Promise.all([
-      buscarPlanoGenerico('planos_habitos', uid),
-      buscarPlanoGenerico('planos_suplementacao', uid),
-      buscarRegistroDia('habitos_registros', uid, hojeIso),
-      buscarRegistroDia('suplementacao_registros', uid, hojeIso)
-    ]);
-    const total = contarItensPlano(r[0] && r[0].conteudo) + contarItensPlano(r[1] && r[1].conteudo);
-    const feitas = r[2].length + r[3].length;
-    if(!total){ num.textContent = 'toque para configurar'; barra.style.width='0%'; return; }
-    num.textContent = feitas+'/'+total+(hojeIso===iso(new Date()) ? ' hoje' : '');
-    barra.style.width = Math.min(100, Math.round(feitas/total*100))+'%';
-  }catch(e){ num.textContent=''; barra.style.width='0%'; }
+  const hojeIso = diaSel || diario.sel || iso(new Date());
+  await Promise.all(alvos.map(async function(a){
+    const num = document.getElementById(a.num);
+    const barra = document.getElementById(a.barra);
+    if(!num || !barra) return;
+    function zerar(txt){ num.textContent = txt || ''; barra.style.width = '0%'; }
+    if(!db || !orgAtiva || !sessaoAtual || !uid){ zerar(); return; }
+    try{
+      const r = await Promise.all([
+        buscarPlanoGenerico(a.plano, uid),
+        buscarRegistroDia(a.registro, uid, hojeIso)
+      ]);
+      const total = contarItensPlano(r[0] && r[0].conteudo);
+      const feitas = r[1].length;
+      if(!total){ zerar('toque para configurar'); return; }
+      num.textContent = feitas+'/'+total+(hojeIso===iso(new Date()) ? ' hoje' : '');
+      barra.style.width = Math.min(100, Math.round(feitas/total*100))+'%';
+    }catch(e){ zerar(); }
+  }));
 }
 
-async function abrirHabitosDlg(){
-  document.getElementById('dlg-tit').textContent = 'Hábitos e suplementação';
+/* `tipo` diz qual dos dois abrir ('habitos' ou 'suplementacao'). Sem tipo,
+   abre os dois juntos - que é como era antes de virarem cartões separados. */
+async function abrirHabitosDlg(tipo){
+  const titulos = { habitos:'Hábitos', suplementacao:'Suplementação' };
+  document.getElementById('dlg-tit').textContent = titulos[tipo] || 'Hábitos e suplementação';
   const body = document.getElementById('dlg-body');
   body.innerHTML = '<p class="hb-vazio-bloco">Carregando...</p>';
   abrirDlg();
   const uid = diario.perfil;
   if(!db || !orgAtiva || !sessaoAtual || !uid){
-    body.innerHTML = '<p class="hb-vazio-bloco">Entre na conta pra ver hábitos e suplementação.</p>';
+    body.innerHTML = '<p class="hb-vazio-bloco">Entre na conta pra ver '+((titulos[tipo]||'hábitos e suplementação').toLowerCase())+'.</p>';
     return;
   }
   const hojeIso = iso(new Date());
@@ -5547,7 +5586,9 @@ async function abrirHabitosDlg(){
       + (sub.trim() ? '<p class="hb-bloco-sub">'+sub+'</p>' : '')
       + secoesHtml + '</div>';
   }
-  body.innerHTML = blocoHtml('habitos','Rotina', planoHab) + blocoHtml('suplementacao','Suplementação', planoSup);
+  body.innerHTML =
+      (tipo === 'suplementacao' ? '' : blocoHtml('habitos','Rotina', planoHab))
+    + (tipo === 'habitos' ? '' : blocoHtml('suplementacao','Suplementação', planoSup));
   Array.prototype.forEach.call(body.querySelectorAll('.hb-item input[type=checkbox]'), function(cb){
     cb.onchange = async function(){
       const tipo = cb.getAttribute('data-tipo'), id = cb.getAttribute('data-id');
@@ -6543,10 +6584,96 @@ function parseDescansoSegundos(txt){
   const n = parseInt(m[1],10);
   return /min/i.test(s) ? n*60 : n;
 }
+/* ---- som do descanso que sobrevive ao app em segundo plano ----
+   No iPhone, sair do app suspende o JavaScript: o setInterval do contador
+   para e qualquer "toque um som daqui a 90s" nunca acontece. Notificação
+   local também não existe na web, e push precisaria de servidor mandando na
+   hora exata.
+   O jeito que funciona é não depender de tempo nenhum: a gente monta um
+   áudio que JÁ CONTÉM o silêncio inteiro do descanso e os bipes no final, e
+   manda tocar no instante em que a série é marcada (que é um toque do
+   usuário, então o iOS deixa tocar). O áudio continua rodando em segundo
+   plano, e o bipe sai na hora certa mesmo com o app congelado atrás do
+   Instagram. */
+function montarWavDescanso(segundos){
+  const TAXA = 8000;                       // suficiente pra um bipe
+  const total = Math.max(1, Math.round(segundos * TAXA));
+  const dados = new Int16Array(total);
+  const DUR_BIPE = 0.12, ESPACO = 0.28, FREQ = 880;
+  for(let b = 0; b < 3; b++){              // três bipes no último 1,2 s
+    const ini = total - Math.round((1.2 - b*ESPACO) * TAXA);
+    const fim = ini + Math.round(DUR_BIPE * TAXA);
+    for(let i = Math.max(0, ini); i < Math.min(total, fim); i++){
+      const t = (i - ini) / TAXA;
+      // rampa nas pontas pra não estalar
+      const env = Math.min(1, (fim - i)/(0.02*TAXA), (i - ini)/(0.005*TAXA));
+      dados[i] = Math.round(Math.sin(2*Math.PI*FREQ*t) * 12000 * Math.max(0, env));
+    }
+  }
+  const buf = new ArrayBuffer(44 + dados.length*2);
+  const dv = new DataView(buf);
+  function txt(pos, str){ for(let i=0;i<str.length;i++) dv.setUint8(pos+i, str.charCodeAt(i)); }
+  txt(0,'RIFF'); dv.setUint32(4, 36 + dados.length*2, true); txt(8,'WAVEfmt ');
+  dv.setUint32(16,16,true); dv.setUint16(20,1,true); dv.setUint16(22,1,true);
+  dv.setUint32(24,TAXA,true); dv.setUint32(28,TAXA*2,true);
+  dv.setUint16(32,2,true); dv.setUint16(34,16,true);
+  txt(36,'data'); dv.setUint32(40, dados.length*2, true);
+  for(let i=0;i<dados.length;i++) dv.setInt16(44 + i*2, dados[i], true);
+  return new Blob([buf], {type:'audio/wav'});
+}
+/* Ícones em SVG, no mesmo traço do resto do app (24x24, stroke 1.8) - nada
+   de emoji, que muda de desenho a cada sistema e não acompanha a cor. */
+const ICO_SINO = '<svg viewBox="0 0 24 24" aria-hidden="true" class="ico-sino">'
+  + '<path d="M18 16.2V11a6 6 0 1 0-12 0v5.2L4.6 18h14.8L18 16.2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>'
+  + '<path d="M10 20.4a2.2 2.2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'
+  + '<path d="M12 5V3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const ICO_SINO_MUDO = '<svg viewBox="0 0 24 24" aria-hidden="true" class="ico-sino">'
+  + '<path d="M18 16.2V11a6 6 0 1 0-12 0v5.2L4.6 18h14.8L18 16.2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>'
+  + '<path d="M10 20.4a2.2 2.2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'
+  + '<path d="M4.4 3.6l15.2 16.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+let descansoAudio = null, descansoAudioUrl = null, descansoWakeLock = null;
+let descansoSomLigado = true;
+try{
+  window.storage.get('descansoSom').then(function(r){
+    const v = r && (r.value !== undefined ? r.value : r);
+    if(v === '0') descansoSomLigado = false;
+  });
+}catch(e){}
+function pararSomDescanso(){
+  if(descansoAudio){ try{ descansoAudio.pause(); }catch(e){} descansoAudio = null; }
+  if(descansoAudioUrl){ try{ URL.revokeObjectURL(descansoAudioUrl); }catch(e){} descansoAudioUrl = null; }
+}
+function tocarSomDescanso(segundos){
+  pararSomDescanso();
+  if(!descansoSomLigado || !(segundos > 0)) return;
+  try{
+    descansoAudioUrl = URL.createObjectURL(montarWavDescanso(segundos));
+    descansoAudio = new Audio(descansoAudioUrl);
+    descansoAudio.preload = 'auto';
+    const pr = descansoAudio.play();
+    if(pr && pr.catch) pr.catch(function(){ /* navegador barrou: fica só o visual */ });
+  }catch(e){ pararSomDescanso(); }
+}
+/* segura a tela acesa durante o descanso - com o app aberto, é o que evita
+   perder o contador de vista. Não existe no iOS antigo, daí o try. */
+async function segurarTela(){
+  try{
+    if(navigator.wakeLock && !descansoWakeLock){
+      descansoWakeLock = await navigator.wakeLock.request('screen');
+    }
+  }catch(e){}
+}
+function soltarTela(){
+  try{ if(descansoWakeLock){ descansoWakeLock.release(); } }catch(e){}
+  descansoWakeLock = null;
+}
+
 let sessaoTreinoDescansoTimer = null;
 function fecharDescanso(){
   if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
   sessaoTreinoDescansoTimer = null;
+  pararSomDescanso();
+  soltarTela();
   const el = document.getElementById('tr-descanso-toast');
   if(el) el.remove();
 }
@@ -6564,7 +6691,10 @@ function iniciarDescanso(txt, nomeExercicio){
   el.innerHTML =
       '<div class="tr-desc-topo">'
     +   '<span class="tr-desc-rot">Descanso</span>'
-    +   '<button type="button" class="tr-descanso-fechar" aria-label="Fechar">✕</button>'
+    +   '<span class="tr-desc-topo-btns">'
+    +     '<button type="button" class="tr-desc-som" aria-label="Som do descanso"></button>'
+    +     '<button type="button" class="tr-descanso-min" aria-label="Encolher">–</button>'
+    +   '</span>'
     + '</div>'
     + (nomeExercicio ? '<div class="tr-desc-ex"></div>' : '')
     + '<div class="tr-desc-tempo"></div>'
@@ -6593,6 +6723,7 @@ function iniciarDescanso(txt, nomeExercicio){
       if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
       sessaoTreinoDescansoTimer = null;
       try{ if(navigator.vibrate) navigator.vibrate([120,70,120]); }catch(e){}
+      soltarTela();
       setTimeout(function(){
         // some sozinho, mas só se não tiver começado outro descanso no meio
         if(document.getElementById('tr-descanso-toast') === el) el.remove();
@@ -6603,12 +6734,44 @@ function iniciarDescanso(txt, nomeExercicio){
   }
   pintar();
   sessaoTreinoDescansoTimer = setInterval(tick, 1000);
-  el.querySelector('.tr-descanso-fechar').onclick = fecharDescanso;
+  tocarSomDescanso(total);
+  segurarTela();
+
+  const btSom = el.querySelector('.tr-desc-som');
+  function pintarSom(){
+    btSom.innerHTML = descansoSomLigado ? ICO_SINO : ICO_SINO_MUDO;
+    btSom.setAttribute('aria-pressed', descansoSomLigado ? 'true' : 'false');
+    btSom.title = descansoSomLigado
+      ? 'Som ligado - o bipe toca mesmo com o app fechado'
+      : 'Som desligado';
+  }
+  pintarSom();
+  btSom.onclick = function(){
+    descansoSomLigado = !descansoSomLigado;
+    try{ window.storage.set('descansoSom', descansoSomLigado ? '1' : '0'); }catch(e){}
+    if(descansoSomLigado) tocarSomDescanso(Math.max(0, restante));
+    else pararSomDescanso();
+    pintarSom();
+  };
+  // Encolher, não fechar: fechado de vez não teria como voltar, e o descanso
+   // continua correndo. Encolhido vira uma pilulazinha com o tempo, e tocar
+   // nela abre de novo. Quem quer acabar com o descanso usa "Pular".
+  el.querySelector('.tr-descanso-min').onclick = function(ev){
+    ev.stopPropagation();
+    el.classList.add('minimizado');
+  };
+  el.onclick = function(ev){
+    if(!el.classList.contains('minimizado')) return;
+    if(ev.target.closest('.tr-desc-btn, .tr-desc-som')) return;
+    el.classList.remove('minimizado');
+  };
   Array.prototype.forEach.call(el.querySelectorAll('.tr-desc-btn'), function(b){
     b.onclick = function(){
       if(b.getAttribute('data-acao') === 'pular'){ fecharDescanso(); return; }
       restante += 30; maior = Math.max(maior, restante); pintar();
       el.classList.remove('fim');
+      // o áudio antigo tem o bipe na hora velha - refaz com o tempo novo
+      tocarSomDescanso(restante);
       if(!sessaoTreinoDescansoTimer) sessaoTreinoDescansoTimer = setInterval(tick, 1000);
     };
   });
