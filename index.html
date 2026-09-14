@@ -415,7 +415,13 @@
   /* "comi algo a mais" usa a mesma linha dos alimentos do plano, dentro de um
      invólucro que permite arrastar pra esquerda e revelar o Excluir - igual
      às séries do treino. */
-  .item-dia-wrap{position:relative;overflow:hidden}
+  .item-dia-wrap{position:relative;overflow:hidden;border-radius:var(--rc)}
+  /* o "Excluir" da linha de alimento a mais: a linha aqui é alta (nome em
+     cima, calorias embaixo), então o vermelho tomando ela inteira virava um
+     bloco enorme e quadrado. Fica um bloco menor, arredondado e com folga em
+     cima e embaixo - o mesmo peso que ele tem nas séries do treino, onde a
+     linha é baixinha e ele já sai pequeno por natureza. */
+  .item-dia-wrap .tr-serie-excluir{top:5px;bottom:5px;right:0;width:72px;border-radius:var(--rc);font-size:13px}
   /* a linha precisa de fundo opaco pra esconder o "Excluir" que fica atrás
      dela, mas tem que ser o MESMO fundo da lista - senão vira um cartãozinho
      branco no meio dos outros itens. */
@@ -440,8 +446,11 @@
      tudo/metade/nada/troquei */
   /* nunca quebra: se em algum caso extremo faltar espaço, o texto some com
      reticências em vez de pular pra outra linha */
+  /* colada no nome: essa linha é a continuação do alimento, não um bloco
+     separado. O gap de 10px da .item-dia (que serve pros botões de
+     tudo/metade/nada) deixava ela caída lá embaixo. */
   .item-macros{flex:1 1 100%;min-width:0;font-size:12.5px;color:var(--ink2);line-height:1.35;
-    font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    margin-top:-7px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .troca-box .campo{flex:1 1 100%;min-width:0}
   .troca-box .campo.pq{flex:0 0 96px}
   .troca-box .campo.md{flex:1 1 120px}
@@ -471,6 +480,11 @@
   .extra-x{flex:0 0 auto;width:26px;height:26px;border-radius:10px;border:0;background:var(--fill);
     color:var(--ink2);font-size:15px;line-height:1;cursor:pointer}
   .extra-ok{flex:1 1 100%;margin-top:4px}
+  /* o editor da troca mora dentro da linha do alimento, então precisa ocupar
+     a largura toda dela (a .item-dia é flex com quebra) */
+  .item-dia > .extra-linha{flex:1 1 100%;min-width:0}
+  /* linha que virou troca: nome e quantidade são do que ele comeu no lugar */
+  .item-dia.trocado{cursor:pointer}
   .extra-linha .tag{font-size:11px;font-weight:600;color:var(--azul);background:var(--car-soft);
     border-radius:10px;padding:3px 9px}
   .rm{background:none;border:0;color:var(--nao);font-size:13px;cursor:pointer;padding:6px 8px;font-weight:500}
@@ -1003,7 +1017,10 @@
      app de treino "de verdade", inspirado no Strong) - ver
      abrirSessaoTreino/montarSessaoTreino/ligarSwipeSerie/abrirMenuExercicio. */
   .tr-serie-bloco{margin-top:18px;padding-top:14px}
-  .tr-serie-bloco:first-of-type{margin-top:14px}
+  /* o primeiro exercício fica à mesma distância do cartão da semana que um
+     exercício fica do "+ Adicionar série" do anterior: 18+14 entre blocos,
+     e aqui 14 (margem do cartão) + 4 + 14 dá a mesma folga de 32px. */
+  .tr-serie-bloco:first-of-type{margin-top:4px}
   .tr-serie-cab{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
   /* quando tem legenda de tipo embaixo, o nome não precisa do respiro todo */
   .tr-serie-cab:has(+ .tr-ex-tipo){margin-bottom:4px}
@@ -1024,34 +1041,40 @@
   .tr-meta-tag{font-size:10.5px;font-weight:500;padding:4px 9px;border-radius:10px;background:var(--fill);color:var(--ink2);white-space:nowrap}
   .tr-meta-tag b{font-weight:700;color:var(--ink3);margin-right:4px;text-transform:uppercase;font-size:9.5px;letter-spacing:.02em}
 
-  .tr-serie-linhas{display:flex;flex-direction:column;gap:6px}
-  .tr-serie-header-row{display:grid;grid-template-columns:32px 1fr 52px 52px 32px;gap:6px;padding:0 2px 2px;
+  .tr-serie-linhas{display:flex;flex-direction:column;gap:5px}
+  .tr-serie-header-row{display:grid;grid-template-columns:38px 1fr 52px 52px 32px;gap:6px;padding:0 2px 2px;
     font-size:11.5px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.02em}
   .tr-serie-header-row span{text-align:center}
 
   .tr-serie-linha-wrap{position:relative;border-radius:10px;overflow:hidden}
   .tr-serie-excluir{position:absolute;top:0;right:0;bottom:0;width:76px;border:none;background:#FF3B30;color:#fff;
     font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0}
-  .tr-serie-linha,.tr-aquecimento-linha{position:relative;display:grid;grid-template-columns:32px 1fr 52px 52px 32px;
-    gap:6px;align-items:center;padding:3px 2px;background:var(--card);touch-action:pan-y}
+  /* o raio aqui não é enfeite: o invólucro do gesto é arredondado e recorta o
+     que está dentro dele, então uma linha de canto vivo deixava aparecer duas
+     pontinhas vermelhas do botão Excluir que fica atrás. */
+  .tr-serie-linha,.tr-aquecimento-linha{position:relative;display:grid;grid-template-columns:38px 1fr 52px 52px 32px;
+    gap:6px;align-items:center;padding:2px;background:var(--card);border-radius:10px;touch-action:pan-y}
   .tr-serie-linha.feita{background:var(--fill2);border-radius:10px}
-  .tr-serie-num{justify-self:center;min-width:26px;height:24px;padding:0 4px;border-radius:10px;background:var(--fill);
-    color:var(--ink2);font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .tr-serie-num{justify-self:center;min-width:34px;height:30px;padding:0 4px;border-radius:10px;background:var(--fill);
+    color:var(--ink);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
   .tr-aquecimento-linha .tr-serie-num{background:transparent;color:var(--ink3);font-size:9px;letter-spacing:.02em}
   .tr-serie-anterior{font-size:13px;color:var(--ink3);white-space:nowrap;overflow:hidden;
     text-overflow:ellipsis;text-align:center}
-  .tr-serie-kg,.tr-serie-reps{width:100%;padding:7px 3px;border-radius:10px;border:none;background:var(--fill);
+  .tr-serie-kg,.tr-serie-reps{width:100%;height:30px;padding:0 3px;border-radius:10px;border:none;background:var(--fill);
     font-size:15px;text-align:center;color:var(--ink)}
   .tr-serie-kg:focus,.tr-serie-reps:focus{outline:2px solid var(--azul);outline-offset:1px}
   /* quadradinho, não bolinha - e com o mesmo arredondamento que o resto do
      app usa nos botões de marcar (os de seguiu/adaptou/não fiz do diário),
      pra não ter um raio só dele. Marcado fica verde, igual "seguiu". */
-  .tr-serie-check{justify-self:center;width:28px;height:28px;border-radius:var(--rc);border:none;background:var(--fill);
+  .tr-serie-check{justify-self:center;width:32px;height:30px;border-radius:var(--rc);border:none;background:var(--fill);
     color:var(--ink3);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;padding:0}
   .tr-serie-check[aria-pressed="true"]{background:var(--ok);color:#fff;box-shadow:var(--sh-min)}
-  .tr-serie-add{margin-top:6px;width:100%;padding:9px;border-radius:10px;border:1px dashed var(--hair);
-    background:none;color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer}
+  /* barra cinza cheia, do mesmo cinza dos campos e do número da série - o
+     contorno tracejado era o único elemento "vazado" no meio da lista. */
+  .tr-serie-add{margin-top:10px;width:100%;padding:11px;border-radius:10px;border:0;
+    background:var(--fill);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+  .tr-serie-add:active{opacity:.8}
   /* ativação (ex.: Wall Slide) - sem kg/reps/anterior, só um checklist de
      séries com a meta de repetições fixa do plano. */
   /* lista de exercícios da aba Treino: cada um num bloco, nome ocupando a
@@ -1078,7 +1101,7 @@
   @media(max-width:359px){ .tr-ex-grade{grid-template-columns:1fr} }
   /* mesma grade dentro da sessão de treino, só com o respiro daquele bloco */
   .tr-ex-grade-sessao{margin:-2px 0 10px}
-  .tr-linha-ativacao{grid-template-columns:32px 1fr 32px}
+  .tr-linha-ativacao{grid-template-columns:38px 1fr 32px}
   .tr-serie-ativacao-label{font-size:14px;color:var(--ink2)}
   .tr-semana-cartao-sessao{margin:0 0 14px;box-shadow:var(--sh-min)}
   /* pré-série de aquecimento (ex.: "2x15" antes da carga que vale): entra
@@ -1087,9 +1110,9 @@
      feio e solto no meio do cartão. Continua fora de .tr-serie-linha de
      propósito: não conta na numeração das séries que valem, não vira
      "Anterior" da próxima vez e não é salva no registro. */
-  .tr-preserie-linha{position:relative;display:grid;grid-template-columns:32px 1fr 52px 52px 32px;
-    gap:6px;align-items:center;padding:3px 2px;background:var(--card)}
-  .tr-preserie-num{justify-self:center;min-width:26px;height:24px;padding:0 4px;border-radius:10px;
+  .tr-preserie-linha{position:relative;display:grid;grid-template-columns:38px 1fr 52px 52px 32px;
+    gap:6px;align-items:center;padding:2px;background:var(--card)}
+  .tr-preserie-num{justify-self:center;min-width:34px;height:30px;padding:0 4px;border-radius:10px;
     background:none;border:1px dashed var(--hair);color:var(--ink3);font-size:10.5px;font-weight:700;
     letter-spacing:.02em;display:flex;align-items:center;justify-content:center}
   .tr-preserie-lab{font-size:13px;color:var(--ink3);text-align:center}
@@ -4646,6 +4669,10 @@ function trocaDoItem(reg, mealId, idx){
 // qual extra está aberto pra edição (mealId:índice). Fica fora do `diario`
 // de propósito: é estado de tela, não vai pro armazenamento.
 let extraAbertoChave = null;
+// mesma ideia pra troca de um item do plano: enquanto está aberta aparece o
+// editor; depois do OK a própria linha passa a mostrar o que foi comido no
+// lugar, e o nome do plano sai de cena (quem quiser mexer toca na linha).
+let trocaAbertaChave = null;
 function extrasDa(reg, mealId){
   return (reg.extras && reg.extras[mealId]) || [];
 }
@@ -5062,8 +5089,12 @@ function renderDiaBox(){
             if(fr[0]==='troca'){
               const atual = trocaDoItem(reg, meal.id, iIdx);
               setItem(reg, meal.id, iIdx, atual || {n:'', q:'', u:'g'});
+              // tocar em "Troquei" sempre abre o editor - inclusive pra
+              // corrigir uma troca que já estava pronta.
+              trocaAbertaChave = meal.id+':'+iIdx;
             } else {
               setItem(reg, meal.id, iIdx, fr[0]);
+              if(trocaAbertaChave === meal.id+':'+iIdx) trocaAbertaChave = null;
             }
             salvarDiario(); renderDiario();
           };
@@ -5072,13 +5103,40 @@ function renderDiaBox(){
         li.appendChild(nm); li.appendChild(qt); li.appendChild(g);
         if(est==='troca'){
           const t = trocaDoItem(reg, meal.id, iIdx);
-          li.appendChild(editorTroca(t, item, function(soSalvar){
-            // reavalia se a refeição fica "seguiu" ou "adaptou" toda vez que
-            // a troca muda (inclusive ao marcar/desmarcar "liberada pelo plano")
-            setItem(reg, meal.id, iIdx, t);
-            salvarDiario();
-            if(soSalvar) atualizaBalanco(); else renderDiario();
-          }, null));
+          const chaveT = meal.id+':'+iIdx;
+          const pronta = !!macrosDaTroca(t);
+          if(pronta && trocaAbertaChave !== chaveT){
+            // trocado e fechado: a linha vira o alimento que ele comeu de
+            // verdade. Repetir o nome do plano em cima e a troca embaixo não
+            // ajudava - o "Troquei" aceso já diz que aquilo saiu do prato.
+            nm.textContent = nomeDaTroca(t);
+            qt.textContent = quantidadeDaTroca(t);
+            nm.title = 'No lugar de ' + pc.nome + (pc.valor!==null ? ' ('+fmt(pc.valor)+')' : '');
+            li.classList.add('trocado');
+            li.onclick = function(ev){
+              if(ev.target.closest('button')) return;
+              trocaAbertaChave = chaveT; renderDiario();
+            };
+          } else {
+            const linhaEd = document.createElement('div'); linhaEd.className='extra-linha';
+            const ok = document.createElement('button');
+            ok.type='button'; ok.className='btn-pill primario extra-ok';
+            ok.textContent = 'OK';
+            ok.disabled = !pronta;
+            ok.onclick = function(){ trocaAbertaChave = null; salvarDiario(); renderDiario(); };
+            linhaEd.appendChild(editorTroca(t, item, function(soSalvar){
+              // reavalia se a refeição fica "seguiu" ou "adaptou" toda vez que
+              // a troca muda (inclusive ao marcar/desmarcar "liberada pelo plano")
+              setItem(reg, meal.id, iIdx, t);
+              salvarDiario();
+              // digitar a quantidade não re-renderiza (senão o campo perde o
+              // foco), então o OK é religado na mão.
+              if(soSalvar){ atualizaBalanco(); ok.disabled = !macrosDaTroca(t); }
+              else renderDiario();
+            }, null));
+            linhaEd.appendChild(ok);
+            li.appendChild(linhaEd);
+          }
         }
         cx.appendChild(li);
       });
