@@ -413,9 +413,11 @@
   /* "comi algo a mais" usa a mesma linha dos alimentos do plano, dentro de um
      invólucro que permite arrastar pra esquerda e revelar o Excluir - igual
      às séries do treino. */
-  .item-dia-wrap{position:relative;border-radius:10px;overflow:hidden}
-  .item-dia-wrap .item-dia{background:var(--card);position:relative;z-index:1;
-    padding-left:2px;padding-right:2px;touch-action:pan-y}
+  .item-dia-wrap{position:relative;overflow:hidden}
+  /* a linha precisa de fundo opaco pra esconder o "Excluir" que fica atrás
+     dela, mas tem que ser o MESMO fundo da lista - senão vira um cartãozinho
+     branco no meio dos outros itens. */
+  .item-dia-wrap .item-dia{background:var(--fill2);position:relative;z-index:1;touch-action:pan-y}
   .item-dia{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0;border-top:.5px solid var(--hair)}
   .item-dia.sem-linha{border-top:0}
   .item-dia .idn{flex:1;min-width:96px;font-size:15px;letter-spacing:-.01em}
@@ -430,6 +432,12 @@
 
   .troca-box{flex:1 1 100%;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;
     background:var(--card);border-radius:var(--rc);padding:10px;margin-top:4px;box-shadow:var(--sh-min)}
+  /* modo "adicionar à refeição": sem cartão por cima do cartão */
+  .troca-box.nu{background:none;box-shadow:none;padding:0;margin-top:6px}
+  /* macros do alimento extra, na faixa onde os outros itens têm o
+     tudo/metade/nada/troquei */
+  .item-macros{flex:1 1 100%;font-size:12px;color:var(--ink2);line-height:1.35;
+    font-variant-numeric:tabular-nums}
   .troca-box .campo{flex:1 1 100%;min-width:0}
   .troca-box .campo.pq{flex:0 0 96px}
   .troca-box .campo.md{flex:1 1 120px}
@@ -445,7 +453,7 @@
   .troca-box .kcal b{color:var(--ink)}
   .add-extra{margin-top:10px;font-size:14px;font-weight:500;color:var(--azul);background:none;
     border:0;padding:6px 0;cursor:pointer}
-  .extra-linha{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 0;border-top:.5px solid var(--hair)}
+  .extra-linha{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 0 0}
   /* extra já preenchido: vira uma linha só, igual às outras refeições */
   .extra-resumo{flex:1 1 auto;min-width:0;display:flex;align-items:baseline;gap:8px;text-align:left;
     background:none;border:0;padding:0;cursor:pointer;font-family:inherit}
@@ -707,9 +715,12 @@
   .cal-palco{overflow:hidden;touch-action:pan-y}
   /* treino do dia na mesma linha do título "Treino", do lado direito -
      clicar abre o modal de troca (trocarTreinoDlg). */
-  .hoje-treino-chave{flex-shrink:0;border:none;cursor:pointer;font-family:inherit;
-    background:var(--azul-soft);color:var(--azul);font-size:13px;font-weight:700;
-    padding:5px 12px;border-radius:10px;display:flex;align-items:center;gap:5px}
+  /* contorno em vez de fundo: vermelho sobre rosa deixava a etiqueta pesada
+     demais pro tamanho dela, competindo com o título do cartão. */
+  .hoje-treino-chave{flex-shrink:0;cursor:pointer;font-family:inherit;
+    background:var(--card);color:var(--azul);border:1px solid var(--azul);
+    font-size:13px;font-weight:700;
+    padding:4px 11px;border-radius:10px;display:flex;align-items:center;gap:5px}
   .hoje-treino-chave::after{content:'›';font-size:15px;line-height:1;opacity:.75}
   /* display:flex na classe passa por cima do [hidden] do navegador */
   .hoje-treino-chave[hidden]{display:none}
@@ -4155,6 +4166,18 @@ function macrosDaTroca(t){
   if(!q) return null;
   return macrosDe(t.n, q+' '+(t.u||'g'));
 }
+/* nome e quantidade separados, pra linha ficar igual à dos alimentos do
+   plano (nome à esquerda, quantidade à direita) */
+function nomeDaTroca(t){
+  if(!t) return '';
+  return t.n === OUTRO ? (t.livre || 'Fora do plano') : t.n;
+}
+function quantidadeDaTroca(t){
+  if(!t) return '';
+  if(t.n === OUTRO) return t.kcal ? (t.kcal + ' kcal') : '';
+  if(t.q === '' || t.q === undefined || t.q === null) return '';
+  return t.q + ' ' + ((t.u || 'g') === 'un' ? 'un' : 'g');
+}
 function rotuloTroca(t){
   if(!t) return '';
   if(t.n===OUTRO) return (t.livre||'algo fora do plano')+(t.kcal?' ('+t.kcal+' kcal)':'');
@@ -4371,12 +4394,21 @@ function renderCalendario(){
 
 /* Editor de uma troca: escolher o alimento, a quantidade e ver as calorias.
    Serve tanto para trocar um item do plano quanto para somar um extra. */
-function editorTroca(t, itemDoPlano, aoMudar, aoRemover){
-  const box = document.createElement('div'); box.className='troca-box';
+/* `modoExtra` é o "+ adicionar à refeição": mesmo editor, mas sem cartão
+   branco por cima do que já está na tela, sem rótulo no seletor (o botão que
+   abriu já diz o que é) e sem a dica de "escolha para calcular" - ali o
+   silêncio já diz que falta escolher. */
+function editorTroca(t, itemDoPlano, aoMudar, aoRemover, modoExtra){
+  const box = document.createElement('div');
+  box.className = 'troca-box' + (modoExtra ? ' nu' : '');
 
   const cAli = document.createElement('div'); cAli.className='campo';
-  const lAli = document.createElement('label'); lAli.textContent='O que você comeu no lugar';
   const sel = document.createElement('select');
+  let lAli = null;
+  if(!modoExtra){
+    lAli = document.createElement('label');
+    lAli.textContent = 'O que você comeu no lugar';
+  }
 
   function opt(valor, texto, grupoEl){
     const o = document.createElement('option');
@@ -4414,7 +4446,8 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover){
     t.ok = trocaLiberadaNoPlano(itemDoPlano, t);
     aoMudar();
   };
-  cAli.appendChild(lAli); cAli.appendChild(sel);
+  if(lAli) cAli.appendChild(lAli);
+  cAli.appendChild(sel);
   box.appendChild(cAli);
 
   if(t.n===OUTRO){
@@ -4434,7 +4467,7 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover){
   } else if(t.n){
     const m = MACRO[norm(t.n)];
     const cQ = document.createElement('div'); cQ.className='campo pq';
-    const lQ = document.createElement('label'); lQ.textContent='Quanto';
+    const lQ = document.createElement('label'); lQ.textContent='Quantidade';
     const iQ = document.createElement('input');
     iQ.type='number'; iQ.inputMode='decimal'; iQ.min='0'; iQ.value = (t.q===undefined?'':t.q);
     iQ.oninput = function(){ t.q = iQ.value; aoMudar(true); };
@@ -4464,12 +4497,16 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover){
     box.appendChild(aviso);
   }
 
-  const info = document.createElement('div'); info.className='kcal';
   const mt = macrosDaTroca(t);
-  if(mt && mt.estimado) info.innerHTML = 'Contando <b>'+fmtKcal(mt.k)+' kcal</b>. Proteína, carboidrato e gordura ficam de fora, porque só as calorias foram informadas.';
-  else if(mt) info.innerHTML = 'Dá <b>'+fmtKcal(mt.k)+' kcal</b> - P '+Math.round(mt.p)+' g · C '+Math.round(mt.c)+' g · G '+Math.round(mt.g)+' g.';
-  else info.textContent = 'Escolha o alimento e a quantidade para calcular.';
-  box.appendChild(info);
+  if(mt || !modoExtra){
+    const info = document.createElement('div'); info.className='kcal';
+    if(mt && mt.estimado) info.innerHTML = 'Contando <b>'+fmtKcal(mt.k)+' kcal</b>. Proteína, carboidrato e gordura ficam de fora, porque só as calorias foram informadas.';
+    else if(mt && modoExtra) info.textContent = 'Calorias '+fmtKcal(mt.k)
+      + ' · Carbo '+Math.round(mt.c)+' g · Proteína '+Math.round(mt.p)+' g · Gordura '+Math.round(mt.g)+' g';
+    else if(mt) info.innerHTML = 'Dá <b>'+fmtKcal(mt.k)+' kcal</b> - P '+Math.round(mt.p)+' g · C '+Math.round(mt.c)+' g · G '+Math.round(mt.g)+' g.';
+    else info.textContent = 'Escolha o alimento e a quantidade para calcular.';
+    box.appendChild(info);
+  }
 
   if(aoRemover){
     const rm = document.createElement('button');
@@ -4642,17 +4679,19 @@ function renderDiaBox(){
           btExcluir.textContent='Excluir';
           const li2 = document.createElement('div'); li2.className='item-dia extra';
           const nm = document.createElement('span'); nm.className='idn';
-          nm.textContent = rotuloTroca(ex);
+          nm.textContent = nomeDaTroca(ex);
           const qt = document.createElement('span'); qt.className='idq';
-          qt.textContent = fmtKcal(mt.k)+' kcal';
-          const g = document.createElement('div'); g.className='estados fr';
-          const marca = document.createElement('button');
-          marca.type='button'; marca.setAttribute('data-e','ad');
-          marca.setAttribute('aria-pressed','true');
-          marca.textContent = 'fora da dieta';
-          marca.onclick = function(){ extraAbertoChave = chave; renderDiario(); };
-          g.appendChild(marca);
-          li2.appendChild(nm); li2.appendChild(qt); li2.appendChild(g);
+          qt.textContent = quantidadeDaTroca(ex);
+          // no lugar do tudo/metade/nada, o que interessa aqui é o que esse
+          // alimento somou no dia
+          const macros = document.createElement('span'); macros.className='item-macros';
+          macros.textContent = mt.estimado
+            ? 'Calorias ' + fmtKcal(mt.k)
+            : 'Calorias ' + fmtKcal(mt.k)
+              + ' · Carbo ' + Math.round(mt.c) + ' g'
+              + ' · Proteína ' + Math.round(mt.p) + ' g'
+              + ' · Gordura ' + Math.round(mt.g) + ' g';
+          li2.appendChild(nm); li2.appendChild(qt); li2.appendChild(macros);
           li2.onclick = function(ev){
             if(ev.target.closest('button')) return;
             extraAbertoChave = chave; renderDiario();
@@ -4664,8 +4703,6 @@ function renderDiaBox(){
         }
         {
           const li = document.createElement('div'); li.className='extra-linha';
-          const tag = document.createElement('span'); tag.className='tag'; tag.textContent='a mais';
-          li.appendChild(tag);
           const ok = document.createElement('button');
           ok.type='button'; ok.className='btn-pill primario extra-ok';
           ok.textContent = 'OK';
@@ -4677,7 +4714,7 @@ function renderDiaBox(){
             // foco no meio da digitação), então o OK é religado na mão.
             if(soSalvar){ atualizaBalanco(); ok.disabled = !macrosDaTroca(ex); }
             else renderDiario();
-          }, removerExtra));
+          }, removerExtra, true));
           li.appendChild(ok);
           cx.appendChild(li);
         }
