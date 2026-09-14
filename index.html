@@ -209,9 +209,14 @@
   .vnome:focus-visible{outline:2px solid var(--azul);outline-offset:2px;border-radius:6px}
   .vaviso{font-size:13px;font-weight:500;color:var(--ad);margin-top:8px}
 
-  .cols,li.item{display:grid;grid-template-columns:minmax(0,1fr) 3.4rem 3.4rem 3.4rem;gap:0 8px}
+  .cols,li.item{display:grid;grid-template-columns:minmax(0,1fr) 3.8rem 3.8rem 3.2rem;gap:0 8px}
   .cols{padding:6px 16px 6px;align-items:end}
-  .cols span{font-size:12px;font-weight:500;color:var(--ink3);text-align:right;line-height:1.2}
+  /* nome de cada um no cabeçalho: letra maior e sempre numa linha só - com
+     3.4rem e 12px um nome tipo "Isabella" quebrava em duas linhas e parecia
+     estar escrito embaixo do alimento, em vez de do lado dele */
+  .cols span{font-size:13.5px;font-weight:600;color:var(--ink3);text-align:right;
+    line-height:1.2;white-space:nowrap}
+  .cols span:last-child{font-size:12px;font-weight:500}
   .cols span.ci{color:var(--isa)} .cols span.cc{color:var(--car)}
   ul.itens{list-style:none;margin:0;padding:0}
   li.item{padding:11px 16px;border-top:.5px solid var(--hair);align-items:center;gap:6px 8px}
@@ -466,8 +471,9 @@
     .estados button{padding:7px 9px}
   }
   @media (max-width:390px){
-    .cols,li.item{grid-template-columns:minmax(0,1fr) 3.1rem 3.1rem 3.1rem;gap:5px 5px;
+    .cols,li.item{grid-template-columns:minmax(0,1fr) 3.6rem 3.6rem 3rem;gap:5px 5px;
       padding-left:13px;padding-right:13px}
+    .cols span{font-size:12.5px}
   }
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
@@ -529,6 +535,11 @@
   .campo input{width:100%;padding:6px 10px;border-radius:6px;border:0.5px solid var(--hair);
     background:#fff;font-size:16px;color:var(--ink);box-sizing:border-box}
   .campo input:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:transparent}
+  /* campo de data: no Safari do iPhone o controle nativo tem uma largura
+     "natural" bem maior que o card, e como ele não encolhe sozinho acabava
+     furando a borda. Segurar largura, box-sizing e min-width resolve sem
+     tirar o calendário nativo. */
+  input[type="date"]{max-width:100%;min-width:0;box-sizing:border-box}
   /* navegador (autofill de e-mail/senha salvos) pinta fundo amarelo por
      padrao - forcamos o fundo branco de volta com o truque do box-shadow
      inset gigante, que e o unico jeito que funciona (background normal
@@ -707,9 +718,17 @@
     border-bottom:.5px solid var(--hair)}
   .vs-linha-editavel:last-child{border-bottom:0}
   .vs-linha-editavel .vs-vigente-edit{font-size:14px;padding:6px 8px;border-radius:8px;
-    border:1px solid var(--hair);background:var(--fill2);flex:0 0 auto}
-  .vs-linha-editavel .pg-vals{flex:1 1 auto;text-align:left}
+    border:1px solid var(--hair);background:var(--fill2);
+    /* pode encolher: antes era flex:0 0 auto e o campo esticava a linha */
+    flex:1 1 150px;min-width:0;max-width:100%;box-sizing:border-box}
+  .vs-linha-editavel .pg-vals{flex:1 1 100%;min-width:0;text-align:left}
   .vs-linha-editavel .vs-salvar-vigente{flex:0 0 auto;padding:6px 12px;font-size:13px}
+  /* recado de "Salvando/Salvo" no lugar do botão que saiu; ocupa espaço só
+     quando tem texto, pra linha não ficar com um buraco à toa */
+  .vs-vigente-status{flex:0 0 auto;font-size:12px;font-weight:600;color:var(--ink3)}
+  .vs-vigente-status:empty{display:none}
+  .vs-vigente-status.bom{color:var(--ok)}
+  .vs-vigente-status.ruim{color:var(--nao)}
 
   /* ---------- aba Evolução: cartões com faixa de referência + gráfico ---------- */
   .evo-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:14px}
@@ -2345,13 +2364,14 @@ async function carregarVersoesHistorico(){
       var dono = (l.__dono && pessoas.length > 1) ? '<span class="vs-dono">'+l.__dono.nome+'</span>' : '';
       return '<div class="vs-linha-editavel">'
         + '<span class="vs-tipo">'+rotuloDaTabela(l.__tabela)+'</span>' + dono
-        + '<input type="date" class="vs-vigente-edit" data-id="'+l.id+'" data-tabela="'+l.__tabela+'" value="'+String(l.vigente_a_partir).slice(0,10)+'">'
-        + '<button type="button" class="vs-btn-mini vs-salvar-vigente" data-id="'+l.id+'" data-tabela="'+l.__tabela+'">Salvar</button>'
+        + '<input type="date" class="vs-vigente-edit" data-id="'+l.id+'" data-tabela="'+l.__tabela+'" data-antes="'+String(l.vigente_a_partir).slice(0,10)+'" value="'+String(l.vigente_a_partir).slice(0,10)+'">'
+        + '<span class="vs-vigente-status" aria-live="polite"></span>'
         + '<button type="button" class="vs-btn-mini perigo vs-apagar" data-id="'+l.id+'" data-tabela="'+l.__tabela+'">Apagar</button>'
         + '</div>';
     }).join('');
-    Array.prototype.forEach.call(alvo.querySelectorAll('.vs-salvar-vigente'), function(btn){
-      btn.onclick = function(){ salvarVigenciaEditada(btn); };
+    // escolher a data no calendário já salva - não tem botão pra apertar
+    Array.prototype.forEach.call(alvo.querySelectorAll('.vs-vigente-edit'), function(inp){
+      inp.onchange = function(){ salvarVigenciaEditada(inp); };
     });
     Array.prototype.forEach.call(alvo.querySelectorAll('.vs-apagar'), function(btn){
       btn.onclick = function(){
@@ -2391,19 +2411,32 @@ async function apagarVersaoPlano(btn){
   }
 }
 
-async function salvarVigenciaEditada(btn){
+/* Salva sozinho assim que a data muda no calendário - não tem botão. Se der
+   errado, o campo volta pro valor que estava antes, pra tela nunca mostrar
+   uma data que não está salva de verdade no banco. */
+async function salvarVigenciaEditada(input){
   limparErroAuth('vs-erro');
-  var id = btn.getAttribute('data-id');
-  var input = document.querySelector('.vs-vigente-edit[data-id="'+id+'"]');
+  var id = input.getAttribute('data-id');
+  var tabela = input.getAttribute('data-tabela') || versoesEstado.tabela;
+  var antes = input.getAttribute('data-antes') || '';
   var novaData = input.value;
-  if(!novaData){ mostrarErroAuth('vs-erro', 'Escolha uma data.'); return; }
-  var tabela = btn.getAttribute('data-tabela') || versoesEstado.tabela;
-  var orig = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Salvando...';
+  var linha = input.closest('.vs-linha-editavel');
+  var aviso = linha && linha.querySelector('.vs-vigente-status');
+  function dizer(txt, classe){
+    if(!aviso) return;
+    aviso.textContent = txt;
+    aviso.className = 'vs-vigente-status' + (classe ? ' ' + classe : '');
+  }
+  if(!novaData){ input.value = antes; dizer('Escolha uma data.', 'ruim'); return; }
+  if(novaData === antes){ dizer(''); return; }
+
+  input.disabled = true;
+  dizer('Salvando...');
   try{
     await db.from(tabela).update({ vigente_a_partir: novaData }).eq('id', id);
-    btn.textContent = 'Salvo!';
-    setTimeout(function(){ carregarVersoesHistorico(); }, 700);
+    input.setAttribute('data-antes', novaData);
+    dizer('Salvo', 'bom');
+    setTimeout(function(){ dizer(''); }, 2200);
     // recarrega sempre, não só se a aba estiver aberta: mudar a data de
     // início é justamente pra mudar o "Vigente desde", e antes isso só
     // aparecia depois de fechar e abrir o app de novo.
@@ -2416,8 +2449,10 @@ async function salvarVigenciaEditada(btn){
     }
     if(typeof renderDiario === 'function') renderDiario();
   }catch(e){
-    mostrarErroAuth('vs-erro', 'Não deu pra salvar essa data agora.');
-    btn.disabled = false; btn.textContent = orig;
+    input.value = antes;
+    dizer('Não salvou', 'ruim');
+  }finally{
+    input.disabled = false;
   }
 }
 
@@ -2979,15 +3014,20 @@ function render(){
     sec.className = 'meal';
     const horas = (meal.hora.i && meal.hora.c && meal.hora.i===meal.hora.c)
       ? '<span>'+meal.hora.i+'</span>'
-      : [meal.hora.i?'<span class="hi"><b>'+nomeSlot('i')+'</b> '+meal.hora.i+'</span>':'',
-         meal.hora.c?'<span class="hc"><b>'+nomeSlot('c')+'</b> '+meal.hora.c+'</span>':''].filter(Boolean).join(' &nbsp; ');
+      : [meuSlot(), outroSlot()].map(function(sl){
+          return meal.hora[sl]
+            ? '<span class="h'+sl+'"><b>'+nomeSlot(sl)+'</b> '+meal.hora[sl]+'</span>' : '';
+        }).filter(Boolean).join(' &nbsp; ');
     sec.innerHTML = '<div class="meal-head"><h2>'+meal.nome+'</h2><div class="horas">'+horas+'</div></div>';
 
     if(meal.versoes.length>1) sec.appendChild(blocoVersoes(meal, vIdx));
 
     if(versao.itens.length){
       const cols = document.createElement('div'); cols.className='cols';
-      cols.innerHTML = '<span></span><span class="ci">'+nomeSlot('i')+'</span><span class="cc">'+nomeSlot('c')+'</span><span>total</span>';
+      const s1 = meuSlot(), s2 = outroSlot();
+      cols.innerHTML = '<span></span>'
+        + '<span class="c'+s1+'">'+primeiroNome(nomeSlot(s1))+'</span>'
+        + '<span class="c'+s2+'">'+primeiroNome(nomeSlot(s2))+'</span><span>total</span>';
       sec.appendChild(cols);
       const ul = document.createElement('ul'); ul.className='itens';
       versao.itens.forEach(function(item,iIdx){ ul.appendChild(linha(meal,vIdx,item,iIdx)); });
@@ -3113,12 +3153,14 @@ function linha(meal,vIdx,item,iIdx){
 
   const food = document.createElement('div'); food.className='food';
   const nome = document.createElement('span'); nome.className='nome';
+  const s1 = meuSlot(), s2 = outroSlot();
+  const nomeDe = {i:nomeI, c:nomeC}, temDe = {i:temI, c:temC};
   if(temI && temC && nomeI!==nomeC){
-    const a=document.createElement('span'); a.className='ni'; a.textContent=nomeI;
-    const b=document.createElement('span'); b.className='nc'; b.textContent=nomeC;
+    const a=document.createElement('span'); a.className='n'+s1; a.textContent=nomeDe[s1];
+    const b=document.createElement('span'); b.className='n'+s2; b.textContent=nomeDe[s2];
     nome.appendChild(a); nome.appendChild(document.createTextNode(' / ')); nome.appendChild(b);
   } else {
-    nome.textContent = temI ? nomeI : nomeC;
+    nome.textContent = temDe[s1] ? nomeDe[s1] : nomeDe[s2];
   }
   food.appendChild(nome);
   if(item.sub){ const s=document.createElement('span'); s.className='sub'; s.textContent=item.sub; food.appendChild(s); }
@@ -3131,8 +3173,11 @@ function linha(meal,vIdx,item,iIdx){
   }
   const base = meal.id+'|'+vIdx+'|'+iIdx+'|';
   li.appendChild(food);
-  li.appendChild(celula(vi,'i', temI?nomeI:null, base+'i'));
-  li.appendChild(celula(vc,'c', temC?nomeC:null, base+'c'));
+  const cel = {
+    i: celula(vi,'i', temI?nomeI:null, base+'i'),
+    c: celula(vc,'c', temC?nomeC:null, base+'c')
+  };
+  li.appendChild(cel[s1]); li.appendChild(cel[s2]);
   li.appendChild(celulaTotal(vi,vc,nomeI,nomeC,temI,temC, base+'t'));
 
   if(aberto===base+'i') pendente = {nome:nomeI, valor:vi, cls:'i', quem:nomeSlot('i')};
@@ -3143,8 +3188,10 @@ function linha(meal,vIdx,item,iIdx){
   if(lista.length>1 && (temI||temC)){
     const box = document.createElement('div');
     box.className = 'trocas' + ((temI&&temC)?'':' uma');
-    if(temI) box.appendChild(seletor(meal,vIdx,item,iIdx,'i',lista,oi));
-    if(temC) box.appendChild(seletor(meal,vIdx,item,iIdx,'c',lista,oc));
+    const idxDe = {i:oi, c:oc};
+    [s1, s2].forEach(function(sl){
+      if(temDe[sl]) box.appendChild(seletor(meal,vIdx,item,iIdx,sl,lista,idxDe[sl]));
+    });
     li.appendChild(box);
   }
   if((!optI.base && optI.grupo && G[optI.grupo].aviso) || (!optC.base && optC.grupo && G[optC.grupo].aviso)){
@@ -3361,13 +3408,17 @@ function textoCompleto(){
       if(meal.versoes.length>1) cab += ' - '+versao.nome+' ('+d+(d>1?' dias':' dia')+')';
       L.push(cab);
       if(meal.hora.i && meal.hora.c && meal.hora.i===meal.hora.c) L.push(meal.hora.i);
-      else L.push([meal.hora.i?nomeSlot('i')+' '+meal.hora.i:'', meal.hora.c?nomeSlot('c')+' '+meal.hora.c:''].filter(Boolean).join(' / '));
+      else L.push([meuSlot(), outroSlot()].map(function(sl){
+        return meal.hora[sl] ? nomeSlot(sl)+' '+meal.hora[sl] : '';
+      }).filter(Boolean).join(' / '));
       versao.itens.forEach(function(item,iIdx){
         const temI = item.i!==null&&item.i!==undefined, temC = item.c!==null&&item.c!==undefined;
         const optI = optDe(meal,vIdx,item,iIdx,'i'), optC = optDe(meal,vIdx,item,iIdx,'c');
         const nI = optI.base?item.n:optI.n, nC = optC.base?item.n:optC.n;
         if(temI && temC && nI===nC){
-          L.push('- '+nI+': '+nomeSlot('i')+' '+fmt(valorPara(item,optI,'i'))+' / '+nomeSlot('c')+' '+fmt(valorPara(item,optC,'c')));
+          L.push('- '+nI+': '+[meuSlot(), outroSlot()].map(function(sl){
+            return nomeSlot(sl)+' '+fmt(valorPara(item, sl==='i'?optI:optC, sl));
+          }).join(' / '));
         } else {
           if(temI) L.push('- '+nI+' ('+nomeSlot('i')+'): '+fmt(valorPara(item,optI,'i')));
           if(temC) L.push('- '+nC+' ('+nomeSlot('c')+'): '+fmt(valorPara(item,optC,'c')));
@@ -3901,6 +3952,9 @@ const FORA_RAW = {
   'Refrigerante comum':M(42,0,10.6,0,350),
   'Suco de fruta natural':M(45,0.5,11,0.1,200),
   'Suco de caixinha':M(48,0.3,12,0,200),
+  /* lata de 290 ml = 78 kcal e 19 g de açúcar (rótulo Coca-Cola/Chás Leão).
+     Aqui a tabela é sempre por 100, então é 78/2,9 e 19/2,9. */
+  'Matte Leão com gás, lata':M(26.9,0,6.6,0,290),
   'Cerveja':M(43,0.5,3.6,0,350),
   'Vinho':M(83,0.1,2.6,0,150),
   'Caipirinha ou drink':M(180,0,18,0,200),
@@ -5252,12 +5306,31 @@ function uidDoSlot(chave){
   const m = membrosDaOrg().find(function(x){ return chaveIC(x.uid)===chave; });
   return m ? m.uid : null;
 }
+/* Qual coluna é a de quem está logado. Os slots 'i'/'c' continuam colados na
+   pessoa (é o que mantém a mesma chave de refeição nos dois logins), mas a
+   ORDEM na tela é relativa: primeiro a coluna de quem abriu o app, depois a da
+   outra pessoa. Sem isso a Isabella via o plano dela na coluna da direita, no
+   lugar onde eu vejo o meu. */
+function meuSlot(){
+  const uid = sessaoAtual && sessaoAtual.user && sessaoAtual.user.id;
+  const ch = uid ? chaveIC(uid) : null;
+  return ch || 'c';
+}
+function outroSlot(){ return meuSlot() === 'i' ? 'c' : 'i'; }
 /* Nome de quem ocupa cada coluna. Vem sempre da conta de verdade - nada de
    nome fixo no código: quem entrar no grupo aparece com o nome que cadastrou. */
 function nomeSlot(chave){
   const uid = uidDoSlot(chave);
-  return uid ? nomeDoPerfil(uid) : (chave === 'i' ? 'Convidada' : 'Você');
+  if(uid) return nomeDoPerfil(uid);
+  // se a lista de integrantes ainda não chegou, o meu nome eu sei pela sessão -
+  // é melhor mostrar "Carlos" do que um "Você" genérico na coluna.
+  if(chave === meuSlot() && sessaoAtual && sessaoAtual.user){
+    return sessaoAtual.user.name || sessaoAtual.user.email || 'Você';
+  }
+  return chave === 'i' ? 'Convidada' : 'Você';
 }
+/* Só o primeiro nome, pro cabeçalho das colunas caber numa linha só. */
+function primeiroNome(n){ return String(n || '').trim().split(/\s+/)[0] || n; }
 function nomeDoPerfil(uid){
   const m = membrosDaOrg().find(function(x){ return x.uid===uid; });
   return m ? m.nome : 'Integrante';
