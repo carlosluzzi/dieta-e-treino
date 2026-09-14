@@ -96,7 +96,7 @@
     --ok:#2E9E52; --ad:#DE8C0A; --nao:#DB4436;
     --ok-soft:#E3F5E9; --ad-soft:#FCEEDA; --nao-soft:#FBE8E6;
     --pan:#3A3A3C; --azul:#AB181E; --azul-soft:#FBEAEB;
-    --r:16px; --rc:11px;
+    --r:12px; --rc:8px;
     --sh:0 1px 4px rgba(0,0,0,.05);
     --sh-min:0 1px 3px rgba(0,0,0,.06);
     --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
@@ -147,16 +147,23 @@
     border-bottom:.5px solid rgba(0,0,0,.08);padding:calc(env(safe-area-inset-top,0px) + 12px) 0 12px}
   .top-inner{max-width:720px;margin:0 auto;padding:0 16px;display:flex;flex-wrap:wrap;
     gap:10px 16px;align-items:center;justify-content:space-between}
-  .marca{font-size:22px;font-weight:700;letter-spacing:-.021em;line-height:1.18}
-  .marca-logo{display:block;width:32px;height:32px}
+  /* logo e nomes na MESMA linha (antes os nomes ficavam embaixo, miúdos e
+     cinzas, parecendo legenda solta). Agora lê "Carlos e Isabella" do lado
+     da maçã, com peso de título. */
+  .marca{display:flex;align-items:center;gap:9px;min-width:0;
+    font-size:22px;font-weight:700;letter-spacing:-.021em;line-height:1.18}
+  .marca-logo{flex:0 0 auto;display:block;width:32px;height:32px}
   .marca-logo svg{width:100%;height:100%;display:block}
-  .marca small{display:block;font-size:13px;font-weight:400;color:var(--ink2);letter-spacing:0;margin-top:4px}
+  .marca small{min-width:0;font-size:18px;font-weight:700;color:var(--ink);
+    letter-spacing:-.015em;line-height:1.2;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  @media (max-width:360px){ .marca small{font-size:16px} }
 
   /* ---------- segmented control ---------- */
-  .switch{display:inline-flex;background:var(--fill);border-radius:12px;padding:2px;gap:2px}
+  .switch{display:inline-flex;background:var(--fill);border-radius:8px;padding:2px;gap:2px}
   .estados{padding:1px;gap:1px}
   .switch button{font-size:14px;font-weight:500;letter-spacing:-.01em;color:var(--ink2);
-    background:none;border:0;padding:7px 14px;border-radius:12px;cursor:pointer;white-space:nowrap;
+    background:none;border:0;padding:7px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;
     transition:background .15s ease,color .15s ease}
   .switch button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--sh-min)}
   .switch button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
@@ -170,9 +177,9 @@
   .switch-dia button{flex:1 1 0;text-align:center}
 
   /* ---------- abas ---------- */
-  .abas{display:inline-flex;background:var(--fill);border-radius:12px;padding:2px;gap:2px;margin-top:16px}
+  .abas{display:inline-flex;background:var(--fill);border-radius:8px;padding:2px;gap:2px;margin-top:16px}
   .abas button{font-size:15px;font-weight:500;letter-spacing:-.01em;color:var(--ink2);background:none;
-    border:0;padding:8px 22px;border-radius:12px;cursor:pointer}
+    border:0;padding:8px 22px;border-radius:8px;cursor:pointer}
   .abas button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--sh-min)}
   .abas button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
 
@@ -182,9 +189,9 @@
   .planejador span.rot{font-size:15px;font-weight:500}
   .planejador span.exp{font-size:13px;color:var(--ink2);flex:1 1 100%;line-height:1.4}
 
-  .stepper{display:inline-flex;align-items:center;background:var(--fill);border-radius:12px;padding:2px}
+  .stepper{display:inline-flex;align-items:center;background:var(--fill);border-radius:8px;padding:2px}
   .stepper button{width:32px;height:32px;font-size:20px;font-weight:400;line-height:1;background:var(--card);
-    border:0;border-radius:12px;color:var(--azul);cursor:pointer;box-shadow:var(--sh-min)}
+    border:0;border-radius:8px;color:var(--azul);cursor:pointer;box-shadow:var(--sh-min)}
   .stepper button:disabled{color:var(--ink3);box-shadow:none;background:none}
   .stepper button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
   .stepper .n{min-width:38px;text-align:center;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
@@ -203,7 +210,7 @@
   .vnome{flex:1;text-align:left;font-size:15px;font-weight:400;color:var(--ink2);background:none;
     border:0;padding:6px 0;cursor:pointer;min-width:0}
   .vnome[aria-pressed="true"]{color:var(--ink);font-weight:600}
-  .vnome::before{content:'';display:inline-block;width:8px;height:8px;border-radius:12px;
+  .vnome::before{content:'';display:inline-block;width:8px;height:8px;border-radius:8px;
     background:var(--hair);margin-right:9px;vertical-align:1px}
   .vnome[aria-pressed="true"]::before{background:var(--azul)}
   .vnome:focus-visible{outline:2px solid var(--azul);outline-offset:2px;border-radius:6px}
@@ -229,7 +236,7 @@
   .val.i{color:var(--isa)} .val.c{color:var(--car)} .val.p{color:var(--ink)}
   .val.zero{color:var(--ink3);font-weight:400}
   .val.sep{font-size:12px;font-weight:500;color:var(--ink3)}
-  button.val{background:none;border:0;cursor:pointer;padding:3px 6px;margin:-3px -6px;border-radius:12px}
+  button.val{background:none;border:0;cursor:pointer;padding:3px 6px;margin:-3px -6px;border-radius:8px}
   button.val:focus-visible{outline:2px solid var(--azul);outline-offset:0}
   button.val.i[aria-expanded="true"]{background:var(--isa);color:#fff}
   button.val.c[aria-expanded="true"]{background:var(--car);color:#fff}
@@ -266,7 +273,7 @@
   .det{display:block;font-size:13px;color:var(--ink2);font-weight:400;margin-top:2px;line-height:1.4}
   .acoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
   .acoes button{font-size:15px;font-weight:500;letter-spacing:-.01em;background:var(--azul);color:#fff;
-    border:0;border-radius:12px;padding:11px 20px;cursor:pointer}
+    border:0;border-radius:8px;padding:11px 20px;cursor:pointer}
   .acoes button.sec{background:var(--fill);color:var(--ink)}
   .acoes button:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
   .aviso{font-size:13px;color:var(--ink2);margin-top:12px;line-height:1.5}
@@ -288,12 +295,12 @@
   th{font-size:12px;color:var(--ink2);font-weight:500;border-top:0}
   td.q{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
   .tags{display:flex;flex-wrap:wrap;gap:6px}
-  .tags span{background:var(--fill);border-radius:12px;padding:5px 11px;font-size:14px}
+  .tags span{background:var(--fill);border-radius:8px;padding:5px 11px;font-size:14px}
   .grupo-tit{font-size:13px;font-weight:600;color:var(--ink2);margin:16px 0 7px}
   .grupo-tit:first-child{margin-top:0}
 
   /* ---------- diálogo e balão ---------- */
-  dialog{border:0;border-radius:14px;padding:0;max-width:540px;width:calc(100% - 32px);
+  dialog{border:0;border-radius:10px;padding:0;max-width:540px;width:calc(100% - 32px);
     background:var(--card);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.22)}
   dialog::backdrop{background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
   .dlg-head{display:flex;justify-content:space-between;align-items:center;padding:15px 18px;
@@ -320,7 +327,7 @@
     line-height:1.5;border:0;border-radius:var(--rc);padding:12px;background:var(--fill);color:var(--ink);resize:vertical}
 
   .balao{position:absolute;z-index:60;width:274px;max-width:calc(100vw - 24px);background:var(--card);
-    border-radius:14px;box-shadow:0 10px 34px rgba(0,0,0,.18);padding:13px 15px}
+    border-radius:10px;box-shadow:0 10px 34px rgba(0,0,0,.18);padding:13px 15px}
   .balao .seta{position:absolute;width:12px;height:12px;background:var(--card);transform:rotate(45deg)}
   .balao.abaixo .seta{top:-5px} .balao.acima .seta{bottom:-5px}
   .porcao .quem{font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:3px}
@@ -336,24 +343,24 @@
   .mes h2{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0}
   .mes .nav{display:flex;gap:6px;align-items:center}
   .mes .nav button{height:34px;min-width:34px;padding:0 12px;font-size:15px;font-weight:500;background:var(--card);
-    border:0;border-radius:12px;cursor:pointer;color:var(--azul);box-shadow:var(--sh-min)}
+    border:0;border-radius:8px;cursor:pointer;color:var(--azul);box-shadow:var(--sh-min)}
   .cal{background:var(--card);border-radius:var(--r);padding:10px;box-shadow:var(--sh)}
   .cal .sem{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
   .cal .cab span{font-size:12px;font-weight:500;color:var(--ink3);text-align:center;padding:4px 0}
   .cal button.d{position:relative;aspect-ratio:1;font-size:15px;font-weight:400;background:none;border:0;
-    border-radius:12px;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;
+    border-radius:8px;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:4px;padding:0;font-variant-numeric:tabular-nums}
   .cal button.d.fora{color:transparent;cursor:default}
   .cal button.d.hoje{font-weight:700;color:var(--azul)}
   .cal button.d[aria-pressed="true"]{background:var(--ink);color:#fff;font-weight:600}
-  .cal .barra{display:flex;width:60%;height:3px;border-radius:12px;overflow:hidden;background:var(--hair)}
+  .cal .barra{display:flex;width:60%;height:3px;border-radius:8px;overflow:hidden;background:var(--hair)}
   .cal button.d[aria-pressed="true"] .barra{background:rgba(255,255,255,.28)}
   .cal .barra i{display:block;height:100%}
   .b-ok{background:var(--ok)} .b-ad{background:var(--ad)} .b-nao{background:var(--nao)}
   .legenda{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:13px;color:var(--ink2);
     margin-top:12px;padding:0 4px}
   .legenda span{display:flex;align-items:center;gap:6px}
-  .legenda i{width:8px;height:8px;border-radius:12px;display:block}
+  .legenda i{width:8px;height:8px;border-radius:8px;display:block}
 
   .dia-box{background:var(--card);border-radius:var(--r);margin-top:16px;box-shadow:var(--sh);overflow:hidden}
   /* dentro do popup ele não é mais um cartão solto: sem margem, sem sombra e
@@ -372,8 +379,8 @@
   /* aviso de "comi algo a mais" na linha fechada da refeição: sem isso o
      extra some dentro da refeição recolhida e as calorias do dia aparecem
      sem nada marcado na tela. */
-  .ref .nm-extra{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:0;
-    color:var(--ad);background:var(--ad-soft);border-radius:999px;padding:2px 6px;line-height:1.3}
+  .ref .nm-extra{font-size:10px;font-weight:800;letter-spacing:0;color:var(--ad);
+    vertical-align:super;line-height:0;margin-left:1px}
   /* o nome da refeição não pode encolher até virar duas letras por causa do
      chip do lado - daí o chip ser curto ("+1") e o nome ter um piso */
   .ref .nm-txt{min-width:4.2rem}
@@ -382,10 +389,10 @@
   .ref .nm-btn[aria-expanded="true"]::after{transform:rotate(-135deg);margin-top:3px}
   .ref .estados{flex:0 0 auto}
 
-  .estados{display:inline-flex;background:var(--fill);border-radius:12px;padding:2px;gap:2px}
+  .estados{display:inline-flex;background:var(--fill);border-radius:8px;padding:2px;gap:2px}
   .estados{flex-shrink:0}
   .estados button{font-size:13px;font-weight:500;background:none;border:0;padding:7px 10px;
-    border-radius:12px;cursor:pointer;color:var(--ink2);white-space:nowrap}
+    border-radius:8px;cursor:pointer;color:var(--ink2);white-space:nowrap}
   .estados button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--sh-min)}
   .estados button[aria-pressed="true"][data-e="ok"],.estados button[aria-pressed="true"][data-f="tudo"]{background:var(--ok);color:#fff}
   .estados button[aria-pressed="true"][data-e="ad"],.estados button[aria-pressed="true"][data-f="meia"]{background:var(--ad);color:#fff}
@@ -399,11 +406,21 @@
   .vsel label{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:4px}
   .vsel select{background-color:var(--card)}
   .trocas select{padding:8px 24px 8px 9px}
+  /* "comi algo a mais" usa a mesma linha dos alimentos do plano, dentro de um
+     invólucro que permite arrastar pra esquerda e revelar o Excluir - igual
+     às séries do treino. */
+  .item-dia-wrap{position:relative;border-radius:8px;overflow:hidden}
+  .item-dia-wrap .item-dia{background:var(--card);position:relative;z-index:1;
+    padding-left:2px;padding-right:2px;touch-action:pan-y}
   .item-dia{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0;border-top:.5px solid var(--hair)}
   .item-dia .idn{flex:1;min-width:96px;font-size:15px;letter-spacing:-.01em}
   .item-dia .idq{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink2)}
   .item-dia .idn{overflow:hidden;text-overflow:ellipsis}
-  .item-dia .estados{flex:0 0 100%;margin-right:auto;width:-webkit-fit-content;width:fit-content}
+  /* tudo/metade/nada/troquei ocupa a linha inteira, com os quatro botões
+     dividindo o espaço por igual - antes o grupo só tinha a largura do texto
+     e sobrava um vazio do lado direito. */
+  .item-dia .estados{flex:0 0 100%;width:100%;display:flex}
+  .item-dia .estados button{flex:1 1 0;min-width:0;text-align:center;padding-left:4px;padding-right:4px}
   .itens-dia .vazio{font-size:13px;color:var(--ink2);padding:10px 0}
 
   .troca-box{flex:1 1 100%;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;
@@ -416,7 +433,7 @@
     background:var(--fill);color:var(--ink);font-variant-numeric:tabular-nums}
   .troca-box input:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
   .troca-selo{flex:1 1 100%;font-size:12px;font-weight:600;line-height:1.35;padding:6px 10px;
-    border-radius:9px;margin-top:2px}
+    border-radius:7px;margin-top:2px}
   .troca-selo.dentro{background:var(--ok-soft);color:#1B6B36}
   .troca-selo.fora{background:var(--ad-soft);color:#8A5600}
   .troca-box .kcal{flex:1 1 100%;font-size:13px;color:var(--ink2);margin-top:-2px}
@@ -429,11 +446,11 @@
     background:none;border:0;padding:0;cursor:pointer;font-family:inherit}
   .extra-resumo-txt{flex:1 1 auto;font-size:14px;color:var(--ink);line-height:1.35}
   .extra-resumo-kcal{flex:0 0 auto;font-size:12.5px;color:var(--ink2)}
-  .extra-x{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:0;background:var(--fill);
+  .extra-x{flex:0 0 auto;width:26px;height:26px;border-radius:8px;border:0;background:var(--fill);
     color:var(--ink2);font-size:15px;line-height:1;cursor:pointer}
   .extra-ok{flex:1 1 100%;margin-top:4px}
   .extra-linha .tag{font-size:11px;font-weight:600;color:var(--azul);background:var(--car-soft);
-    border-radius:12px;padding:3px 9px}
+    border-radius:8px;padding:3px 9px}
   .rm{background:none;border:0;color:var(--nao);font-size:13px;cursor:pointer;padding:6px 8px;font-weight:500}
 
   .obs{padding:14px 16px;border-top:.5px solid var(--hair)}
@@ -476,7 +493,7 @@
   .calresumo b{font-size:22px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 
   .rodape{margin-top:26px;font-size:13px;color:var(--ink2);line-height:1.6}
-  .reset{font-size:15px;font-weight:500;background:var(--card);border:0;border-radius:12px;
+  .reset{font-size:15px;font-weight:500;background:var(--card);border:0;border-radius:8px;
     padding:11px 20px;cursor:pointer;color:var(--nao);box-shadow:var(--sh-min)}
   noscript{display:block;background:var(--card);border-radius:var(--r);padding:18px;margin-top:16px;box-shadow:var(--sh)}
 
@@ -505,9 +522,9 @@
      só o CSS que não deixava esconder de verdade) */
   .tela-cheia{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;
     align-items:center;justify-content:center;padding:24px 16px;overflow-y:auto}
-  .tela-cheia .cartao{width:100%;max-width:400px;background:var(--card);border-radius:16px;
+  .tela-cheia .cartao{width:100%;max-width:400px;background:var(--card);border-radius:12px;
     box-shadow:var(--sh);padding:28px 24px;text-align:center}
-  .tela-cheia .logo-app{width:64px;height:64px;border-radius:16px;margin:0 auto 16px;
+  .tela-cheia .logo-app{width:64px;height:64px;border-radius:12px;margin:0 auto 16px;
     display:flex;align-items:center;justify-content:center;overflow:hidden}
   .tela-cheia .logo-app img,.tela-cheia .logo-app svg{width:100%;height:100%;object-fit:contain;display:block}
   .tela-cheia h1{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0 0 6px}
@@ -525,13 +542,13 @@
     padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;
     background:rgba(255,255,255,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);
     backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid rgba(0,0,0,.08)}
-  .sessao-treino-head button{width:32px;height:32px;flex-shrink:0;border-radius:50%;border:0;
+  .sessao-treino-head button{width:32px;height:32px;flex-shrink:0;border-radius:8px;border:0;
     background:var(--fill);color:var(--ink);font-size:18px;line-height:1;cursor:pointer}
   .sessao-treino-head h1{font-size:18px;font-weight:700;letter-spacing:-.019em;margin:0}
   .sessao-treino-corpo{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
     overscroll-behavior-y:contain;max-width:720px;margin:0 auto;width:100%;
     padding:16px 16px calc(24px + env(safe-area-inset-bottom,0px))}
-  .tr-chip-sel{font-size:13px;font-weight:600;padding:8px 16px;border-radius:12px;
+  .tr-chip-sel{font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;
     background:var(--fill);color:var(--ink2);border:0;cursor:pointer}
   .tr-chip-sel[aria-pressed="true"]{background:var(--azul);color:#fff}
 
@@ -582,18 +599,18 @@
     transition:max-height .22s ease,margin-bottom .22s ease}
   .erro-auth.mostra{max-height:4.5em;margin-bottom:12px}
   .badge-convite{display:inline-block;font-size:12px;font-weight:600;color:var(--azul);
-    background:var(--car-soft);border-radius:12px;padding:5px 12px;margin-bottom:14px}
+    background:var(--car-soft);border-radius:8px;padding:5px 12px;margin-bottom:14px}
 
   /* ---------- conta / convite ---------- */
-  .conta-btn{width:34px;height:34px;border-radius:50%;border:0;background:var(--fill);
+  .conta-btn{width:34px;height:34px;border-radius:8px;border:0;background:var(--fill);
     color:var(--ink);font-size:14px;font-weight:700;cursor:pointer;display:flex;
     align-items:center;justify-content:center;flex:0 0 auto}
-  #dlg-conta{border:0;border-radius:14px;padding:0;max-width:340px;width:90vw;box-shadow:var(--sh)}
+  #dlg-conta{border:0;border-radius:10px;padding:0;max-width:340px;width:90vw;box-shadow:var(--sh)}
   #dlg-conta::backdrop{background:rgba(0,0,0,.28)}
   .conta-corpo{padding:22px;max-height:80vh;overflow-y:auto;overflow-x:hidden;touch-action:pan-y}
   .conta-nome{font-size:17px;font-weight:700;letter-spacing:-.02em;margin:0 0 2px}
   .conta-papel{font-size:13px;color:var(--ink2);margin:0 0 18px}
-  .conta-acao{display:block;width:100%;text-align:left;padding:12px 14px;border-radius:12px;
+  .conta-acao{display:block;width:100%;text-align:left;padding:12px 14px;border-radius:8px;
     border:0;background:var(--fill2);font-size:15px;color:var(--ink);cursor:pointer;margin-bottom:8px}
   .conta-acao.sair{color:var(--nao)}
   .conv-intro{font-size:13.5px;color:var(--ink2);line-height:1.5;margin:0 0 16px}
@@ -601,7 +618,7 @@
   .conv-passos b{color:var(--ink)}
   .convite-link-box[hidden]{display:none}
   .convite-link-box{display:flex;gap:8px;align-items:center;background:var(--fill2);
-    border-radius:12px;padding:10px 12px;margin:10px 0;word-break:break-all;font-size:13px}
+    border-radius:8px;padding:10px 12px;margin:10px 0;word-break:break-all;font-size:13px}
   .convite-link-box button{flex:0 0 auto;width:auto;padding:8px 14px;margin:0}
 
   /* ---------- barra de abas (navegação principal) ---------- */
@@ -631,9 +648,19 @@
   .hoje-cartao-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
   .hoje-cartao-tit{font-size:18px;font-weight:700;letter-spacing:-.015em}
   .hoje-cartao-num{font-size:14px;color:var(--ink2);font-weight:500}
-  .hoje-cartao-barra{height:8px;border-radius:12px;background:var(--fill);overflow:hidden}
-  .hoje-cartao-barra-fill{height:100%;background:var(--ok);border-radius:12px;transition:width .3s ease}
-  .hoje-cartao-cta{margin-top:12px;width:100%;padding:10px 14px;border-radius:12px;border:0;
+  .hoje-cartao-barra{height:8px;border-radius:8px;background:var(--fill);overflow:hidden}
+  .hoje-cartao-barra-fill{height:100%;background:var(--ok);border-radius:8px;transition:width .3s ease}
+  /* treinos já registrados no dia, com saída pra apagar */
+  .hoje-treino-feitos[hidden]{display:none}
+  .hoje-treino-feitos{display:flex;flex-direction:column;gap:6px;margin:8px 0 2px}
+  .hoje-treino-feito{display:flex;align-items:center;gap:8px;background:var(--fill2);
+    border-radius:var(--rc);padding:8px 10px}
+  .hoje-treino-feito-txt{flex:1 1 auto;min-width:0;font-size:13px;font-weight:600;color:var(--ink2);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hoje-treino-apagar{flex:0 0 auto;border:0;background:none;color:var(--nao);
+    font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:4px 6px;border-radius:7px}
+  .hoje-treino-apagar:disabled{color:var(--ink3)}
+  .hoje-cartao-cta{margin-top:12px;width:100%;padding:10px 14px;border-radius:8px;border:0;
     background:var(--fill2);color:var(--azul);font-size:14px;font-weight:600;cursor:pointer}
   .hoje-cartao-nota{font-size:13px;color:var(--ink2);margin:0;line-height:1.4}
   /* Orçamento de calorias do dia no card Dieta: medidor em arco no meio
@@ -659,7 +686,7 @@
   .orc-centro-rot{font-size:12.5px;color:var(--ink2)}
   .orc-macros{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 14px}
   .orc-macro{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
-  .orc-ponto{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-bottom:2px}
+  .orc-ponto{width:9px;height:9px;border-radius:8px;flex-shrink:0;margin-bottom:2px}
   .orc-ponto-g{background:#E3B341}
   .orc-ponto-c{background:#5BA8D8}
   .orc-ponto-p{background:#7B5EC7}
@@ -670,15 +697,15 @@
      clicar abre o modal de troca (trocarTreinoDlg). */
   .hoje-treino-chave{flex-shrink:0;border:none;cursor:pointer;font-family:inherit;
     background:var(--azul-soft);color:var(--azul);font-size:13px;font-weight:700;
-    padding:5px 12px;border-radius:999px;display:flex;align-items:center;gap:5px}
+    padding:5px 12px;border-radius:8px;display:flex;align-items:center;gap:5px}
   .hoje-treino-chave::after{content:'›';font-size:15px;line-height:1;opacity:.75}
   /* display:flex na classe passa por cima do [hidden] do navegador */
   .hoje-treino-chave[hidden]{display:none}
   .tr-troca-lista{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
   .tr-troca-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;
-    border:1px solid var(--hair);background:var(--card);border-radius:12px;padding:11px 13px;font-family:inherit}
+    border:1px solid var(--hair);background:var(--card);border-radius:8px;padding:11px 13px;font-family:inherit}
   .tr-troca-item[aria-pressed="true"]{border-color:var(--azul);background:var(--azul-soft)}
-  .tr-troca-chave{flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--fill);
+  .tr-troca-chave{flex-shrink:0;width:34px;height:34px;border-radius:8px;background:var(--fill);
     color:var(--ink);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
   .tr-troca-item[aria-pressed="true"] .tr-troca-chave{background:var(--azul);color:#fff}
   .tr-troca-nome{font-size:14px;color:var(--ink);font-weight:500;line-height:1.3}
@@ -714,7 +741,7 @@
   .progresso-form-card .pg-linha3 .campo label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .progresso-historico{margin-top:20px}
   .pg-linha{display:flex;justify-content:space-between;align-items:baseline;background:var(--card);
-    border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--sh-min)}
+    border-radius:8px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--sh-min)}
   .pg-linha .pg-data{font-size:13px;color:var(--ink2)}
   .pg-linha .pg-vals{font-size:14px;font-weight:600;text-align:right}
   /* painel de enviar plano: escolher PDF e pronto */
@@ -722,7 +749,7 @@
   .vs-intro{font-size:13.5px;color:var(--ink2);line-height:1.5;margin:0 0 16px}
   .vs-status{margin-top:12px;display:flex;flex-direction:column;gap:6px}
   .vs-item{display:flex;align-items:baseline;gap:8px;font-size:13px;padding:9px 11px;
-    border-radius:10px;background:var(--fill2)}
+    border-radius:8px;background:var(--fill2)}
   .vs-item-nome{flex:1 1 auto;min-width:0;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .vs-item-res{flex:0 0 auto;font-weight:600;color:var(--ink2)}
   .vs-item.ok{background:var(--ok-soft)} .vs-item.ok .vs-item-res{color:#1B6B36}
@@ -765,18 +792,18 @@
   .evo-card-situacao.alto{color:var(--nao)}
   .evo-card-semfaixa{font-size:11.5px;color:var(--ink3);margin-top:8px}
   .evo-barra{position:relative;height:16px;margin-top:10px}
-  .evo-barra-trilho{position:absolute;left:0;right:0;top:5px;height:6px;border-radius:12px;overflow:hidden;background:var(--fill)}
+  .evo-barra-trilho{position:absolute;left:0;right:0;top:5px;height:6px;border-radius:8px;overflow:hidden;background:var(--fill)}
   .evo-barra-zona{position:absolute;top:0;bottom:0}
   .evo-zona-abaixo{background:var(--ad-soft)}
   .evo-zona-normal{background:var(--ok-soft)}
   .evo-zona-alto{background:var(--nao-soft)}
   .evo-barra-marcador{position:absolute;top:8px;width:12px;height:12px;margin-left:-6px;margin-top:-6px;
-    border-radius:50%;background:var(--azul);border:2px solid var(--card);box-shadow:var(--sh-min)}
+    border-radius:8px;background:var(--azul);border:2px solid var(--card);box-shadow:var(--sh-min)}
   .evo-link{display:block;background:none;border:0;padding:10px 2px;margin:0;color:var(--azul);
     font-size:13px;font-weight:600;cursor:pointer;text-align:left}
   .evo-secao{margin-top:24px}
   .evo-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:12px}
-  .evo-chip{flex:0 0 auto;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:12px;
+  .evo-chip{flex:0 0 auto;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:8px;
     background:var(--fill);color:var(--ink2);border:0;cursor:pointer;white-space:nowrap}
   .evo-chip[aria-pressed="true"]{background:var(--azul);color:#fff}
   .evo-grafico-wrap{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:14px 8px;overflow-x:auto}
@@ -798,17 +825,17 @@
   .switch-semana{display:flex;width:100%}
   .switch-semana button{flex:1 1 0;text-align:center;padding:8px 6px}
   .tr-semana-cartao{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:12px;
-    background:var(--fill);border-radius:14px;overflow:hidden}
+    background:var(--fill);border-radius:10px;overflow:hidden}
   .tr-sem-celula{display:flex;flex-direction:column;align-items:center;gap:3px;
     background:var(--card);padding:12px 6px;min-width:0}
   .tr-sem-rot{display:flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:var(--ink3);
     text-transform:uppercase;letter-spacing:.03em;text-align:center;line-height:1.2}
   .tr-sem-val{font-size:13.5px;font-weight:700;color:var(--ink);text-align:center;line-height:1.25}
-  .tr-dica-btn{width:15px;height:15px;flex-shrink:0;border:0;border-radius:50%;background:var(--azul-soft);
+  .tr-dica-btn{width:15px;height:15px;flex-shrink:0;border:0;border-radius:8px;background:var(--azul-soft);
     color:var(--azul);font-size:10px;font-weight:800;line-height:1;cursor:pointer;padding:0;
     display:flex;align-items:center;justify-content:center;font-family:inherit}
   .dica{position:absolute;z-index:130;width:270px;max-width:calc(100vw - 24px);background:var(--card);
-    border-radius:13px;box-shadow:0 10px 34px rgba(0,0,0,.2);border:1px solid var(--hair);padding:12px 14px}
+    border-radius:10px;box-shadow:0 10px 34px rgba(0,0,0,.2);border:1px solid var(--hair);padding:12px 14px}
   .dica b{display:block;font-size:13px;color:var(--ink);margin-bottom:4px}
   .dica p{margin:0;font-size:12.5px;color:var(--ink2);line-height:1.5}
   .dica-seta{position:absolute;width:11px;height:11px;background:var(--card);transform:rotate(45deg);
@@ -819,7 +846,7 @@
   .tr-divisao{display:flex;gap:6px;flex-wrap:wrap}
   #tr-divisao{flex-wrap:nowrap}
   #tr-divisao .tr-chip{flex:1 1 0}
-  .tr-chip{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:12px;background:var(--fill);color:var(--ink2);text-align:center}
+  .tr-chip{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:8px;background:var(--fill);color:var(--ink2);text-align:center}
   .tr-chip.off{background:transparent;color:var(--ink3);border:1px dashed var(--hair)}
   .tr-treino-card{background:var(--card);border-radius:var(--r);padding:16px;margin-top:12px;box-shadow:var(--sh)}
   .tr-treino-card h4{font-size:16px;font-weight:700;letter-spacing:-.01em;margin:0 0 12px}
@@ -843,7 +870,7 @@
   .tr-tabela td.tr-num{text-align:center;white-space:nowrap;color:var(--ink2)}
   .tr-core{margin-top:10px;padding-top:10px;border-top:1px dashed var(--hair);font-size:12.5px;color:var(--ink2);line-height:1.5}
   .tr-core b{color:var(--ink)}
-  .tr-aero-linha{background:var(--card);border-radius:12px;padding:12px 14px;margin-top:8px;box-shadow:var(--sh-min)}
+  .tr-aero-linha{background:var(--card);border-radius:8px;padding:12px 14px;margin-top:8px;box-shadow:var(--sh-min)}
   .tr-aero-linha .tr-aero-mod{font-weight:600;font-size:14px}
   .tr-aero-linha .tr-aero-det{font-size:12.5px;color:var(--ink2);margin-top:2px}
   .tr-detalhes{margin-top:20px;background:var(--card);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
@@ -858,7 +885,7 @@
   .tr-registro-linha{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--fill)}
   .tr-registro-linha:last-of-type{border-bottom:0}
   .tr-registro-nome{font-size:13px;color:var(--ink);flex:1 1 auto}
-  .tr-carga-input{width:70px;flex:0 0 auto;padding:8px 10px;border-radius:10px;border:1px solid var(--hair);
+  .tr-carga-input{width:70px;flex:0 0 auto;padding:8px 10px;border-radius:8px;border:1px solid var(--hair);
     font-size:16px;text-align:center;background:var(--fill2)}
   .tr-carga-input:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:transparent}
   .tr-registro .btn-pill{margin-top:10px}
@@ -882,7 +909,7 @@
   .tr-serie-menu-btn{flex-shrink:0;width:28px;height:28px;border-radius:8px;border:none;background:var(--fill);
     color:var(--azul);font-size:12px;font-weight:800;line-height:1;cursor:pointer;letter-spacing:1.5px;
     display:flex;align-items:center;justify-content:center;padding:0;overflow:hidden;text-indent:1.5px}
-  .tr-serie-nota{margin:-2px 0 10px;padding:8px 10px;border-radius:10px;background:#FFF6D8;color:#8A6D1A;
+  .tr-serie-nota{margin:-2px 0 10px;padding:8px 10px;border-radius:8px;background:#FFF6D8;color:#8A6D1A;
     font-size:12.5px;line-height:1.4;white-space:pre-wrap}
   .tr-serie-meta{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 10px}
   .tr-meta-tag{font-size:10.5px;font-weight:500;padding:4px 9px;border-radius:8px;background:var(--fill);color:var(--ink2);white-space:nowrap}
@@ -893,7 +920,7 @@
     font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.02em}
   .tr-serie-header-row span{text-align:center}
 
-  .tr-serie-linha-wrap{position:relative;border-radius:10px;overflow:hidden}
+  .tr-serie-linha-wrap{position:relative;border-radius:8px;overflow:hidden}
   .tr-serie-excluir{position:absolute;top:0;right:0;bottom:0;width:76px;border:none;background:#FF3B30;color:#fff;
     font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0}
   .tr-serie-linha,.tr-aquecimento-linha{position:relative;display:grid;grid-template-columns:32px 1fr 52px 52px 32px;
@@ -904,7 +931,7 @@
   .tr-aquecimento-linha .tr-serie-num{background:transparent;color:var(--ink3);font-size:9px;letter-spacing:.02em}
   .tr-serie-anterior{font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;
     text-overflow:ellipsis;text-align:center}
-  .tr-serie-kg,.tr-serie-reps{width:100%;padding:7px 3px;border-radius:10px;border:none;background:var(--fill);
+  .tr-serie-kg,.tr-serie-reps{width:100%;padding:7px 3px;border-radius:8px;border:none;background:var(--fill);
     font-size:15px;text-align:center;color:var(--ink)}
   .tr-serie-kg:focus,.tr-serie-reps:focus{outline:2px solid var(--azul);outline-offset:1px}
   /* quadradinho, não bolinha - e com o mesmo arredondamento que o resto do
@@ -914,7 +941,7 @@
     color:var(--ink3);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;padding:0}
   .tr-serie-check[aria-pressed="true"]{background:var(--ok);color:#fff;box-shadow:var(--sh-min)}
-  .tr-serie-add{margin-top:6px;width:100%;padding:9px;border-radius:10px;border:1px dashed var(--hair);
+  .tr-serie-add{margin-top:6px;width:100%;padding:9px;border-radius:8px;border:1px dashed var(--hair);
     background:none;color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer}
   /* ativação (ex.: Wall Slide) - sem kg/reps/anterior, só um checklist de
      séries com a meta de repetições fixa do plano. */
@@ -930,7 +957,7 @@
      fundo colorido - só a bolinha separa ativação de isométrico. */
   .tr-ex-tipo{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:600;
     text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin:-3px 0 7px}
-  .tr-ex-tipo::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+  .tr-ex-tipo::before{content:'';width:5px;height:5px;border-radius:8px;flex-shrink:0}
   .tr-ex-tipo-ativacao::before{background:#2E4C6D}
   .tr-ex-tipo-isometrico::before{background:#9A4B00}
   /* números do plano em duas colunas alinhadas, embaixo do nome */
@@ -968,23 +995,23 @@
      botão que abriu (ver abrirMenuExercicio), não mais um cartão solto
      embaixo da tela. Sem "Cancelar": clicar fora já fecha. */
   .tr-opcoes-backdrop{position:fixed;inset:0;z-index:120;background:transparent}
-  .tr-opcoes-card{position:absolute;background:var(--card);border-radius:14px;overflow:hidden;
+  .tr-opcoes-card{position:absolute;background:var(--card);border-radius:10px;overflow:hidden;
     border:1px solid var(--hair);box-shadow:0 10px 30px rgba(0,0,0,.16)}
   .tr-opcoes-item{display:block;width:100%;text-align:left;padding:12px 14px;border:none;
     border-top:.5px solid var(--hair);background:none;color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
   .tr-opcoes-item:first-child{border-top:none}
   .tr-opcoes-item.perigo{color:var(--nao)}
-  .tr-nota-card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  .tr-nota-card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
   /* popup de explicação do exercício (figura padronizada + texto), aberto
      ao tocar no nome do exercício - ver abrirExplicacaoExercicio. */
-  .tr-exp-card{position:relative;width:100%;max-width:340px;background:var(--card);border-radius:18px;
+  .tr-exp-card{position:relative;width:100%;max-width:340px;background:var(--card);border-radius:12px;
     padding:22px 20px 18px;box-shadow:0 8px 30px rgba(0,0,0,.32)}
-  .tr-exp-fechar{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:none;
+  .tr-exp-fechar{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:8px;border:none;
     background:var(--fill);color:var(--ink2);font-size:16px;line-height:1;cursor:pointer}
   .tr-exp-titulo{font-size:16px;font-weight:700;color:var(--ink);text-align:center;margin-bottom:8px}
   .tr-exp-texto{font-size:13.5px;color:var(--ink2);line-height:1.55;text-align:left}
   .tr-nota-titulo{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px}
-  .tr-nota-input{width:100%;min-height:90px;border-radius:12px;border:1px solid var(--hair);background:var(--fill2);
+  .tr-nota-input{width:100%;min-height:90px;border-radius:8px;border:1px solid var(--hair);background:var(--fill2);
     padding:10px;font-size:14px;color:var(--ink);resize:vertical;font-family:inherit}
   .tr-nota-botoes{display:flex;gap:8px;margin-top:12px}
   .tr-nota-botoes .btn-pill{flex:1 1 0;margin-top:0;padding:10px}
@@ -993,7 +1020,7 @@
      apoiado no banco. Nasce sozinho quando uma série é marcada. */
   .tr-descanso-toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));
     transform:translateX(-50%);z-index:120;background:var(--card);color:var(--ink);
-    width:min(420px, calc(100vw - 28px));border-radius:20px;padding:14px 16px 16px;
+    width:min(420px, calc(100vw - 28px));border-radius:12px;padding:14px 16px 16px;
     border:1px solid var(--hair);box-shadow:0 12px 34px rgba(0,0,0,.2)}
   .tr-desc-topo{display:flex;align-items:center;justify-content:space-between;gap:8px}
   .tr-desc-rot{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
@@ -1001,8 +1028,8 @@
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tr-desc-tempo{font-size:52px;font-weight:800;line-height:1.05;letter-spacing:-.03em;
     font-variant-numeric:tabular-nums;margin:4px 0 10px;text-align:center}
-  .tr-desc-trilho{height:8px;border-radius:12px;background:var(--fill);overflow:hidden}
-  .tr-desc-barra{height:100%;width:100%;border-radius:12px;background:var(--ok);
+  .tr-desc-trilho{height:8px;border-radius:8px;background:var(--fill);overflow:hidden}
+  .tr-desc-barra{height:100%;width:100%;border-radius:8px;background:var(--ok);
     transition:width 1s linear}
   .tr-descanso-toast.acabando .tr-desc-barra{background:var(--ad)}
   .tr-descanso-toast.acabando .tr-desc-tempo{color:var(--ad)}
@@ -1012,14 +1039,14 @@
     background:var(--card);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
   .tr-desc-btn.forte{background:var(--ink);color:#fff;border-color:var(--ink)}
   .tr-desc-topo-btns{display:flex;align-items:center;gap:6px;flex-shrink:0}
-  .tr-descanso-min,.tr-desc-som{width:26px;height:26px;border-radius:50%;border:none;background:var(--fill);
+  .tr-descanso-min,.tr-desc-som{width:26px;height:26px;border-radius:8px;border:none;background:var(--fill);
     color:var(--ink2);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;padding:0}
   .tr-descanso-min{font-size:17px;font-weight:700;padding-bottom:3px}
   .ico-sino{width:15px;height:15px;display:block}
   /* encolhido: pilulazinha só com o tempo, tocar nela abre de novo. O
      descanso continua correndo - encolher não é cancelar. */
-  .tr-descanso-toast.minimizado{width:auto;border-radius:999px;padding:10px 16px;cursor:pointer;
+  .tr-descanso-toast.minimizado{width:auto;border-radius:8px;padding:10px 16px;cursor:pointer;
     box-shadow:0 8px 24px rgba(0,0,0,.18)}
   .tr-descanso-toast.minimizado .tr-desc-ex,
   .tr-descanso-toast.minimizado .tr-desc-trilho,
@@ -1056,7 +1083,7 @@
       background:var(--card);border-top:0;border-right:.5px solid rgba(0,0,0,.08);
       backdrop-filter:none;-webkit-backdrop-filter:none;padding:20px 14px;gap:6px}
     .tabbar-item{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;
-      margin:0;padding:11px 14px;border-radius:12px;width:100%}
+      margin:0;padding:11px 14px;border-radius:8px;width:100%}
     .tabbar-item span{font-size:15px}
     .tabbar-item[aria-pressed="true"]{background:var(--fill)}
   }
@@ -1210,6 +1237,7 @@
         <button type="button" class="hoje-treino-chave" id="hoje-treino-chave" hidden></button>
       </div>
       <p class="hoje-cartao-nota" id="hoje-treino-nota"></p>
+      <div class="hoje-treino-feitos" id="hoje-treino-feitos" hidden></div>
       <button class="hoje-cartao-cta" id="hoje-ir-iniciar-treino">Iniciar treino</button>
     </div>
 
@@ -1732,13 +1760,21 @@ async function entrarNoApp(){
 function primeiroNome(nome){
   return (nome || '').trim().split(/\s+/)[0] || (nome || 'Integrante');
 }
+/* Nomes do cabeçalho: sempre quem está logado primeiro, depois o resto do
+   grupo - e com o nome de verdade, não "Você". Então no meu app lê "Carlos e
+   Isabella" e no dela "Isabella e Carlos". Sozinho na organização, mostra só
+   o próprio nome. */
 function textoIntegrantes(){
   var membros = membrosDaOrg();
   var proprio = sessaoAtual && sessaoAtual.user && sessaoAtual.user.id;
+  var eu = membros.filter(function(m){ return m.uid === proprio; })[0];
+  var meuNome = primeiroNome((eu && eu.nome)
+    || (sessaoAtual && sessaoAtual.user && (sessaoAtual.user.name || sessaoAtual.user.email))
+    || 'Você');
   var outros = membros.filter(function(m){ return m.uid !== proprio; }).map(function(m){ return primeiroNome(m.nome); });
-  if(!outros.length) return 'Só você';
-  if(outros.length === 1) return 'Você e ' + outros[0];
-  return 'Você, ' + outros[0] + ' e mais ' + (outros.length - 1);
+  if(!outros.length) return meuNome;
+  if(outros.length === 1) return meuNome + ' e ' + outros[0];
+  return meuNome + ', ' + outros.slice(0,-1).join(', ') + ' e ' + outros[outros.length-1];
 }
 function nomesParaExportar(){
   var nomes = membrosDaOrg().map(function(m){ return primeiroNome(m.nome); });
@@ -1750,11 +1786,8 @@ function nomesParaExportar(){
 function atualizarMarca(){
   var texto = textoIntegrantes();
   var el = document.getElementById('marca-sub');
-  // Com uma pessoa só na organização não faz sentido escrever "Só você" no
-  // cabeçalho (é óbvio de quem é a conta); o texto só aparece quando há mais
-  // gente na organização, pra dizer quem está incluído (ex.: "Você e Isabela").
-  if(el) el.textContent = texto === 'Só você' ? '' : texto;
-  document.title = texto === 'Só você' ? 'Dieta e treino' : ('Dieta e treino - ' + texto);
+  if(el) el.textContent = texto;
+  document.title = texto ? ('Dieta e treino - ' + texto) : 'Dieta e treino';
 }
 
 /* =========================================================
@@ -4464,14 +4497,19 @@ function renderDiaBox(){
     nmBtn.appendChild(nmTxt);
     // se tem "algo a mais" guardado aqui dentro, avisa na linha fechada -
     // senão as calorias aparecem no card do dia sem nada visível marcado.
+    // O chip fica FORA do botão do nome: dentro dele, entrava entre o nome e
+    // o chevron e desmanchava a linha inteira.
+    // vira expoente colado no nome ("Almoço⁺¹"): não ocupa espaço de layout,
+    // então não empurra o chevron nem espreme o nome, e continua avisando
+    // que tem algo a mais guardado ali dentro.
     const qExtras = extrasDa(reg, meal.id).length;
     if(qExtras){
-      const chip = document.createElement('span'); chip.className='nm-extra';
-      chip.textContent = '+' + qExtras;
-      chip.title = qExtras===1 ? '1 item a mais nessa refeição'
-                               : qExtras+' itens a mais nessa refeição';
-      chip.setAttribute('aria-label', chip.title);
-      nmBtn.appendChild(chip);
+      const sup = document.createElement('sup'); sup.className='nm-extra';
+      sup.textContent = '+' + qExtras;
+      sup.title = qExtras===1 ? '1 item a mais nessa refeição'
+                              : qExtras+' itens a mais nessa refeição';
+      sup.setAttribute('aria-label', sup.title);
+      nmTxt.appendChild(sup);
     }
     nmBtn.onclick = function(){
       diario.aberta = (diario.aberta===meal.id) ? null : meal.id;
@@ -4572,14 +4610,12 @@ function renderDiaBox(){
         cx.appendChild(li);
       });
       // extra ("comi algo a mais"): enquanto está sendo preenchido mostra o
-      // editor inteiro com um "OK"; depois de pronto colapsa numa linha só,
-      // junto das outras refeições, com a etiqueta "a mais". Tocar na linha
-      // abre pra editar de novo.
+      // editor inteiro com um "OK"; depois de pronto vira uma linha igualzinha
+      // à dos alimentos do plano - nome à esquerda, quantidade à direita e,
+      // embaixo, uma etiqueta no lugar do tudo/metade/nada/troquei. Pra tirar,
+      // arrasta pra esquerda, o mesmo gesto das séries do treino.
       extrasDa(reg, meal.id).forEach(function(ex, k){
         const chave = meal.id+':'+k;
-        const li = document.createElement('div'); li.className='extra-linha';
-        const tag = document.createElement('span'); tag.className='tag'; tag.textContent='a mais';
-        li.appendChild(tag);
         function removerExtra(){
           const lista = extrasDa(reg, meal.id).slice();
           lista.splice(k,1); setExtras(reg, meal.id, lista);
@@ -4588,19 +4624,36 @@ function renderDiaBox(){
         }
         const mt = macrosDaTroca(ex);
         if(mt && extraAbertoChave !== chave){
-          const resumo = document.createElement('button');
-          resumo.type='button'; resumo.className='extra-resumo';
-          resumo.innerHTML = '<span class="extra-resumo-txt"></span><span class="extra-resumo-kcal"></span>';
-          resumo.querySelector('.extra-resumo-txt').textContent = rotuloTroca(ex);
-          resumo.querySelector('.extra-resumo-kcal').textContent = fmtKcal(mt.k)+' kcal';
-          resumo.onclick = function(){ extraAbertoChave = chave; renderDiario(); };
-          li.appendChild(resumo);
-          const x = document.createElement('button');
-          x.type='button'; x.className='extra-x'; x.setAttribute('aria-label','Tirar esse item');
-          x.textContent = '×';
-          x.onclick = removerExtra;
-          li.appendChild(x);
-        }else{
+          const wrap = document.createElement('div'); wrap.className='item-dia-wrap';
+          const btExcluir = document.createElement('button');
+          btExcluir.type='button'; btExcluir.className='tr-serie-excluir';
+          btExcluir.textContent='Excluir';
+          const li2 = document.createElement('div'); li2.className='item-dia extra';
+          const nm = document.createElement('span'); nm.className='idn';
+          nm.textContent = rotuloTroca(ex);
+          const qt = document.createElement('span'); qt.className='idq';
+          qt.textContent = fmtKcal(mt.k)+' kcal';
+          const g = document.createElement('div'); g.className='estados fr';
+          const marca = document.createElement('button');
+          marca.type='button'; marca.setAttribute('data-e','ad');
+          marca.setAttribute('aria-pressed','true');
+          marca.textContent = 'fora da dieta';
+          marca.onclick = function(){ extraAbertoChave = chave; renderDiario(); };
+          g.appendChild(marca);
+          li2.appendChild(nm); li2.appendChild(qt); li2.appendChild(g);
+          li2.onclick = function(ev){
+            if(ev.target.closest('button')) return;
+            extraAbertoChave = chave; renderDiario();
+          };
+          wrap.appendChild(btExcluir); wrap.appendChild(li2);
+          ligarSwipeSerie(wrap, removerExtra);
+          cx.appendChild(wrap);
+          return;
+        }
+        {
+          const li = document.createElement('div'); li.className='extra-linha';
+          const tag = document.createElement('span'); tag.className='tag'; tag.textContent='a mais';
+          li.appendChild(tag);
           const ok = document.createElement('button');
           ok.type='button'; ok.className='btn-pill primario extra-ok';
           ok.textContent = 'OK';
@@ -4614,12 +4667,12 @@ function renderDiaBox(){
             else renderDiario();
           }, removerExtra));
           li.appendChild(ok);
+          cx.appendChild(li);
         }
-        cx.appendChild(li);
       });
       const add = document.createElement('button');
       add.type='button'; add.className='add-extra';
-      add.textContent = '+ comi algo a mais nessa refeição';
+      add.textContent = '+ adicionar à refeição';
       add.onclick = function(){
         const lista = extrasDa(reg, meal.id).slice();
         lista.push({n:'', q:'', u:'g'});
@@ -5017,6 +5070,7 @@ async function atualizarCardTreinoHoje(diaSel){
   const uid = diario.perfil;
   if(!db || !orgAtiva || !sessaoAtual || !uid){
     chaveBtn.hidden = true; nota.textContent = '';
+    listarTreinosFeitos([], null, null);
     treinoHojeEscolhido = null; treinoHojeConteudo = null;
     return;
   }
@@ -5042,9 +5096,12 @@ async function atualizarCardTreinoHoje(diaSel){
       btnIniciar.textContent = ehHoje ? 'Iniciar treino' : 'Iniciar treino de hoje';
     }
 
-    const rDia = await db.from('treino_registros').select('treino_chave')
+    const rDia = await db.from('treino_registros').select('id,treino_chave')
       .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', diaIso);
     const feitosNoDia = (rDia && rDia.data) || [];
+    // treino registrado sem querer (um teste, o treino errado) precisa ter
+    // como sair - antes não havia nenhum caminho pra apagar pelo app.
+    listarTreinosFeitos(feitosNoDia, plano, diaIso);
 
     // num dia passado o card mostra o que foi feito naquele dia; só o dia de
     // hoje é que ganha a sugestão do próximo treino da sequência.
@@ -5092,6 +5149,51 @@ async function atualizarCardTreinoHoje(diaSel){
     }
   }catch(e){ chaveBtn.hidden = true; nota.textContent = ''; }
 }
+/* Lista os treinos já registrados no dia que a tela mostra, cada um com um
+   "Apagar" de dois toques (registro apagado não volta). */
+function listarTreinosFeitos(feitos, plano, diaIso){
+  const box = document.getElementById('hoje-treino-feitos');
+  if(!box) return;
+  box.innerHTML = '';
+  if(!feitos || !feitos.length){ box.hidden = true; return; }
+  box.hidden = false;
+  feitos.forEach(function(rg){
+    const t = plano && plano.treinos && plano.treinos[rg.treino_chave];
+    const linha = document.createElement('div');
+    linha.className = 'hoje-treino-feito';
+    const txt = document.createElement('span');
+    txt.className = 'hoje-treino-feito-txt';
+    txt.textContent = 'Treino ' + rg.treino_chave + (t && t.nome ? ' · ' + t.nome : '');
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'hoje-treino-apagar';
+    btn.textContent = 'Apagar';
+    btn.onclick = async function(){
+      if(btn.getAttribute('data-confirmar') !== '1'){
+        btn.setAttribute('data-confirmar','1');
+        btn.textContent = 'Confirmar';
+        setTimeout(function(){
+          if(btn.getAttribute('data-confirmar')==='1'){
+            btn.removeAttribute('data-confirmar'); btn.textContent = 'Apagar';
+          }
+        }, 4000);
+        return;
+      }
+      btn.disabled = true; btn.textContent = 'Apagando...';
+      try{
+        await db.from('treino_registros').delete().eq('id', rg.id);
+        // o treino apagado não pode continuar mandando na sugestão do dia
+        treinoHojeEscolhido = null; treinoHojeEscolhidoDia = null;
+        renderDiario();
+        if(typeof renderTreino === 'function') renderTreino();
+      }catch(e){
+        btn.disabled = false; btn.textContent = 'Apagar';
+      }
+    };
+    linha.appendChild(txt); linha.appendChild(btn);
+    box.appendChild(linha);
+  });
+}
+
 /* modal de troca do treino do dia - lista os treinos da divisão com o nome
    de cada um, marca o escolhido e só aplica quando confirma. */
 function abrirTrocaTreinoDlg(){
@@ -6419,8 +6521,11 @@ function renumerarSeries(linhasBox){
 }
 // deslizar a linha da série pra esquerda revela o botão vermelho "Excluir",
 // igual ao gesto do Strong - usa Pointer Events (funciona em touch e mouse).
-function ligarSwipeSerie(wrapEl){
-  const linha = wrapEl.querySelector('.tr-serie-linha, .tr-aquecimento-linha');
+/* `aoExcluir` deixa o mesmo gesto servir fora da sessão de treino (o diário
+   usa pra tirar um "comi algo a mais"): quando vem, ele manda no lugar da
+   remoção padrão, que é feita pra linha de série. */
+function ligarSwipeSerie(wrapEl, aoExcluir){
+  const linha = wrapEl.querySelector('.tr-serie-linha, .tr-aquecimento-linha, .item-dia');
   const excluirBtn = wrapEl.querySelector('.tr-serie-excluir');
   if(!linha) return;
   const LARGURA_ABERTA = 76;
@@ -6459,6 +6564,7 @@ function ligarSwipeSerie(wrapEl){
   linha.addEventListener('pointercancel', soltar);
   if(excluirBtn){
     excluirBtn.onclick = function(){
+      if(aoExcluir){ aoExcluir(); return; }
       const linhasBox = wrapEl.closest('.tr-serie-linhas');
       wrapEl.style.overflow = 'hidden';
       wrapEl.style.maxHeight = wrapEl.offsetHeight+'px';
