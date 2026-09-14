@@ -528,6 +528,49 @@
   }
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
+  /* ---------- folha do relatório (vira PDF pela impressão) ---------- */
+  .folha-relatorio{display:none}
+  @media print{
+    @page{ size:A4; margin:14mm 12mm; }
+    /* o app é uma "tela cheia" travada (html/body com altura 100%, position
+       fixed e overflow hidden). Na impressão isso cortava tudo numa página
+       só - aqui a página volta a ser um documento que flui. */
+    html,body{position:static !important;height:auto !important;width:auto !important;
+      inset:auto !important;overflow:visible !important;background:#fff}
+    #app-shell,header.top,.tabbar,dialog,.tr-descanso-toast{display:none !important}
+    .folha-relatorio{display:block;font-family:var(--sans);color:#111;
+      font-size:11pt;line-height:1.45;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .fr-topo{display:flex;align-items:center;gap:12px;border-bottom:2px solid #111;
+      padding-bottom:10px;margin-bottom:16px}
+    .fr-marca{width:34px;height:34px;flex:0 0 auto}
+    .fr-marca svg{width:100%;height:100%;display:block}
+    .fr-topo h1{margin:0;font-size:19pt;letter-spacing:-.02em}
+    .fr-sub{margin:2px 0 0;font-size:10.5pt;color:#555}
+    .fr-numeros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}
+    .fr-num{border:1px solid #DDD;border-radius:8px;padding:9px 10px;text-align:center}
+    .fr-num-val{display:block;font-size:17pt;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+    .fr-num-rot{display:block;font-size:8.5pt;color:#555;margin-top:2px}
+    .fr-bloco{margin-bottom:16px;break-inside:avoid}
+    .fr-bloco h2{font-size:11.5pt;margin:0 0 6px;padding-bottom:4px;
+      border-bottom:1px solid #DDD;letter-spacing:-.01em}
+    .fr-tab{width:100%;border-collapse:collapse;font-size:10.5pt}
+    .fr-tab th{text-align:left;font-size:8.5pt;text-transform:uppercase;letter-spacing:.04em;
+      color:#666;font-weight:700;padding:3px 6px;border-bottom:1px solid #DDD}
+    .fr-tab td{padding:4px 6px;border-bottom:1px solid #F0F0F0}
+    /* primeira coluna toma o espaço que sobra: os números ficam encostados
+       à direita em vez de boiando no meio da tabela */
+    .fr-tab th:first-child,.fr-tab td:first-child{width:100%}
+    .fr-tab tr:last-child td{border-bottom:0}
+    .fr-n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .fr-acima{color:#B3261E;font-weight:600}
+    .fr-abaixo{color:#1B6B36;font-weight:600}
+    .fr-lista{margin:0;padding-left:16px;font-size:10.5pt}
+    .fr-lista li{margin-bottom:3px}
+    .fr-vazio{font-size:11pt;color:#555}
+    .fr-rodape{margin-top:20px;padding-top:8px;border-top:1px solid #DDD;
+      font-size:8.5pt;color:#777;line-height:1.4}
+  }
+
   /* ---------- telas cheias: instalar / autenticação ---------- */
   .tela-cheia[hidden]{display:none}
   /* mesmo bug da rodada 10 (display:block do autor vence o [hidden] do
@@ -628,6 +671,26 @@
   #dlg-conta{border:0;border-radius:12px;padding:0;max-width:340px;width:90vw;box-shadow:var(--sh)}
   #dlg-conta::backdrop{background:rgba(0,0,0,.28)}
   .conta-corpo{padding:22px;max-height:80vh;overflow-y:auto;overflow-x:hidden;touch-action:pan-y}
+  /* foto de perfil - mesmo esquema do Pilotquest: prévia grande, recorte com
+     arrasto e zoom, e o resultado exportado num quadrado de 400px. */
+  .foto-grande{width:120px;height:120px;border-radius:14px;margin:0 auto 12px;overflow:hidden;
+    background:var(--azul);color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:44px;font-weight:700}
+  .foto-grande img{width:100%;height:100%;object-fit:cover;display:block}
+  .foto-acoes{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
+  .foto-acoes .btn-pill{width:auto;margin:0;padding:8px 14px;font-size:13px}
+  .cortador[hidden]{display:none}
+  .cortador{margin:0 0 14px}
+  .cortador-palco{width:220px;height:220px;margin:0 auto 10px;position:relative;overflow:hidden;
+    border-radius:14px;background:var(--fill);touch-action:none;cursor:grab}
+  .cortador-palco img{position:absolute;left:50%;top:50%;transform-origin:center;
+    max-width:none;user-select:none;-webkit-user-drag:none}
+  #cortador-zoom{width:100%;margin:0 0 10px}
+  .cortador-botoes{display:flex;gap:8px}
+  .cortador-botoes .btn-pill{flex:1 1 0;margin:0;padding:9px}
+  /* avatar do topo mostra a foto quando existe */
+  .conta-btn{overflow:hidden;padding:0}
+  .conta-btn img{width:100%;height:100%;object-fit:cover;display:block}
   .conta-nome{font-size:17px;font-weight:700;letter-spacing:-.02em;margin:0 0 2px}
   .conta-papel{font-size:13px;color:var(--ink2);margin:0 0 18px}
   .conta-acao{display:block;width:100%;text-align:left;padding:12px 14px;border-radius:10px;
@@ -777,14 +840,23 @@
   .vs-item-res{flex:0 0 auto;font-weight:600;color:var(--ink2)}
   .vs-item.ok{background:var(--ok-soft)} .vs-item.ok .vs-item-res{color:#1B6B36}
   .vs-item.falhou{background:var(--ad-soft)} .vs-item.falhou .vs-item-res{color:#8A5600}
-  .vs-tipo{flex:0 0 auto;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
-    color:var(--ink2);background:var(--fill);padding:4px 8px;border-radius:8px;min-width:74px;text-align:center}
+  /* sem etiqueta: texto normal, do tamanho do campo de data que fica do lado.
+     A pílula minúscula ficava desproporcional ao lado de um input alto. */
+  /* todas as linhas com a MESMA coluna de rótulo, medida pelo maior texto
+     ("Suplementação", 109px): assim o campo de data começa e termina no
+     mesmo lugar em todas, em vez de encolher só na linha do nome comprido. */
+  .vs-tipo{flex:0 0 112px;font-size:15px;font-weight:600;color:var(--ink);
+    letter-spacing:-.01em}
+  .vs-linha-editavel .vs-vigente-edit{flex:1 1 auto}
   .vs-btn-mini{flex:0 0 auto;border:0;background:var(--fill);color:var(--ink2);font-family:inherit;
     font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:10px;cursor:pointer}
   .vs-btn-mini.perigo{color:var(--nao)}
-  .vs-linha-editavel{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 0;
-    border-bottom:.5px solid var(--hair)}
-  .vs-linha-editavel:last-child{border-bottom:0}
+  /* a linha vira o invólucro do gesto: o "Apagar" fica atrás, escondido,
+     e aparece quando se arrasta pra esquerda */
+  .vs-linha-wrap{position:relative;overflow:hidden;border-bottom:.5px solid var(--hair)}
+  .vs-linha-wrap:last-child{border-bottom:0}
+  .vs-linha-editavel{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;
+    background:var(--card);position:relative;z-index:1;touch-action:pan-y}
   .vs-linha-editavel .vs-vigente-edit{font-size:14px;padding:6px 8px;border-radius:10px;
     border:1px solid var(--hair);background:var(--fill2);
     /* pode encolher: antes era flex:0 0 auto e o campo esticava a linha */
@@ -1178,6 +1250,7 @@
   </div>
 </div>
 
+<div class="folha-relatorio" id="folha-relatorio" aria-hidden="true"></div>
 <div id="app-shell" hidden>
 <header class="top">
   <div class="top-inner">
@@ -1291,10 +1364,10 @@
       </div>
       <div id="resumo-corpo"></div>
       <div class="acoes">
-        <button id="copiar-relatorio">Copiar relatório</button>
-        <button class="sec" id="backup">Salvar ou restaurar o diário</button>
+        <button id="relatorio-whatsapp">Enviar no WhatsApp</button>
+        <button class="sec" id="relatorio-pdf">Salvar em PDF</button>
+        <button class="sec" id="copiar-relatorio">Copiar texto</button>
       </div>
-      <p class="aviso">O diário fica guardado só neste aparelho e não vai junto no link de compartilhar. Use o botão de salvar para levar os dados pra outro celular.</p>
     </section>
   </div>
 
@@ -1453,6 +1526,21 @@
 
 <dialog id="dlg-conta">
   <div class="conta-corpo">
+    <div class="foto-grande" id="conta-foto-preview"></div>
+    <input type="file" id="foto-arquivo" accept="image/*" class="hidden">
+    <div class="foto-acoes">
+      <button type="button" class="btn-pill secundario" id="btn-trocar-foto">Trocar foto</button>
+      <button type="button" class="btn-pill secundario" id="btn-remover-foto" hidden>Remover foto</button>
+    </div>
+    <div class="cortador" id="cortador" hidden>
+      <div class="cortador-palco" id="cortador-palco"><img id="cortador-img" alt=""></div>
+      <input type="range" id="cortador-zoom" min="1" max="3" step="0.01" value="1" aria-label="Aproximar">
+      <div class="cortador-botoes">
+        <button type="button" class="btn-pill secundario" id="btn-cancelar-corte">Cancelar</button>
+        <button type="button" class="btn-pill primario" id="btn-usar-foto">Usar essa foto</button>
+      </div>
+    </div>
+    <div class="erro-auth" id="conta-erro-foto"></div>
     <p class="conta-nome" id="conta-nome"></p>
     <p class="conta-papel" id="conta-papel"></p>
     <div id="conta-admin-area" hidden>
@@ -1773,6 +1861,9 @@ async function entrarNoApp(){
 
   montarContaUsuario();
   atualizarMarca();
+  // as fotos vêm depois (não travam a entrada no app); quando chegam, o
+  // avatar e o menu se redesenham sozinhos
+  carregarFotosPerfil().then(montarContaUsuario);
   iniciarApp();
 }
 
@@ -1816,20 +1907,187 @@ function atualizarMarca(){
 /* =========================================================
    0.3 MENU DA CONTA (perfil, convite, sair)
    ========================================================= */
+/* ---- foto de perfil ----
+   Guardada em escolhas_individuais (chave "foto_perfil"), que é a tabela
+   genérica de preferência por pessoa: já tem a chave única
+   (organização, pessoa, chave) e as regras de acesso prontas, então não
+   precisou de tabela nova nem migração. A imagem entra como data URL de um
+   JPEG 400x400 - dá uns 50 KB, cabe tranquilo no campo. */
+const FOTO_CHAVE = 'foto_perfil';
+let fotosPerfil = {};      // uid -> data URL
+function fotoDoPerfil(uid){ return fotosPerfil[uid] || null; }
+async function carregarFotosPerfil(){
+  if(!db || !orgAtiva) return;
+  try{
+    const r = await db.from('escolhas_individuais').select('user_id,valor')
+      .eq('organization_id', orgAtiva.id).eq('chave', FOTO_CHAVE);
+    const mapa = {};
+    ((r && r.data) || []).forEach(function(l){
+      const u = l.valor && (l.valor.url || l.valor);
+      if(typeof u === 'string' && u) mapa[l.user_id] = u;
+    });
+    fotosPerfil = mapa;
+  }catch(e){}
+}
+async function salvarFotoPerfil(dataUrl){
+  const uid = sessaoAtual && sessaoAtual.user && sessaoAtual.user.id;
+  if(!db || !orgAtiva || !uid) return false;
+  try{
+    if(dataUrl){
+      await db.from('escolhas_individuais').upsert({
+        organization_id: orgAtiva.id, user_id: uid, chave: FOTO_CHAVE,
+        valor: { url: dataUrl }, atualizado_em: new Date().toISOString()
+      }, { onConflict: 'organization_id,user_id,chave' });
+      fotosPerfil[uid] = dataUrl;
+    }else{
+      await db.from('escolhas_individuais').delete()
+        .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('chave', FOTO_CHAVE);
+      delete fotosPerfil[uid];
+    }
+    montarContaUsuario();
+    return true;
+  }catch(e){ return false; }
+}
+function pintarFoto(el, uid, inicial){
+  if(!el) return;
+  const url = fotoDoPerfil(uid);
+  if(url){
+    el.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = url; img.alt = '';
+    el.appendChild(img);
+  }else{
+    el.textContent = inicial;
+  }
+}
 function montarContaUsuario(){
   var user = sessaoAtual && sessaoAtual.user;
   var nome = (user && user.name) || (user && user.email) || 'Você';
   var inicial = nome.trim().charAt(0).toUpperCase() || '?';
-  var btn = document.getElementById('btn-conta');
-  btn.textContent = inicial;
+  var uid = user && user.id;
+  pintarFoto(document.getElementById('btn-conta'), uid, inicial);
+  pintarFoto(document.getElementById('conta-foto-preview'), uid, inicial);
+  var btRem = document.getElementById('btn-remover-foto');
+  if(btRem) btRem.hidden = !fotoDoPerfil(uid);
+  var btTrocar = document.getElementById('btn-trocar-foto');
+  if(btTrocar) btTrocar.textContent = fotoDoPerfil(uid) ? 'Trocar foto' : 'Adicionar foto';
   document.getElementById('conta-nome').textContent = nome;
   var ehAdmin = papelAtual === 'owner' || papelAtual === 'admin';
   document.getElementById('conta-papel').textContent = ehAdmin ? 'Administrador(a)' : 'Integrante';
   document.getElementById('conta-admin-area').hidden = !ehAdmin;
 }
 
+/* Recorte da foto: mesma ideia do Pilotquest - a imagem fica maior que o
+   quadrado e a pessoa arrasta e aproxima até enquadrar. O que é salvo é o
+   que está visível no quadrado, redesenhado num canvas de 400x400. */
+let corte = null;
+function fecharCortador(){
+  document.getElementById('cortador').hidden = true;
+  document.getElementById('foto-arquivo').value = '';
+  corte = null;
+}
+function limitarCorte(){
+  if(!corte) return;
+  const ef = corte.base * corte.escala;
+  const maxX = Math.max(0, (corte.w * ef - corte.C) / 2);
+  const maxY = Math.max(0, (corte.h * ef - corte.C) / 2);
+  corte.tx = Math.max(-maxX, Math.min(maxX, corte.tx));
+  corte.ty = Math.max(-maxY, Math.min(maxY, corte.ty));
+}
+function desenharCorte(){
+  if(!corte) return;
+  corte.escala = parseFloat(document.getElementById('cortador-zoom').value) || 1;
+  limitarCorte();
+  const img = document.getElementById('cortador-img');
+  const ef = corte.base * corte.escala;
+  img.style.width = corte.w + 'px';
+  img.style.height = corte.h + 'px';
+  img.style.transform = 'translate(-50%,-50%) translate('+corte.tx+'px,'+corte.ty+'px) scale('+ef+')';
+}
+/* O arrasto é ligado quando o cortador abre, e não uma vez na carga da
+   página: assim não depende da ordem em que os elementos existem. */
+let arrastoCorteLigado = false;
+function ligarArrastoCorte(){
+  if(arrastoCorteLigado) return;
+  const palco = document.getElementById('cortador-palco');
+  if(!palco) return;
+  arrastoCorteLigado = true;
+  let arrastando = false, x0 = 0, y0 = 0, tx0 = 0, ty0 = 0;
+  palco.addEventListener('pointerdown', function(ev){
+    if(!corte) return;
+    arrastando = true; x0 = ev.clientX; y0 = ev.clientY; tx0 = corte.tx; ty0 = corte.ty;
+    try{ palco.setPointerCapture(ev.pointerId); }catch(e){}
+  });
+  palco.addEventListener('pointermove', function(ev){
+    if(!arrastando || !corte) return;
+    ev.preventDefault();
+    corte.tx = tx0 + (ev.clientX - x0);
+    corte.ty = ty0 + (ev.clientY - y0);
+    limitarCorte(); desenharCorte();
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(function(e){
+    palco.addEventListener(e, function(){ arrastando = false; });
+  });
+  const zoom = document.getElementById('cortador-zoom');
+  if(zoom) zoom.oninput = desenharCorte;
+}
+function abrirCortador(arquivo){
+  const leitor = new FileReader();
+  leitor.onload = function(ev){
+    const img = document.getElementById('cortador-img');
+    img.onload = function(){
+      const C = 220;
+      corte = { w: img.naturalWidth, h: img.naturalHeight, C: C, escala: 1, tx: 0, ty: 0,
+                base: Math.max(C / img.naturalWidth, C / img.naturalHeight) };
+      document.getElementById('cortador-zoom').value = 1;
+      desenharCorte();
+      document.getElementById('cortador').hidden = false;
+      ligarArrastoCorte();
+    };
+    img.src = ev.target.result;
+  };
+  leitor.readAsDataURL(arquivo);
+}
+document.getElementById('btn-trocar-foto').onclick = function(){
+  document.getElementById('foto-arquivo').click();
+};
+document.getElementById('foto-arquivo').onchange = function(){
+  const f = this.files && this.files[0];
+  if(f) abrirCortador(f);
+};
+document.getElementById('btn-cancelar-corte').onclick = fecharCortador;
+document.getElementById('btn-usar-foto').onclick = function(){
+  if(!corte) return;
+  const bt = this;
+  const O = 400;                                   // o que fica salvo
+  const cv = document.createElement('canvas');
+  cv.width = O; cv.height = O;
+  const ctx = cv.getContext('2d');
+  const img = document.getElementById('cortador-img');
+  const fator = O / corte.C;
+  const ef = corte.base * corte.escala * fator;
+  ctx.save();
+  ctx.translate(O/2 + corte.tx*fator, O/2 + corte.ty*fator);
+  ctx.scale(ef, ef);
+  ctx.drawImage(img, -corte.w/2, -corte.h/2);
+  ctx.restore();
+  const dados = cv.toDataURL('image/jpeg', 0.9);
+  bt.disabled = true; bt.textContent = 'Salvando...';
+  salvarFotoPerfil(dados).then(function(ok){
+    bt.disabled = false; bt.textContent = 'Usar essa foto';
+    if(ok) fecharCortador();
+    else mostrarErroAuth('conta-erro-foto', 'Não deu pra salvar a foto agora.');
+  });
+};
+document.getElementById('btn-remover-foto').onclick = function(){
+  const bt = this;
+  bt.disabled = true;
+  salvarFotoPerfil(null).then(function(){ bt.disabled = false; fecharCortador(); });
+};
+
 document.getElementById('btn-conta').onclick = function(){
   document.getElementById('convite-link-box').hidden = true;
+  fecharCortador();
   document.getElementById('dlg-conta').showModal();
 };
 document.getElementById('btn-fechar-conta').onclick = function(){
@@ -2335,8 +2593,6 @@ function abrirVersoes(){
    perfil errado). Nada de JSON na tela: essa conferência não era usada. */
 function htmlVersoesPainel(){
   return ''
-    + '<p class="vs-intro">Escolhe os PDFs que o Pedro mandou. Dá pra mandar vários de uma vez - '
-    + 'o app reconhece sozinho o que é treino, dieta, hábitos e suplementação.</p>'
     + '<div class="campo"><label for="vs-vigente">Começa a valer em</label>'
     + '<input type="date" id="vs-vigente"></div>'
     + '<input type="file" id="vs-pdf-arquivo" accept="application/pdf" multiple class="hidden">'
@@ -2498,14 +2754,18 @@ async function carregarVersoesHistorico(){
     // Agrupado por pessoa, com o nome como título: quem está logado primeiro.
     // Dentro de cada um, uma linha por plano (tipo, data e apagar) - o nome
     // não se repete em toda linha porque já está no título do bloco.
+    // tipo escrito por extenso (a etiqueta miúda ficava desproporcional ao
+    // lado do campo de data, que é alto), e apagar é arrastando pra esquerda,
+    // o mesmo gesto do resto do app - sem botão vermelho fixo na linha.
     function linhaHtml(l){
       var d = String(l.vigente_a_partir).slice(0,10);
-      return '<div class="vs-linha-editavel">'
+      return '<div class="vs-linha-wrap">'
+        + '<button type="button" class="tr-serie-excluir vs-apagar" data-id="'+l.id+'" data-tabela="'+l.__tabela+'">Apagar</button>'
+        + '<div class="vs-linha-editavel">'
         + '<span class="vs-tipo">'+rotuloDaTabela(l.__tabela)+'</span>'
         + '<input type="date" class="vs-vigente-edit" data-id="'+l.id+'" data-tabela="'+l.__tabela+'" data-antes="'+d+'" value="'+d+'">'
         + '<span class="vs-vigente-status" aria-live="polite"></span>'
-        + '<button type="button" class="vs-btn-mini perigo vs-apagar" data-id="'+l.id+'" data-tabela="'+l.__tabela+'">Apagar</button>'
-        + '</div>';
+        + '</div></div>';
     }
     alvo.innerHTML = pessoas.map(function(pes){
       var meus = todos.filter(function(l){ return l.__dono && l.__dono.uid === pes.uid; });
@@ -2526,19 +2786,11 @@ async function carregarVersoesHistorico(){
     Array.prototype.forEach.call(alvo.querySelectorAll('.vs-vigente-edit'), function(inp){
       inp.onchange = function(){ salvarVigenciaEditada(inp); };
     });
-    Array.prototype.forEach.call(alvo.querySelectorAll('.vs-apagar'), function(btn){
-      btn.onclick = function(){
-        // dois toques de propósito: apagar plano não tem volta
-        if(btn.getAttribute('data-confirmar') !== '1'){
-          btn.setAttribute('data-confirmar','1');
-          btn.textContent = 'Confirmar';
-          setTimeout(function(){
-            if(btn.getAttribute('data-confirmar')==='1'){ btn.removeAttribute('data-confirmar'); btn.textContent = 'Apagar'; }
-          }, 4000);
-          return;
-        }
-        apagarVersaoPlano(btn);
-      };
+    // arrastar a linha pra esquerda revela o Apagar; o próprio gesto já é
+    // deliberado o bastante, então aqui um toque basta.
+    Array.prototype.forEach.call(alvo.querySelectorAll('.vs-linha-wrap'), function(w){
+      const btn = w.querySelector('.vs-apagar');
+      ligarSwipeSerie(w, function(){ apagarVersaoPlano(btn); });
     });
   }catch(e){
     alvo.innerHTML = '<p class="pg-vazio">Não deu pra carregar as versões agora.</p>';
@@ -4958,6 +5210,112 @@ function textoRelatorio(){
   return L.join('\n');
 }
 
+/* ---- relatório em PDF ----
+   Sem biblioteca: a folha é montada em HTML dentro da própria página e o
+   @media print esconde o app e imprime só ela. No iPhone, Compartilhar >
+   Imprimir > "Salvar em Arquivos" gera o PDF. */
+function montarFolhaRelatorio(){
+  const e = estatisticas();
+  const nome = nomeDoPerfil(diario.perfil);
+  const ini = brData(e.dias[0]), fim = brData(e.dias[e.dias.length-1]);
+  const pct = e.tot.total ? Math.round(e.tot.ok/e.tot.total*100) : 0;
+  const med = function(v){ return e.diasMarcados ? Math.round(v/e.diasMarcados) : 0; };
+  function esc(t){
+    return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  let h = '';
+  h += '<div class="fr-topo">'
+     +   '<div class="fr-marca">'+LOGO_SVG+'</div>'
+     +   '<div><h1>Diário da dieta</h1>'
+     +   '<p class="fr-sub">'+esc(nome)+' · '+ini+' a '+fim+'</p></div>'
+     + '</div>';
+
+  if(!e.tot.total){
+    h += '<p class="fr-vazio">Nenhuma refeição marcada nesse período.</p>';
+    document.getElementById('folha-relatorio').innerHTML = h;
+    return;
+  }
+
+  h += '<div class="fr-numeros">'
+     +   '<div class="fr-num"><span class="fr-num-val">'+pct+'%</span><span class="fr-num-rot">seguiu à risca</span></div>'
+     +   '<div class="fr-num"><span class="fr-num-val">'+fmtKcal(med(e.kReal))+'</span><span class="fr-num-rot">kcal por dia</span></div>'
+     +   '<div class="fr-num"><span class="fr-num-val">'+fmtKcal(med(e.kPlan))+'</span><span class="fr-num-rot">kcal planejadas</span></div>'
+     +   '<div class="fr-num"><span class="fr-num-val">'+e.diasMarcados+'</span><span class="fr-num-rot">'+(e.diasMarcados===1?'dia marcado':'dias marcados')+'</span></div>'
+     + '</div>';
+
+  h += '<div class="fr-bloco"><h2>Como foram as refeições</h2>'
+     +   '<table class="fr-tab"><tbody>'
+     +   '<tr><td>Seguiu à risca</td><td class="fr-n">'+e.tot.ok+' de '+e.tot.total+'</td></tr>'
+     +   '<tr><td>Adaptou</td><td class="fr-n">'+e.tot.ad+'</td></tr>'
+     +   '<tr><td>Não fez</td><td class="fr-n">'+e.tot.nao+'</td></tr>'
+     +   '</tbody></table></div>';
+
+  h += '<div class="fr-bloco"><h2>Média por dia</h2>'
+     +   '<table class="fr-tab"><thead><tr><th></th><th class="fr-n">Comido</th><th class="fr-n">Plano</th></tr></thead><tbody>'
+     +   '<tr><td>Calorias</td><td class="fr-n">'+fmtKcal(med(e.kReal))+'</td><td class="fr-n">'+fmtKcal(med(e.kPlan))+'</td></tr>'
+     +   '<tr><td>Proteína</td><td class="fr-n">'+med(e.pReal)+' g</td><td class="fr-n">'+med(e.pPlan||0)+' g</td></tr>'
+     +   '<tr><td>Carboidrato</td><td class="fr-n">'+med(e.cReal)+' g</td><td class="fr-n">'+med(e.cPlan||0)+' g</td></tr>'
+     +   '<tr><td>Gordura</td><td class="fr-n">'+med(e.gReal)+' g</td><td class="fr-n">'+med(e.gPlan||0)+' g</td></tr>'
+     +   '</tbody></table></div>';
+
+  if(e.porDia && e.porDia.length){
+    h += '<div class="fr-bloco"><h2>Dia a dia</h2><table class="fr-tab"><thead>'
+       + '<tr><th>Dia</th><th class="fr-n">Comido</th><th class="fr-n">Plano</th><th class="fr-n">Diferença</th></tr>'
+       + '</thead><tbody>';
+    e.porDia.forEach(function(d){
+      const dif = d.real - d.plan;
+      h += '<tr><td>'+brData(d.dia)+'</td><td class="fr-n">'+fmtKcal(d.real)+'</td>'
+         + '<td class="fr-n">'+fmtKcal(d.plan)+'</td>'
+         + '<td class="fr-n '+(dif>0?'fr-acima':'fr-abaixo')+'">'+(dif>0?'+':'')+fmtKcal(dif)+'</td></tr>';
+    });
+    h += '</tbody></table></div>';
+  }
+
+  const refs = Object.keys(e.porRef||{});
+  if(refs.length){
+    h += '<div class="fr-bloco"><h2>Por refeição</h2><table class="fr-tab"><thead>'
+       + '<tr><th>Refeição</th><th class="fr-n">Seguiu</th><th class="fr-n">Adaptou</th><th class="fr-n">Não fez</th></tr>'
+       + '</thead><tbody>';
+    refs.forEach(function(n){
+      const r = e.porRef[n];
+      h += '<tr><td>'+esc(n)+'</td><td class="fr-n">'+r.ok+'</td><td class="fr-n">'+r.ad+'</td><td class="fr-n">'+r.nao+'</td></tr>';
+    });
+    h += '</tbody></table></div>';
+  }
+
+  if(e.trocas && e.trocas.length){
+    h += '<div class="fr-bloco"><h2>Trocas e acréscimos</h2><ul class="fr-lista">';
+    e.trocas.forEach(function(t){
+      h += '<li><b>'+brData(t.dia)+'</b> · '+esc(t.ref)+' — '
+         + (t.de ? 'trocou '+esc(t.de)+' por '+esc(t.para) : 'comeu a mais '+esc(t.para))+'</li>';
+    });
+    h += '</ul></div>';
+  }
+
+  if(e.obs && e.obs.length){
+    h += '<div class="fr-bloco"><h2>Observações</h2><ul class="fr-lista">';
+    e.obs.forEach(function(o){ h += '<li><b>'+brData(o.dia)+'</b> · '+esc(o.txt)+'</li>'; });
+    h += '</ul></div>';
+  }
+
+  h += '<p class="fr-rodape">Calorias estimadas por tabela (TACO e rótulos), a partir do que foi '
+     + 'marcado como comido em cada item. Gerado pelo app Dieta e treino.</p>';
+  document.getElementById('folha-relatorio').innerHTML = h;
+}
+function salvarRelatorioPdf(){
+  montarFolhaRelatorio();
+  document.body.classList.add('imprimindo');
+  // deixa o navegador desenhar a folha antes de abrir a impressão
+  setTimeout(function(){
+    window.print();
+    setTimeout(function(){ document.body.classList.remove('imprimindo'); }, 400);
+  }, 60);
+}
+function enviarRelatorioWhatsapp(){
+  const txt = textoRelatorio();
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+}
+
 function abrirRelatorio(){
   document.getElementById('dlg-tit').textContent = 'Relatório para o nutricionista';
   const t = textoRelatorio();
@@ -4972,37 +5330,6 @@ function abrirRelatorio(){
   abrirDlg();
 }
 
-function abrirBackup(){
-  document.getElementById('dlg-tit').textContent = 'Salvar ou restaurar o diário';
-  document.getElementById('dlg-body').innerHTML =
-    '<p style="font-size:13px;color:#5C6862;margin:0 0 8px">Copie este texto e guarde onde quiser. Para restaurar num outro celular, cole aqui e toque em restaurar.</p>'+
-    '<textarea id="bk"></textarea>'+
-    '<div class="acoes"><button id="bk-copia">Copiar</button><button class="sec" id="bk-rest">Restaurar</button></div>'+
-    '<p class="aviso" id="bk-msg" style="margin-top:8px"></p>';
-  const campo = document.getElementById('bk');
-  campo.readOnly = false;
-  campo.value = JSON.stringify({perfil:diario.perfil, log:diario.log});
-  document.getElementById('bk-copia').onclick = function(){
-    const btn=this; copiar(campo.value).then(function(ok){ btn.textContent = ok?'Copiado':'Selecione e copie'; });
-  };
-  document.getElementById('bk-rest').onclick = function(){
-    const msg = document.getElementById('bk-msg');
-    try{
-      const d = JSON.parse(campo.value);
-      if(!d || !d.log) throw new Error('formato não reconhecido');
-      Object.keys(d.log).forEach(function(p){
-        const origem = d.log[p]||{};
-        if(!diario.log[p]) diario.log[p]={};
-        Object.keys(origem).forEach(function(dia){ diario.log[p][dia] = origem[dia]; });
-      });
-      salvarDiario(); renderDiario();
-      msg.textContent = 'Diário restaurado. Os dias que já existiam neste aparelho foram substituídos pelos do texto.';
-    }catch(err){
-      msg.textContent = 'Não deu pra ler esse texto: '+(err.message||err)+'. Cole o texto inteiro, sem cortar.';
-    }
-  };
-  abrirDlg();
-}
 
 /* --- resumo de hoje, no topo do Diário (antes era a aba Início, que foi
    removida - o Diário virou a "página principal": dieta+treino+hábitos de
@@ -7070,7 +7397,9 @@ document.getElementById('mes-hoje').onclick = function(){
   };
 });
 document.getElementById('copiar-relatorio').onclick = abrirRelatorio;
-document.getElementById('backup').onclick = abrirBackup;
+document.getElementById('relatorio-pdf').onclick = salvarRelatorioPdf;
+document.getElementById('relatorio-whatsapp').onclick = enviarRelatorioWhatsapp;
+window.addEventListener('afterprint', function(){ document.body.classList.remove('imprimindo'); });
 
 async function iniciarApp(){
   try{
