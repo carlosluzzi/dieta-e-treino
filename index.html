@@ -312,7 +312,11 @@
     touch-action:pan-y;overscroll-behavior:contain}
   .dlg-body pre,.dlg-body table,.dlg-body .rolagem-lateral{max-width:100%;overflow-x:auto;touch-action:pan-x pan-y}
   dialog{overflow:hidden;touch-action:pan-y}
-  .dlg-body textarea{width:100%;height:42vh;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:16px;
+  /* textarea monoespaçada e alta: era do campo de JSON do painel de versões.
+     Antes valia pra QUALQUER popup e acabava pegando o "O que mudou nesse
+     dia" do popup de refeições, que saía com fonte de código e 42vh de
+     altura. Agora fica presa ao popup genérico. */
+  #dlg .dlg-body textarea{width:100%;height:42vh;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:16px;
     line-height:1.5;border:0;border-radius:var(--rc);padding:12px;background:var(--fill);color:var(--ink);resize:vertical}
 
   .balao{position:absolute;z-index:60;width:274px;max-width:calc(100vw - 24px);background:var(--card);
@@ -352,6 +356,11 @@
   .legenda i{width:8px;height:8px;border-radius:12px;display:block}
 
   .dia-box{background:var(--card);border-radius:var(--r);margin-top:16px;box-shadow:var(--sh);overflow:hidden}
+  /* dentro do popup ele não é mais um cartão solto: sem margem, sem sombra e
+     sem o respiro de cima, que somava 48px de vazio acima da data */
+  #dlg-refeicoes .dia-box{margin-top:0;box-shadow:none;border-radius:0;background:none}
+  #dlg-refeicoes .dia-box h3{padding-top:0}
+  #dlg-refeicoes .dlg-body{padding-top:10px}
   .dia-box h3{font-size:20px;font-weight:700;letter-spacing:-.019em;margin:0;padding:16px 16px 2px}
   .dia-box .sub{font-size:13px;color:var(--ink2);padding:0 16px 14px;display:block;line-height:1.4}
   .ref{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:12px 8px 12px 12px;
@@ -363,8 +372,11 @@
   /* aviso de "comi algo a mais" na linha fechada da refeição: sem isso o
      extra some dentro da refeição recolhida e as calorias do dia aparecem
      sem nada marcado na tela. */
-  .ref .nm-extra{flex:0 0 auto;font-size:11px;font-weight:600;letter-spacing:.02em;
-    color:var(--ad);background:var(--ad-soft);border-radius:999px;padding:2px 7px;line-height:1.3}
+  .ref .nm-extra{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:0;
+    color:var(--ad);background:var(--ad-soft);border-radius:999px;padding:2px 6px;line-height:1.3}
+  /* o nome da refeição não pode encolher até virar duas letras por causa do
+     chip do lado - daí o chip ser curto ("+1") e o nome ter um piso */
+  .ref .nm-txt{min-width:4.2rem}
   .ref .nm-btn::after{content:'';flex:0 0 auto;width:6px;height:6px;margin-top:-3px;
     border-right:1.6px solid var(--ink3);border-bottom:1.6px solid var(--ink3);transform:rotate(45deg)}
   .ref .nm-btn[aria-expanded="true"]::after{transform:rotate(-135deg);margin-top:3px}
@@ -437,8 +449,10 @@
     transform:rotate(45deg) translate(-2px,-2px);transition:transform .18s ease}
   .obs[open] > summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
   .obs[open] textarea{margin-top:8px}
-  .obs textarea{width:100%;min-height:70px;font-size:16px;line-height:1.45;border:0;border-radius:var(--rc);
-    padding:11px;background:var(--fill);color:var(--ink);resize:vertical}
+  .obs textarea{width:100%;min-height:70px;font-size:15px;line-height:1.45;border:0;border-radius:var(--rc);
+    padding:11px;background:var(--fill);color:var(--ink);resize:vertical;
+    font-family:var(--sans);letter-spacing:-.01em}
+  .obs textarea::placeholder{color:var(--ink3);font-family:var(--sans);letter-spacing:-.01em}
   .obs textarea:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
 
   .balanco{border-top:.5px solid var(--hair);padding:14px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
@@ -530,6 +544,10 @@
   #tela-instalar h1{all:revert}
   #tela-instalar .btn-pill{padding:10px;border-radius:8px;font-size:16px;font-weight:500;
     letter-spacing:normal;margin-top:20px}
+  /* campo nenhum herda a fonte do app sozinho - sem isto o textarea do "O que
+     mudou nesse dia" e os inputs saem com a fonte padrão do navegador, que
+     destoa de todo o resto da tela */
+  input,select,textarea,button{font-family:var(--sans)}
   .campo{margin-bottom:12px;text-align:left}
   .campo label{display:block;font-size:13px;font-weight:500;color:var(--ink2);margin:0 0 6px}
   .campo input{width:100%;padding:6px 10px;border-radius:6px;border:0.5px solid var(--hair);
@@ -611,7 +629,7 @@
   .hoje-cartao{background:var(--card);border-radius:var(--r);padding:16px;margin-top:14px;box-shadow:var(--sh)}
   .hoje-cartao.desabilitado{opacity:.62}
   .hoje-cartao-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-  .hoje-cartao-tit{font-size:16px;font-weight:600;letter-spacing:-.01em}
+  .hoje-cartao-tit{font-size:18px;font-weight:700;letter-spacing:-.015em}
   .hoje-cartao-num{font-size:14px;color:var(--ink2);font-weight:500}
   .hoje-cartao-barra{height:8px;border-radius:12px;background:var(--fill);overflow:hidden}
   .hoje-cartao-barra-fill{height:100%;background:var(--ok);border-radius:12px;transition:width .3s ease}
@@ -725,6 +743,11 @@
   .vs-linha-editavel .vs-salvar-vigente{flex:0 0 auto;padding:6px 12px;font-size:13px}
   /* recado de "Salvando/Salvo" no lugar do botão que saiu; ocupa espaço só
      quando tem texto, pra linha não ficar com um buraco à toa */
+  /* histórico agrupado por pessoa: o nome vira título do bloco e some das
+     linhas, que ficam só com tipo, data e apagar */
+  .vs-grupo{margin-top:16px}
+  .vs-grupo:first-child{margin-top:4px}
+  .vs-grupo-nome{margin:0 0 2px;font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
   .vs-vigente-status{flex:0 0 auto;font-size:12px;font-weight:600;color:var(--ink3)}
   .vs-vigente-status:empty{display:none}
   .vs-vigente-status.bom{color:var(--ok)}
@@ -846,15 +869,19 @@
   .tr-serie-bloco{margin-top:18px;padding-top:14px}
   .tr-serie-bloco:first-of-type{margin-top:14px}
   .tr-serie-cab{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+  /* quando tem legenda de tipo embaixo, o nome não precisa do respiro todo */
+  .tr-serie-cab:has(+ .tr-ex-tipo){margin-bottom:4px}
+  .tr-serie-bloco .tr-ex-tipo{margin:0 0 8px}
   .tr-serie-titulo-wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1 1 auto;min-width:0}
   .tr-serie-titulo{font-size:14.5px;font-weight:700;color:var(--azul);margin:0;
     border:none;background:none;padding:0;font-family:inherit;text-align:left;cursor:pointer}
-  .tr-tipo-badge{flex-shrink:0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
-    padding:4px 9px;border-radius:8px}
-  .tr-tipo-badge.tr-tipo-ativacao{background:#E4ECF3;color:#1F3A57}
-  .tr-tipo-badge.tr-tipo-isometrico{background:#F7E7D3;color:#7A4200}
-  .tr-serie-menu-btn{flex-shrink:0;width:26px;height:26px;border-radius:8px;border:none;background:var(--fill);
-    color:var(--azul);font-size:14px;font-weight:800;line-height:1;cursor:pointer;letter-spacing:1px}
+  /* os três pontinhos não cabiam no quadradinho: 14px + letter-spacing de 1px
+     davam ~24px de texto numa caixa de 26px sem padding, e a folga sumia no
+     Safari. Agora o botão centraliza de verdade (flex), a letra é menor e o
+     espaço extra que sobrava DEPOIS do último ponto é compensado no recuo. */
+  .tr-serie-menu-btn{flex-shrink:0;width:28px;height:28px;border-radius:8px;border:none;background:var(--fill);
+    color:var(--azul);font-size:12px;font-weight:800;line-height:1;cursor:pointer;letter-spacing:1.5px;
+    display:flex;align-items:center;justify-content:center;padding:0;overflow:hidden;text-indent:1.5px}
   .tr-serie-nota{margin:-2px 0 10px;padding:8px 10px;border-radius:10px;background:#FFF6D8;color:#8A6D1A;
     font-size:12.5px;line-height:1.4;white-space:pre-wrap}
   .tr-serie-meta{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 10px}
@@ -880,9 +907,13 @@
   .tr-serie-kg,.tr-serie-reps{width:100%;padding:7px 3px;border-radius:10px;border:none;background:var(--fill);
     font-size:15px;text-align:center;color:var(--ink)}
   .tr-serie-kg:focus,.tr-serie-reps:focus{outline:2px solid var(--azul);outline-offset:1px}
-  .tr-serie-check{justify-self:center;width:28px;height:28px;border-radius:50%;border:none;background:var(--fill);
-    color:var(--ink3);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0}
-  .tr-serie-check[aria-pressed="true"]{background:var(--ink);color:#fff}
+  /* quadradinho, não bolinha - e com o mesmo arredondamento que o resto do
+     app usa nos botões de marcar (os de seguiu/adaptou/não fiz do diário),
+     pra não ter um raio só dele. Marcado fica verde, igual "seguiu". */
+  .tr-serie-check{justify-self:center;width:28px;height:28px;border-radius:var(--rc);border:none;background:var(--fill);
+    color:var(--ink3);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;padding:0}
+  .tr-serie-check[aria-pressed="true"]{background:var(--ok);color:#fff;box-shadow:var(--sh-min)}
   .tr-serie-add{margin-top:6px;width:100%;padding:9px;border-radius:10px;border:1px dashed var(--hair);
     background:none;color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer}
   /* ativação (ex.: Wall Slide) - sem kg/reps/anterior, só um checklist de
@@ -913,7 +944,7 @@
   .tr-ex-grade-sessao{margin:-2px 0 10px}
   .tr-linha-ativacao{grid-template-columns:32px 1fr 32px}
   .tr-serie-ativacao-label{font-size:13px;color:var(--ink2)}
-  .tr-semana-faixa{margin:-6px 0 14px;font-size:12px;color:var(--ink2);line-height:1.4}
+  .tr-semana-cartao-sessao{margin:0 0 14px;box-shadow:var(--sh-min)}
   /* pré-série de aquecimento (ex.: "2x15" antes da carga que vale) - vira
      checklist igual à ativação, em vez de só uma etiqueta informativa lá em
      cima sem nada pra marcar. Fica fora de .tr-serie-linha de propósito:
@@ -928,8 +959,11 @@
 
   /* nota por exercício - modal central clássico (merece atenção total, por
      isso continua com fundo escurecido e cartão centralizado). */
+  /* centralizado: a explicação do exercício nascia colada na borda de baixo,
+     longe do nome que foi tocado e difícil de ler com o polegar em cima. */
   .tr-menu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:120;display:flex;
-    align-items:flex-end;justify-content:center;padding:0 12px calc(16px + env(safe-area-inset-bottom,0px))}
+    align-items:center;justify-content:center;
+    padding:16px 12px calc(16px + env(safe-area-inset-bottom,0px))}
   /* menu "..." de opções por exercício - popover claro ancorado no próprio
      botão que abriu (ver abrirMenuExercicio), não mais um cartão solto
      embaixo da tela. Sem "Cancelar": clicar fora já fecha. */
@@ -947,9 +981,6 @@
     padding:22px 20px 18px;box-shadow:0 8px 30px rgba(0,0,0,.32)}
   .tr-exp-fechar{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:none;
     background:var(--fill);color:var(--ink2);font-size:16px;line-height:1;cursor:pointer}
-  .tr-exp-figura{width:128px;height:128px;margin:0 auto 12px;background:var(--fill2);border-radius:16px;
-    padding:12px;box-sizing:border-box}
-  .tr-exp-figura svg{width:100%;height:100%;display:block}
   .tr-exp-titulo{font-size:16px;font-weight:700;color:var(--ink);text-align:center;margin-bottom:8px}
   .tr-exp-texto{font-size:13.5px;color:var(--ink2);line-height:1.55;text-align:left}
   .tr-nota-titulo{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px}
@@ -958,12 +989,31 @@
   .tr-nota-botoes{display:flex;gap:8px;margin-top:12px}
   .tr-nota-botoes .btn-pill{flex:1 1 0;margin-top:0;padding:10px}
 
-  .tr-descanso-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));
-    transform:translateX(-50%);z-index:120;background:var(--card);color:var(--ink);border-radius:999px;
-    padding:10px 10px 10px 16px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;
-    border:1px solid var(--hair);box-shadow:0 8px 24px rgba(0,0,0,.16)}
-  .tr-descanso-fechar{width:24px;height:24px;border-radius:50%;border:none;background:var(--fill);
-    color:var(--ink2);font-size:12px;line-height:1;cursor:pointer}
+  /* painel de descanso: grande de propósito, pra ler de longe com o celular
+     apoiado no banco. Nasce sozinho quando uma série é marcada. */
+  .tr-descanso-toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));
+    transform:translateX(-50%);z-index:120;background:var(--card);color:var(--ink);
+    width:min(420px, calc(100vw - 28px));border-radius:20px;padding:14px 16px 16px;
+    border:1px solid var(--hair);box-shadow:0 12px 34px rgba(0,0,0,.2)}
+  .tr-desc-topo{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .tr-desc-rot{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
+  .tr-desc-ex{font-size:13.5px;font-weight:600;color:var(--ink2);margin-top:2px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tr-desc-tempo{font-size:52px;font-weight:800;line-height:1.05;letter-spacing:-.03em;
+    font-variant-numeric:tabular-nums;margin:4px 0 10px;text-align:center}
+  .tr-desc-trilho{height:8px;border-radius:12px;background:var(--fill);overflow:hidden}
+  .tr-desc-barra{height:100%;width:100%;border-radius:12px;background:var(--ok);
+    transition:width 1s linear}
+  .tr-descanso-toast.acabando .tr-desc-barra{background:var(--ad)}
+  .tr-descanso-toast.acabando .tr-desc-tempo{color:var(--ad)}
+  .tr-descanso-toast.fim .tr-desc-tempo{color:var(--ok)}
+  .tr-desc-acoes{display:flex;gap:8px;margin-top:12px}
+  .tr-desc-btn{flex:1 1 0;padding:11px;border-radius:var(--rc);border:1px solid var(--hair);
+    background:var(--card);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
+  .tr-desc-btn.forte{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tr-descanso-fechar{width:26px;height:26px;border-radius:50%;border:none;background:var(--fill);
+    color:var(--ink2);font-size:12px;line-height:1;cursor:pointer;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;padding:0}
   .pg-vazio{font-size:14px;color:var(--ink2);padding:8px 0}
   .tr-hist-linha{background:var(--card);border-radius:var(--rc);padding:10px 12px;margin-top:8px;box-shadow:var(--sh-min)}
   .tr-hist-linha:first-child{margin-top:0}
@@ -2341,8 +2391,15 @@ async function carregarVersoesHistorico(){
     // mas aqui na lista o admin enxerga os planos de todo mundo do grupo,
     // pra poder corrigir a data ou apagar um envio errado de qualquer um.
     var ehAdmin = papelAtual === 'owner' || papelAtual === 'admin';
-    var pessoas = ehAdmin ? membrosDaOrg() : [{uid: meuUid, nome: 'Você'}];
-    if(!pessoas.length) pessoas = [{uid: meuUid, nome: 'Você'}];
+    var pessoas = ehAdmin ? membrosDaOrg() : [{uid: meuUid, nome: nomeDoPerfil(meuUid)}];
+    if(!pessoas.length) pessoas = [{uid: meuUid, nome: nomeDoPerfil(meuUid)}];
+    // quem está logado vem primeiro: no meu app eu apareço em cima, no dela
+    // aparece ela. O resto do grupo vem depois, na ordem de sempre.
+    pessoas = pessoas.slice().sort(function(a, b){
+      if(a.uid === meuUid) return -1;
+      if(b.uid === meuUid) return 1;
+      return 0;
+    });
     // Mostra os quatro tipos juntos, sem precisar ficar trocando de aba -
     // cada linha diz o que é, deixa corrigir a data de início e apagar.
     var todos = [];
@@ -2359,14 +2416,31 @@ async function carregarVersoesHistorico(){
       }
     }
     if(!todos.length){ alvo.innerHTML = '<p class="pg-vazio">Nenhum plano enviado ainda.</p>'; return; }
-    todos.sort(function(a,b){ return String(b.criado_em||'') < String(a.criado_em||'') ? -1 : 1; });
-    alvo.innerHTML = todos.map(function(l){
-      var dono = (l.__dono && pessoas.length > 1) ? '<span class="vs-dono">'+l.__dono.nome+'</span>' : '';
+    // Agrupado por pessoa, com o nome como título: quem está logado primeiro.
+    // Dentro de cada um, uma linha por plano (tipo, data e apagar) - o nome
+    // não se repete em toda linha porque já está no título do bloco.
+    function linhaHtml(l){
+      var d = String(l.vigente_a_partir).slice(0,10);
       return '<div class="vs-linha-editavel">'
-        + '<span class="vs-tipo">'+rotuloDaTabela(l.__tabela)+'</span>' + dono
-        + '<input type="date" class="vs-vigente-edit" data-id="'+l.id+'" data-tabela="'+l.__tabela+'" data-antes="'+String(l.vigente_a_partir).slice(0,10)+'" value="'+String(l.vigente_a_partir).slice(0,10)+'">'
+        + '<span class="vs-tipo">'+rotuloDaTabela(l.__tabela)+'</span>'
+        + '<input type="date" class="vs-vigente-edit" data-id="'+l.id+'" data-tabela="'+l.__tabela+'" data-antes="'+d+'" value="'+d+'">'
         + '<span class="vs-vigente-status" aria-live="polite"></span>'
         + '<button type="button" class="vs-btn-mini perigo vs-apagar" data-id="'+l.id+'" data-tabela="'+l.__tabela+'">Apagar</button>'
+        + '</div>';
+    }
+    alvo.innerHTML = pessoas.map(function(pes){
+      var meus = todos.filter(function(l){ return l.__dono && l.__dono.uid === pes.uid; });
+      if(!meus.length) return '';
+      // dentro da pessoa, na ordem dos tipos (treino, dieta, hábitos, suplementação)
+      meus.sort(function(a,b){
+        var ia = VS_TABELAS.findIndex(function(t){ return t.chave === a.__tabela; });
+        var ib = VS_TABELAS.findIndex(function(t){ return t.chave === b.__tabela; });
+        if(ia !== ib) return ia - ib;
+        return String(b.vigente_a_partir||'') < String(a.vigente_a_partir||'') ? -1 : 1;
+      });
+      return '<div class="vs-grupo">'
+        + '<h4 class="vs-grupo-nome">'+pes.nome+'</h4>'
+        + meus.map(linhaHtml).join('')
         + '</div>';
     }).join('');
     // escolher a data no calendário já salva - não tem botão pra apertar
@@ -3566,7 +3640,7 @@ function abrirRefeicoesDlg(diaIso){
     const reg = registro(diario.sel);
     const nada = !Object.keys(reg.r||{}).length;
     if(nada && !diario.aberta){
-      const meals = PLANO[fimDeSemana(deIso(diario.sel)) ? 'fds' : 'semana'] || [];
+      const meals = refeicoesDoPerfil(deIso(diario.sel));
       const comExtra = meals.filter(function(m){ return extrasDa(reg, m.id).length; })[0];
       if(comExtra) diario.aberta = comExtra.id;
     }
@@ -3860,8 +3934,30 @@ function iso(d){
 function deIso(s){ const a=s.split('-'); return new Date(+a[0], +a[1]-1, +a[2]); }
 function brData(s){ const a=s.split('-'); return a[2]+'/'+a[1]; }
 function fimDeSemana(d){ const w=d.getDay(); return w===0 || w===6; }
+/* PLANO é o plano dos dois juntos - é assim que a aba Dieta mostra as duas
+   colunas lado a lado. Mas o diário é de UMA pessoa: se a Isabella tem "Pós
+   treino líquido" e eu não, essa refeição não pode aparecer pra mim nem
+   entrar no meu "x/6". Aqui a gente filtra pelo que a pessoa realmente tem:
+   o horário dela naquela refeição, ou algum item com quantidade pra ela.
+   Vale pra qualquer integrante - nada de nome ou posição fixa. */
+function temRefeicao(meal, p){
+  if(!p || !meal) return true;
+  if(meal.hora && meal.hora[p]) return true;
+  return (meal.versoes||[]).some(function(v){
+    return (v.itens||[]).some(function(it){ return it[p]!==null && it[p]!==undefined; });
+  });
+}
+function refeicoesDoPerfil(d, perfil){
+  const p = chaveIC(perfil === undefined ? diario.perfil : perfil);
+  const lista = PLANO[fimDeSemana(d)?'fds':'semana'] || [];
+  if(!p) return lista;
+  const minhas = lista.filter(function(m){ return temRefeicao(m, p); });
+  // se por algum motivo nada casar (plano só do outro, perfil sem slot),
+  // é melhor mostrar tudo do que deixar a tela vazia
+  return minhas.length ? minhas : lista;
+}
 function refeicoesDoDia(d){
-  return PLANO[fimDeSemana(d)?'fds':'semana'].map(function(m){ return {id:m.id, nome:m.nome}; });
+  return refeicoesDoPerfil(d).map(function(m){ return {id:m.id, nome:m.nome}; });
 }
 function registro(dia){
   if(!diario.log[diario.perfil]) diario.log[diario.perfil] = {};
@@ -4107,7 +4203,7 @@ function porcaoPerfil(meal, vIdx, item, iIdx){
 }
 function contasDoDia(dia){
   const d = deIso(dia);
-  const meals = PLANO[fimDeSemana(d)?'fds':'semana'];
+  const meals = refeicoesDoPerfil(d);
   const reg = (diario.log[diario.perfil]||{})[dia];
   let plan = Object.assign({}, ZERO), real = Object.assign({}, ZERO);
   let semDados = 0, marcou = false, estimados = 0, semInfo = 0;
@@ -4322,7 +4418,7 @@ function renderDiaBox(){
   if(!diario.sel) return;
   const d = deIso(diario.sel);
   const reg = registro(diario.sel);
-  const meals = PLANO[fimDeSemana(d)?'fds':'semana'];
+  const meals = refeicoesDoPerfil(d);
   // conserta na hora qualquer dia antigo que tenha ficado com "a mais" solto
   if(normalizarExtras(reg, meals)) salvarDiario();
 
@@ -4348,7 +4444,10 @@ function renderDiaBox(){
     const qExtras = extrasDa(reg, meal.id).length;
     if(qExtras){
       const chip = document.createElement('span'); chip.className='nm-extra';
-      chip.textContent = '+' + qExtras + ' a mais';
+      chip.textContent = '+' + qExtras;
+      chip.title = qExtras===1 ? '1 item a mais nessa refeição'
+                               : qExtras+' itens a mais nessa refeição';
+      chip.setAttribute('aria-label', chip.title);
       nmBtn.appendChild(chip);
     }
     nmBtn.onclick = function(){
@@ -4531,37 +4630,16 @@ function renderDiaBox(){
   obs.appendChild(resumo); obs.appendChild(ta);
   box.appendChild(obs);
 
-  const bal = document.createElement('div'); bal.className='balanco'; bal.id='balanco';
-  desenhaBalanco(bal);
-  box.appendChild(bal);
+  // o resumo de calorias do dia NÃO entra aqui: ele já está no card da tela
+  // inicial, atrás do popup. Dentro do popup fica só o que é de marcar comida.
   alvo.appendChild(box);
 }
 
+/* Chamado a cada mudança dentro do popup. Em vez de desenhar um resumo aqui
+   dentro, atualiza o que está atrás: o dia no calendário e o card da Dieta. */
 function atualizaBalanco(){
-  const bal = document.getElementById('balanco');
-  if(bal) desenhaBalanco(bal);
   renderCalendario();
-}
-function desenhaBalanco(bal){
-  const c = contasDoDia(diario.sel);
-  if(!c.marcou){
-    bal.innerHTML = '<div class="bl"><b>'+fmtKcal(c.plan.k)+' kcal</b><span>planejadas para este dia</span></div>'+
-      '<div class="bnota">Marque as refeições para ver o que realmente entrou.</div>';
-    return;
-  }
-  const dif = c.real.k - c.plan.k;
-  let nota = 'Proteína '+Math.round(c.real.p)+' g de '+Math.round(c.plan.p)+
-    ' · Carboidrato '+Math.round(c.real.c)+' g de '+Math.round(c.plan.c)+
-    ' · Gordura '+Math.round(c.real.g)+' g de '+Math.round(c.plan.g)+
-    '. Diferença de '+(dif>=0?'+':'')+fmtKcal(dif)+' kcal no dia.';
-  if(c.estimados) nota += ' '+c.estimados+(c.estimados===1?' item entrou':' itens entraram')+
-    ' só com as calorias digitadas, sem macros.';
-  if(c.semInfo) nota += ' '+c.semInfo+(c.semInfo===1?' troca está':' trocas estão')+
-    ' sem alimento ou quantidade, e por isso ficou de fora da conta.';
-  bal.innerHTML =
-    '<div class="bl forte"><b>'+fmtKcal(c.real.k)+' kcal</b><span>você comeu</span></div>'+
-    '<div class="bl"><b>'+fmtKcal(c.plan.k)+' kcal</b><span>estava planejado</span></div>'+
-    '<div class="bnota">'+nota+'</div>';
+  if(typeof atualizarCardDieta === 'function') atualizarCardDieta();
 }
 
 function periodoDias(){
@@ -4610,7 +4688,7 @@ function estatisticas(){
     }
     (function(){
       const d2 = deIso(s);
-      PLANO[fimDeSemana(d2)?'fds':'semana'].forEach(function(meal){
+      refeicoesDoPerfil(d2).forEach(function(meal){
         const v = versaoDoDia(reg, meal);
         meal.versoes[v].itens.forEach(function(item, iIdx){
           const t = trocaDoItem(reg, meal.id, iIdx);
@@ -4818,6 +4896,27 @@ function renderResumoHoje(){
   document.getElementById('hoje-ir-diario').textContent =
     (diaIso === iso(new Date())) ? 'Marcar refeições de hoje' : 'Marcar refeições desse dia';
 
+  atualizarCardDieta(diaIso, feitas, total);
+  atualizarCardHabitos(diaIso);
+  atualizarCardTreinoHoje(diaIso);
+}
+
+/* Só o card da Dieta (medidor de calorias e macros). Fica separado porque é
+   chamado de dois lugares: no desenho da tela inteira e a cada marcação feita
+   dentro do popup - e nesse caso refazer a tela toda (que consulta o banco do
+   treino) seria desperdício. */
+function atualizarCardDieta(diaIso, feitas, total){
+  diaIso = diaIso || diario.sel || iso(new Date());
+  if(feitas === undefined){
+    const meals = refeicoesDoDia(deIso(diaIso));
+    const reg = (diario.log[diario.perfil]||{})[diaIso];
+    total = meals.length;
+    feitas = 0;
+    meals.forEach(function(m){ if(reg && reg.r && reg.r[m.id]) feitas++; });
+    document.getElementById('hoje-dieta-num').textContent = feitas+'/'+total+' refeições';
+    document.getElementById('hoje-dieta-barra').style.width =
+      (total ? Math.round(feitas/total*100) : 0)+'%';
+  }
   // Orçamento do dia: o plano define quanto cabe, o medidor mostra quanto
   // ainda sobra (ou quanto passou), e os macros aparecem como comido/alvo.
   try{
@@ -4829,7 +4928,7 @@ function renderResumoHoje(){
     const caixa = document.getElementById('hoje-orc');
 
     document.getElementById('hoje-dieta-orcamento').textContent =
-      orc ? (fmtKcal(orc) + ' cals') : 'Dieta';
+      orc ? (fmtKcal(orc) + ' calorias') : 'Dieta';
     document.getElementById('orc-comeu').textContent = fmtKcal(comeu);
     document.getElementById('orc-refeicoes').textContent = feitas + '/' + total;
     document.getElementById('orc-restante').textContent = fmtKcal(Math.abs(resta));
@@ -4850,9 +4949,6 @@ function renderResumoHoje(){
     macro('orc-carbo', c.real.c, c.plan.c);
     macro('orc-proteina', c.real.p, c.plan.p);
   }catch(e){ /* sem plano carregado ainda - o card fica com os zeros */ }
-
-  atualizarCardHabitos(diaIso);
-  atualizarCardTreinoHoje(diaIso);
 }
 document.getElementById('hoje-ir-diario').onclick = function(){
   // abre o popup no dia que a tela está mostrando (o que foi escolhido no
@@ -4943,11 +5039,19 @@ async function atualizarCardTreinoHoje(diaSel){
       return;
     }
 
-    if(treinoHojeEscolhidoDia !== hojeIso){ treinoHojeEscolhido = null; treinoHojeEscolhidoDia = hojeIso; }
+    // A sugestão só olha treinos feitos DENTRO do plano que está valendo. Sem
+    // isso, um treino A registrado antes (num teste, ou no plano anterior)
+    // continuava mandando na rotação e o primeiro dia do plano novo já vinha
+    // como B. A chave do cache leva a data de início junto, pra mudar a
+    // vigência recalcular na hora em vez de só no dia seguinte.
+    const inicioPlano = String((linha && linha.vigente_a_partir) || '').slice(0,10);
+    const chaveCache = hojeIso + '|' + inicioPlano;
+    if(treinoHojeEscolhidoDia !== chaveCache){ treinoHojeEscolhido = null; treinoHojeEscolhidoDia = chaveCache; }
     if(!treinoHojeEscolhido){
-      const rUlt = await db.from('treino_registros').select('treino_chave,dia')
-        .eq('organization_id', orgAtiva.id).eq('user_id', uid)
-        .order('dia', { ascending:false }).limit(1);
+      let q = db.from('treino_registros').select('treino_chave,dia')
+        .eq('organization_id', orgAtiva.id).eq('user_id', uid);
+      if(inicioPlano) q = q.gte('dia', inicioPlano);
+      const rUlt = await q.order('dia', { ascending:false }).limit(1);
       const ultimo = rUlt && rUlt.data && rUlt.data[0] ? rUlt.data[0].treino_chave : null;
       treinoHojeEscolhido = proximoTreinoSugerido(plano, ultimo);
     }
@@ -5848,84 +5952,6 @@ function preSerieAquecimentoHtml(aquecimentoTxt){
   return '<div class="tr-preserie-bloco"><div class="tr-preserie-titulo">Aquecimento</div>' + linhas + '</div>';
 }
 
-/* --- figura padronizada por exercício ---------------------------------
-   Em vez de foto (que nunca fica padronizada entre exercícios diferentes),
-   desenha um boneco-palito por código: mesmo traço, mesma proporção, mesma
-   cor pra qualquer exercício - só muda a "pose" (ângulos das juntas) e o
-   "equip" (halter/barra/cabo/peso/parede/nada) escolhidos por exercício em
-   conteudo.biblioteca_exercicios. Ângulos em graus, 0=direita, -90=cima,
-   90=baixo, 180=esquerda (eixo y da tela cresce pra baixo). */
-const FIG = (function(){
-  function seg(x,y,ang,len){ const a=ang*Math.PI/180; return {x:x+len*Math.cos(a), y:y+len*Math.sin(a)}; }
-  function pontos(p){
-    const hip = {x:p.hipX, y:p.hipY};
-    const ombro = seg(hip.x,hip.y,p.torsoAngle,p.torsoLen);
-    const cabeca = seg(ombro.x,ombro.y,p.torsoAngle,p.headR+3);
-    const cotovelo = seg(ombro.x,ombro.y,p.armUpperAngle,p.armUpperLen);
-    const pulso = seg(cotovelo.x,cotovelo.y,p.armLowerAngle,p.armLowerLen);
-    const joelho = seg(hip.x,hip.y,p.legUpperAngle,p.legUpperLen);
-    const tornozelo = seg(joelho.x,joelho.y,p.legLowerAngle,p.legLowerLen);
-    const pe = seg(tornozelo.x,tornozelo.y,p.footAngle!=null?p.footAngle:0,p.footLen||8);
-    return { hip:hip, ombro:ombro, cabeca:cabeca, cotovelo:cotovelo, pulso:pulso, joelho:joelho, tornozelo:tornozelo, pe:pe };
-  }
-  function linha(a,b,cor,w){
-    return '<line x1="'+a.x.toFixed(1)+'" y1="'+a.y.toFixed(1)+'" x2="'+b.x.toFixed(1)+'" y2="'+b.y.toFixed(1)+'" stroke="'+(cor||'var(--ink)')+'" stroke-width="'+(w||4.2)+'" stroke-linecap="round"/>';
-  }
-  function circulo(c,r,cor,w){
-    return '<circle cx="'+c.x.toFixed(1)+'" cy="'+c.y.toFixed(1)+'" r="'+r+'" fill="none" stroke="'+(cor||'var(--ink)')+'" stroke-width="'+(w||3.4)+'"/>';
-  }
-  function boneco(pts,p){
-    return linha(pts.hip,pts.joelho) + linha(pts.joelho,pts.tornozelo) + linha(pts.tornozelo,pts.pe,'var(--ink)',3.6)
-      + linha(pts.hip,pts.ombro) + linha(pts.ombro,pts.cotovelo) + linha(pts.cotovelo,pts.pulso)
-      + circulo(pts.cabeca, p.headR);
-  }
-  function equipMaoSVG(equip, pts){
-    const EQ = 'var(--ink3)';
-    if(equip==='halter'){
-      const c = pts.pulso;
-      return linha({x:c.x-6,y:c.y},{x:c.x+6,y:c.y},EQ,3) + circulo({x:c.x-6,y:c.y},3,EQ,2.6) + circulo({x:c.x+6,y:c.y},3,EQ,2.6);
-    }
-    if(equip==='barra'){
-      const c = pts.pulso;
-      return linha({x:c.x-13,y:c.y},{x:c.x+13,y:c.y},EQ,3) + circulo({x:c.x-13,y:c.y},3.6,EQ,2.6) + circulo({x:c.x+13,y:c.y},3.6,EQ,2.6);
-    }
-    if(equip==='cabo'){
-      const c = pts.pulso;
-      return linha({x:c.x,y:4},{x:c.x,y:c.y},EQ,2.4) + circulo({x:c.x,y:4},2.6,EQ,2.2);
-    }
-    if(equip==='peso'){
-      return circulo(pts.pulso, 4.6, EQ, 2.8);
-    }
-    return '';
-  }
-  function svg(nomePose, equip){
-    const p = FIGURA_POSES[nomePose];
-    if(!p) return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"></svg>';
-    if(p.custom) return p.custom;
-    const pts = pontos(p);
-    const EQ = 'var(--ink3)';
-    let fundo = '';
-    if(equip==='parede') fundo += linha({x:14,y:12},{x:14,y:88},EQ,3);
-    if(p.assento){
-      const largo = p.assentoLargo||14;
-      const y = pts.hip.y + (p.assentoDy!=null?p.assentoDy:11);
-      fundo += '<rect x="'+(pts.hip.x-largo).toFixed(1)+'" y="'+(y-2).toFixed(1)+'" width="'+(largo*2).toFixed(1)+'" height="4" rx="1.5" fill="none" stroke="'+EQ+'" stroke-width="2.6"/>';
-    }
-    if(p.banco){
-      const xs = [pts.hip.x, pts.ombro.x, pts.cabeca.x, pts.joelho.x, pts.tornozelo.x];
-      const x1 = Math.min.apply(null, xs) - 6, x2 = Math.max.apply(null, xs) + 8;
-      fundo += '<rect x="'+x1.toFixed(1)+'" y="'+(pts.hip.y+8).toFixed(1)+'" width="'+(x2-x1).toFixed(1)+'" height="4" rx="1.5" fill="none" stroke="'+EQ+'" stroke-width="2.6"/>';
-    }
-    if(p.aparelho){
-      fundo += '<rect x="'+p.aparelho[0]+'" y="'+p.aparelho[1]+'" width="'+p.aparelho[2]+'" height="'+p.aparelho[3]+'" rx="2" fill="none" stroke="'+EQ+'" stroke-width="2.8"/>';
-    }
-    let frente = (equip==='peso' && p.pesoNoCorpo)
-      ? circulo({x:(pts.hip.x+pts.ombro.x)/2, y:(pts.hip.y+pts.ombro.y)/2 - 5}, 4.6, EQ, 2.8)
-      : equipMaoSVG(equip, pts);
-    return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'+fundo+boneco(pts,p)+frente+'</svg>';
-  }
-  return { svg: svg };
-})();
 
 // poses (geometria do boneco) - o "equip" é escolhido por exercício, não
 // pela pose, pra reaproveitar a mesma pose com halter, cabo ou máquina.
@@ -6092,10 +6118,10 @@ function abrirExplicacaoExercicio(nome){
   const info = c && c.biblioteca_exercicios && c.biblioteca_exercicios[nome];
   const wrap = document.createElement('div');
   wrap.className = 'tr-menu-backdrop';
-  const figuraSvg = info ? FIG.svg(info.pose, info.equip) : '';
+  // sem desenho: as figuras genéricas não ajudavam a entender o movimento,
+  // o texto faz esse trabalho melhor.
   wrap.innerHTML = '<div class="tr-exp-card">'
     + '<button type="button" class="tr-exp-fechar" aria-label="Fechar">×</button>'
-    + (figuraSvg ? '<div class="tr-exp-figura">'+figuraSvg+'</div>' : '')
     + '<div class="tr-exp-titulo">'+nome+'</div>'
     + '<div class="tr-exp-texto">'+((info && info.explicacao) || 'Ainda não tem explicação cadastrada pra esse exercício.')+'</div>'
     + '</div>';
@@ -6144,13 +6170,31 @@ function montarSessaoTreino(){
     // info da semana atual (série/RIR/intervalo padrão do bloco todo) - vale
     // pra qualquer exercício do treino, por isso fica uma vez só no topo.
     const semAtual = (c.semanas||[]).find(function(s){ return s.n===treinoSemana; });
+    // mesmo cartão de três células da aba Treino (com a dica do RIR), em vez
+    // da faixa de texto corrido que estava aqui - é a mesma informação e não
+    // faz sentido ter dois jeitos de mostrar a prescrição da semana.
     const semanaInfo = semAtual
-      ? '<div class="tr-semana-faixa">Semana '+semAtual.n+' · Séries válidas: '+semAtual.reps+' · Intensidade: '+semAtual.rir+' · Intervalos: '+semAtual.intervalo+'</div>'
+      ? '<div class="tr-semana-cartao tr-semana-cartao-sessao">'
+        + '<div class="tr-sem-celula"><span class="tr-sem-rot">Séries válidas</span>'
+        + '<span class="tr-sem-val">'+semAtual.reps+'</span></div>'
+        + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intensidade'
+        + '<button type="button" class="tr-dica-btn" id="tr-dica-rir-sessao" aria-label="O que é RIR">?</button>'
+        + '</span><span class="tr-sem-val">'+semAtual.rir+'</span></div>'
+        + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intervalo</span>'
+        + '<span class="tr-sem-val">'+semAtual.intervalo+'</span></div></div>'
       : '';
+    // intervalo da semana serve de reserva pro descanso de exercícios que não
+    // trazem "Descanso" próprio no plano
+    sessaoTreinoIntervaloSemana = semAtual ? semAtual.intervalo : '';
     const badgesTipo = { ativacao: 'Ativação', isometrico: 'Isométrico' };
     const blocos = (t.ex||[]).map(function(e, idx){
       const tipo = e[5] || 'normal';
-      const badge = badgesTipo[tipo] ? '<span class="tr-tipo-badge tr-tipo-'+tipo+'">'+badgesTipo[tipo]+'</span>' : '';
+      // mesmo formato da aba Treino: legenda miúda EMBAIXO do nome, com uma
+      // bolinha do lado, sem pílula colorida. A pílula azul destoava aqui
+      // dentro e disputava atenção com o nome do exercício.
+      const legendaTipo = badgesTipo[tipo]
+        ? '<div class="tr-ex-tipo tr-ex-tipo-'+tipo+'">'+badgesTipo[tipo]+'</div>'
+        : '';
       // colunas de referência do plano (teste de carga, séries válidas e
       // descanso) que antes ficavam só na tabela de cima - agora aparecem
       // junto de cada exercício aqui embaixo, pra não precisar rolar pra
@@ -6213,9 +6257,12 @@ function montarSessaoTreino(){
             + '</div></div>';
         }
       }
-      return '<div class="tr-serie-bloco" data-ex="'+idx+'" data-tipo="'+tipo+'">'
-        + '<div class="tr-serie-cab"><span class="tr-serie-titulo-wrap"><button type="button" class="tr-serie-titulo" data-nome="'+e[0].replace(/"/g,'&quot;')+'">'+e[0]+'</button>'+badge+'</span>'
+      return '<div class="tr-serie-bloco" data-ex="'+idx+'" data-tipo="'+tipo+'"'
+        + ' data-descanso="'+String(e[4]||'').replace(/"/g,'&quot;')+'"'
+        + ' data-nome="'+String(e[0]||'').replace(/"/g,'&quot;')+'">'
+        + '<div class="tr-serie-cab"><span class="tr-serie-titulo-wrap"><button type="button" class="tr-serie-titulo" data-nome="'+e[0].replace(/"/g,'&quot;')+'">'+e[0]+'</button></span>'
         + '<button type="button" class="tr-serie-menu-btn" data-ex="'+idx+'" aria-label="Opções do exercício">•••</button></div>'
+        + legendaTipo
         + '<div class="tr-serie-nota" data-ex="'+idx+'" hidden></div>'
         + meta
         + preSerie
@@ -6240,6 +6287,14 @@ function montarSessaoTreino(){
   Array.prototype.forEach.call(corpo.querySelectorAll('.tr-chip-sel'), function(b){
     b.onclick = function(){ sessaoTreinoChave = b.getAttribute('data-chave'); montarSessaoTreino(); };
   });
+  (function(){
+    const bt = document.getElementById('tr-dica-rir-sessao');
+    if(bt) bt.onclick = function(ev){
+      ev.stopPropagation();
+      abrirDica(bt, 'RIR: repetições na reserva',
+        'É quanto ainda sobraria no tanque quando você encerra a série. ~3 RIR quer dizer parar três repetições antes da falha: se daria pra fazer mais três com boa execução, o peso está no ponto. Quanto menor o RIR, mais perto da falha.');
+    };
+  })();
   Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-check'), function(b){
     ligarCheckSerie(b);
   });
@@ -6293,6 +6348,7 @@ function montarSessaoTreino(){
 }
 // liga o toggle "feita" de uma série (botão de check) - marca também a linha
 // inteira (fundo levemente diferente), igual ao Strong.
+let sessaoTreinoIntervaloSemana = '';
 function ligarCheckSerie(btn){
   if(!btn) return;
   btn.onclick = function(){
@@ -6300,6 +6356,15 @@ function ligarCheckSerie(btn){
     btn.setAttribute('aria-pressed', feita);
     const linha = btn.closest('.tr-serie-linha, .tr-aquecimento-linha, .tr-preserie-linha');
     if(linha) linha.classList.toggle('feita', feita);
+    // terminou a série: já começa a contar o descanso pra próxima, com o
+    // tempo que o plano manda naquele exercício (e, na falta dele, o
+    // intervalo da semana). Desmarcar não dispara nada.
+    if(feita){
+      const bloco = btn.closest('.tr-serie-bloco');
+      const txt = (bloco && bloco.getAttribute('data-descanso')) || sessaoTreinoIntervaloSemana;
+      const nome = (bloco && bloco.getAttribute('data-nome')) || '';
+      if(temValorPlano(txt) || sessaoTreinoIntervaloSemana) iniciarDescanso(txt, nome);
+    }
   };
 }
 // renumera visualmente as séries (1,2,3...) de um exercício depois de
@@ -6412,7 +6477,7 @@ function abrirMenuExercicio(idx, btnEl){
     fecharMenuExercicio();
     if(acao==='nota') abrirNotaExercicio(idx);
     else if(acao==='aquecimento') adicionarSerieAquecimento(idx);
-    else if(acao==='descanso') iniciarDescanso(descansoTxt);
+    else if(acao==='descanso') iniciarDescanso(descansoTxt, e[0]||'');
     else if(acao==='remover') removerExercicioDaSessao(idx);
   });
 }
@@ -6479,29 +6544,74 @@ function parseDescansoSegundos(txt){
   return /min/i.test(s) ? n*60 : n;
 }
 let sessaoTreinoDescansoTimer = null;
-function iniciarDescanso(txt){
-  let restante = parseDescansoSegundos(txt);
-  const existente = document.getElementById('tr-descanso-toast');
-  if(existente) existente.remove();
+function fecharDescanso(){
   if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
+  sessaoTreinoDescansoTimer = null;
+  const el = document.getElementById('tr-descanso-toast');
+  if(el) el.remove();
+}
+/* Painel de descanso: aparece sozinho quando a série é marcada. É grande de
+   propósito - dá pra ler o tempo de longe, com o celular apoiado no banco,
+   sem precisar aproximar o rosto no meio da série. */
+function iniciarDescanso(txt, nomeExercicio){
+  const total = parseDescansoSegundos(txt);
+  let restante = total;
+  fecharDescanso();
   const el = document.createElement('div');
   el.id = 'tr-descanso-toast';
   el.className = 'tr-descanso-toast';
-  el.innerHTML = '<span class="tr-descanso-tempo"></span><button type="button" class="tr-descanso-fechar">✕</button>';
+  el.setAttribute('role','status');
+  el.innerHTML =
+      '<div class="tr-desc-topo">'
+    +   '<span class="tr-desc-rot">Descanso</span>'
+    +   '<button type="button" class="tr-descanso-fechar" aria-label="Fechar">✕</button>'
+    + '</div>'
+    + (nomeExercicio ? '<div class="tr-desc-ex"></div>' : '')
+    + '<div class="tr-desc-tempo"></div>'
+    + '<div class="tr-desc-trilho"><div class="tr-desc-barra"></div></div>'
+    + '<div class="tr-desc-acoes">'
+    +   '<button type="button" class="tr-desc-btn" data-acao="mais">+30 s</button>'
+    +   '<button type="button" class="tr-desc-btn forte" data-acao="pular">Pular</button>'
+    + '</div>';
   document.body.appendChild(el);
-  const tempoEl = el.querySelector('.tr-descanso-tempo');
-  function tick(){
-    if(restante<0){ clearInterval(sessaoTreinoDescansoTimer); el.remove(); return; }
-    const mm = Math.floor(restante/60), ss = restante%60;
-    tempoEl.textContent = 'Descanso ' + mm + ':' + (ss<10?'0':'') + ss;
-    restante--;
+  if(nomeExercicio) el.querySelector('.tr-desc-ex').textContent = nomeExercicio;
+  const tempoEl = el.querySelector('.tr-desc-tempo');
+  const barra = el.querySelector('.tr-desc-barra');
+  let maior = total;
+  function pintar(){
+    const mm = Math.floor(Math.max(0,restante)/60), ss = Math.max(0,restante)%60;
+    tempoEl.textContent = mm + ':' + (ss<10?'0':'') + ss;
+    barra.style.width = maior > 0 ? Math.max(0, Math.min(100, restante/maior*100)) + '%' : '0%';
+    el.classList.toggle('acabando', restante <= 5 && restante > 0);
   }
-  tick();
+  function tick(){
+    restante--;
+    if(restante < 0){
+      el.classList.add('fim');
+      tempoEl.textContent = 'Vai!';
+      barra.style.width = '0%';
+      if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
+      sessaoTreinoDescansoTimer = null;
+      try{ if(navigator.vibrate) navigator.vibrate([120,70,120]); }catch(e){}
+      setTimeout(function(){
+        // some sozinho, mas só se não tiver começado outro descanso no meio
+        if(document.getElementById('tr-descanso-toast') === el) el.remove();
+      }, 2500);
+      return;
+    }
+    pintar();
+  }
+  pintar();
   sessaoTreinoDescansoTimer = setInterval(tick, 1000);
-  el.querySelector('.tr-descanso-fechar').onclick = function(){
-    clearInterval(sessaoTreinoDescansoTimer);
-    el.remove();
-  };
+  el.querySelector('.tr-descanso-fechar').onclick = fecharDescanso;
+  Array.prototype.forEach.call(el.querySelectorAll('.tr-desc-btn'), function(b){
+    b.onclick = function(){
+      if(b.getAttribute('data-acao') === 'pular'){ fecharDescanso(); return; }
+      restante += 30; maior = Math.max(maior, restante); pintar();
+      el.classList.remove('fim');
+      if(!sessaoTreinoDescansoTimer) sessaoTreinoDescansoTimer = setInterval(tick, 1000);
+    };
+  });
 }
 
 /* --- abas e controles principais --- */
