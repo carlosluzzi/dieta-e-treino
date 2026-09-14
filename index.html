@@ -949,10 +949,16 @@
   /* prescrição da semana em três células, com a dica do RIR */
   .switch-semana{display:flex;width:100%}
   .switch-semana button{flex:1 1 0;text-align:center;padding:8px 6px}
-  .tr-semana-cartao{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:12px;
-    background:var(--fill);border-radius:12px;overflow:hidden}
-  .tr-sem-celula{display:flex;flex-direction:column;align-items:center;gap:3px;
-    background:var(--card);padding:12px 6px;min-width:0}
+  /* sem cartão em volta: só os fios verticais separando as três colunas. O
+     retângulo cinza em volta era mais uma caixa dentro de outra caixa. */
+  .tr-semana-cartao{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:12px;
+    background:none;border-radius:0}
+  /* o valor fica encostado embaixo: quando um rótulo quebra em duas linhas
+     ("Séries válidas" em tela estreita), os três valores continuam na mesma
+     altura em vez de cada um flutuar num lugar. */
+  .tr-sem-celula{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+    gap:3px;background:none;padding:10px 6px;min-width:0}
+  .tr-sem-celula + .tr-sem-celula{border-left:1px solid var(--hair)}
   .tr-sem-rot{display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:var(--ink3);
     text-transform:uppercase;letter-spacing:.03em;text-align:center;line-height:1.2}
   .tr-sem-val{font-size:15px;font-weight:700;color:var(--ink);text-align:center;line-height:1.25;
@@ -1113,7 +1119,7 @@
   /* mesma grade dentro da sessão de treino, só com o respiro daquele bloco */
   .tr-ex-grade-sessao{margin:-2px 0 10px}
   .tr-serie-ativacao-label{font-size:14px;color:var(--ink2)}
-  .tr-semana-cartao-sessao{margin:0 0 14px;box-shadow:var(--sh-min)}
+  .tr-semana-cartao-sessao{margin:0 0 8px}
   /* pré-série de aquecimento (ex.: "2x15" antes da carga que vale): entra
      como as primeiras linhas da MESMA tabela das séries, com "AQ" no lugar do
      número. Antes era um bloco à parte com faixa cinza de ponta a ponta -
