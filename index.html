@@ -1064,9 +1064,9 @@
   /* o vermelho fica com a mesma folga e o mesmo raio da linha: encostando nos
      cantos, sobrava uma pontinha dele aparecendo por baixo do arredondado. */
   .tr-serie-linha-wrap .tr-serie-excluir{top:2px;bottom:2px;border-radius:10px}
-  /* passou do ponto de soltar-e-apagar: só o vermelho escurece um tom, sem
-     mexer em nada de lugar. */
-  .tr-serie-excluir.pronto{background:#D92B23}
+  /* a cor do botão é escrita pelo próprio gesto (ver acompanhar()), que a
+     escurece aos poucos conforme a linha anda - por isso ela não fica
+     fixa aqui. */
   /* o texto fica ancorado na direita (a 14px da borda, exatamente onde ele já
      nascia centralizado nos 76px do botão fechado). Assim, quando o botão
      cresce junto com o arrasto, o "Excluir" não passeia pro meio e depois
@@ -7250,10 +7250,21 @@ function ligarSwipeSerie(wrapEl, aoExcluir){
   // puxada curta revela o botão, puxada longa resolve sem precisar mirar nele.
   function limiar(){ return Math.max(LARGURA_ABERTA * 2, largura() * 0.45); }
   // o vermelho acompanha a linha: enquanto ela anda, ele cresce junto, senão
-  // apareceria um buraco branco entre o botão e a borda da tela.
+  // apareceria um buraco branco entre o botão e a borda da tela. E escurece
+  // aos poucos no caminho, do vermelho claro até o ponto em que soltar já
+  // apaga - assim o dedo sente a mudança acontecendo, em vez de levar um
+  // susto com a cor virando de uma vez.
+  const VERM_CLARO = [255, 59, 48], VERM_ESCURO = [190, 32, 26];
+  function corDoExcluir(t){
+    const c = VERM_CLARO.map(function(v, i){ return Math.round(v + (VERM_ESCURO[i] - v) * t); });
+    return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
+  }
   function acompanhar(x){
     if(!excluirBtn) return;
     excluirBtn.style.width = Math.max(LARGURA_ABERTA, -x) + 'px';
+    const faixa = Math.max(1, limiar() - LARGURA_ABERTA);
+    const t = Math.min(1, Math.max(0, (-x - LARGURA_ABERTA) / faixa));
+    excluirBtn.style.background = corDoExcluir(t);
   }
   linha.addEventListener('pointerdown', function(ev){
     if(ev.target.closest('input,button')) { /* ainda pode iniciar o gesto pelo próprio campo */ }
@@ -7274,9 +7285,6 @@ function ligarSwipeSerie(wrapEl, aoExcluir){
     let x = (aberto ? -LARGURA_ABERTA : 0) + dx;
     if(x>0) x=0; if(x < -largura()) x = -largura();
     setX(x); acompanhar(x);
-    // passou do ponto de apagar: o vermelho fica cheio pra avisar que soltar
-    // ali já resolve
-    if(excluirBtn) excluirBtn.classList.toggle('pronto', x < -limiar());
   });
   function soltar(){
     if(!arrastando) return;
@@ -7293,7 +7301,6 @@ function ligarSwipeSerie(wrapEl, aoExcluir){
     }
     if(x < -LARGURA_ABERTA*0.5){ setX(-LARGURA_ABERTA); acompanhar(-LARGURA_ABERTA); aberto = true; }
     else { setX(0); acompanhar(0); aberto = false; }
-    if(excluirBtn) excluirBtn.classList.remove('pronto');
   }
   linha.addEventListener('pointerup', soltar);
   linha.addEventListener('pointercancel', soltar);
