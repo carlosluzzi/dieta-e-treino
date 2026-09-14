@@ -4978,13 +4978,17 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover, modoExtra){
   // No "+ adicionar à refeição" continua aparecendo, porque ali é comida que
   // entrou por fora e o número é justamente o que interessa. E quando só as
   // calorias foram digitadas, o aviso fica em qualquer um dos dois.
-  if(modoExtra || mt){
-    // a linha nasce junto com o editor, mesmo vazia: o espaço dela já fica
-    // reservado, então preencher a quantidade não empurra o resto da tela
-    // pra baixo do nada.
+  // Na troca de um item do plano não existe linha de conta nenhuma - nem
+  // escrita, nem em branco: a quantidade vem da tabela de substituição, então
+  // não há o que informar, e uma linha vazia nascendo quando a quantidade é
+  // preenchida só faz a tela pular. A única exceção é "outro alimento", onde
+  // as calorias são digitadas na mão (e aí o editor já muda de cara junto).
+  // No "+ adicionar à refeição" a linha existe desde o começo, mesmo vazia,
+  // pelo mesmo motivo: o espaço já fica reservado.
+  if(modoExtra || t.n === OUTRO){
     const info = document.createElement('div'); info.className='kcal';
     if(mt && mt.estimado) info.innerHTML = 'Contando <b>'+fmtKcal(mt.k)+' kcal</b>. Proteína, carboidrato e gordura ficam de fora, porque só as calorias foram informadas.';
-    else if(mt && (modoExtra || mt.estimado)) info.textContent = fmtKcal(mt.k)+' kcal'
+    else if(mt && modoExtra) info.textContent = fmtKcal(mt.k)+' kcal'
       + ' · C '+Math.round(mt.c)+' g · P '+Math.round(mt.p)+' g · G '+Math.round(mt.g)+' g';
     box.appendChild(info);
   }
