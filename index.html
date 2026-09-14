@@ -4944,7 +4944,12 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover, modoExtra){
   if(itemDoPlano){
     const g1 = document.createElement('optgroup');
     g1.label = 'Pode trocar por';
-    opcoesDo(itemDoPlano).forEach(function(o){ jaListado[norm(o.n)] = 1; opt(o.n, o.n, g1); });
+    // em ordem alfabética, pra achar o alimento pelo nome. A ordem da tabela
+    // do nutricionista continua valendo onde ela importa (na aba Dieta, que
+    // guarda a escolha pela posição na lista) - aqui é só a vitrine.
+    opcoesDo(itemDoPlano).slice().sort(function(a, b){
+      return String(a.n).localeCompare(String(b.n), 'pt');
+    }).forEach(function(o){ jaListado[norm(o.n)] = 1; opt(o.n, o.n, g1); });
     if(g1.children.length > 1){ sel.appendChild(g1); temEquivalente = true; }
   }
   // "Troquei" é troca DENTRO do plano: só aparece o que a tabela daquele
