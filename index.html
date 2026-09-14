@@ -405,7 +405,9 @@
   .estados button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
   .estados.fr button{font-size:12px;padding:6px 10px}
 
-  .itens-dia{background:var(--fill2);border-top:.5px solid var(--hair);padding:6px 16px 14px}
+  /* sem tapete cinza: os itens da refeição ficam no mesmo fundo do cartão,
+     e a linha de cima já basta pra separar do cabeçalho da refeição */
+  .itens-dia{background:none;border-top:.5px solid var(--hair);padding:6px 16px 14px}
   .vsel{padding:10px 0 6px}
   .vsel label{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:4px}
   .vsel select{background-color:var(--card)}
@@ -417,7 +419,7 @@
   /* a linha precisa de fundo opaco pra esconder o "Excluir" que fica atrás
      dela, mas tem que ser o MESMO fundo da lista - senão vira um cartãozinho
      branco no meio dos outros itens. */
-  .item-dia-wrap .item-dia{background:var(--fill2);position:relative;z-index:1;touch-action:pan-y}
+  .item-dia-wrap .item-dia{background:var(--card);position:relative;z-index:1;touch-action:pan-y}
   .item-dia{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0;border-top:.5px solid var(--hair)}
   .item-dia.sem-linha{border-top:0}
   .item-dia .idn{flex:1;min-width:96px;font-size:15px;letter-spacing:-.01em}
@@ -436,14 +438,21 @@
   .troca-box.nu{background:none;box-shadow:none;padding:0;margin-top:6px}
   /* macros do alimento extra, na faixa onde os outros itens têm o
      tudo/metade/nada/troquei */
-  .item-macros{flex:1 1 100%;font-size:12px;color:var(--ink2);line-height:1.35;
-    font-variant-numeric:tabular-nums}
+  /* nunca quebra: se em algum caso extremo faltar espaço, o texto some com
+     reticências em vez de pular pra outra linha */
+  .item-macros{flex:1 1 100%;min-width:0;font-size:12.5px;color:var(--ink2);line-height:1.35;
+    font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .troca-box .campo{flex:1 1 100%;min-width:0}
   .troca-box .campo.pq{flex:0 0 96px}
   .troca-box .campo.md{flex:1 1 120px}
   .troca-box label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:4px}
-  .troca-box input{width:100%;font-size:16px;border:0;border-radius:var(--rc);padding:9px 10px;
-    background:var(--fill);color:var(--ink);font-variant-numeric:tabular-nums}
+  /* o <select> e o <input> têm caixas nativas de alturas diferentes; sem uma
+     altura explícita, o seletor de unidade fica mais alto que o campo de
+     quantidade do lado. */
+  .troca-box input,.troca-box select{width:100%;height:40px;font-size:16px;border:0;
+    border-radius:var(--rc);padding:0 10px;background:var(--fill);color:var(--ink);
+    font-variant-numeric:tabular-nums;box-sizing:border-box;line-height:normal}
+  .troca-box select{padding-right:30px}
   .troca-box input:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
   .troca-selo{flex:1 1 100%;font-size:12px;font-weight:600;line-height:1.35;padding:6px 10px;
     border-radius:8px;margin-top:2px}
@@ -470,7 +479,11 @@
      sombra). A linha de separação que existia aqui era desenhada POR CIMA
      desse cartão e o raio a recortava nas pontas - dava aquele arco solto
      depois do campo. Dentro do popup ele fica só com um fundo levinho. */
-  .obs{padding:14px 16px;border-top:0;background:var(--fill2);box-shadow:none;margin:12px 0 0}
+  /* o bloco de anotação também perde o fundo cinza. Sem raio, a linha de cima
+     volta a ser reta (era o raio do <details> que recortava ela nas pontas e
+     fazia aquele arco solto). */
+  .obs{padding:14px 16px;background:none;box-shadow:none;border-radius:0;margin:6px 0 0;
+    border-top:.5px solid var(--hair)}
   .obs label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px}
   .obs > summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;
     font-size:13px;font-weight:600;color:var(--ink2)}
@@ -483,7 +496,8 @@
     transform:rotate(45deg) translate(-2px,-2px);transition:transform .18s ease}
   .obs[open] > summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
   .obs[open] textarea{margin-top:8px}
-  .obs textarea{width:100%;min-height:70px;font-size:15px;line-height:1.45;border:0;border-radius:var(--rc);
+  .obs textarea{width:100%;min-height:70px;font-size:15px;line-height:1.45;border-radius:var(--rc);
+    border:1px solid var(--hair);
     padding:11px;background:var(--card);color:var(--ink);
     /* sem alça de redimensionar: o risquinho no canto parecia uma linha
        sobrando embaixo do campo, e o campo já cresce o quanto precisa */
@@ -1067,17 +1081,20 @@
   .tr-linha-ativacao{grid-template-columns:32px 1fr 32px}
   .tr-serie-ativacao-label{font-size:13px;color:var(--ink2)}
   .tr-semana-cartao-sessao{margin:0 0 14px;box-shadow:var(--sh-min)}
-  /* pré-série de aquecimento (ex.: "2x15" antes da carga que vale) - vira
-     checklist igual à ativação, em vez de só uma etiqueta informativa lá em
-     cima sem nada pra marcar. Fica fora de .tr-serie-linha de propósito:
-     não conta na numeração das séries que valem, não vira "Anterior" da
-     próxima vez e não é salva no registro (é só apoio durante o treino). */
-  .tr-preserie-bloco{display:flex;flex-direction:column;gap:5px;margin:-2px 0 10px}
-  .tr-preserie-titulo{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink3)}
-  .tr-preserie-linha{display:flex;align-items:center;justify-content:space-between;gap:8px;
-    padding:6px 10px;border-radius:10px;background:var(--fill2)}
-  .tr-preserie-linha.feita{background:var(--fill)}
-  .tr-preserie-linha.feita .tr-serie-ativacao-label{color:var(--ink3)}
+  /* pré-série de aquecimento (ex.: "2x15" antes da carga que vale): entra
+     como as primeiras linhas da MESMA tabela das séries, com "AQ" no lugar do
+     número. Antes era um bloco à parte com faixa cinza de ponta a ponta -
+     feio e solto no meio do cartão. Continua fora de .tr-serie-linha de
+     propósito: não conta na numeração das séries que valem, não vira
+     "Anterior" da próxima vez e não é salva no registro. */
+  .tr-preserie-linha{position:relative;display:grid;grid-template-columns:32px 1fr 52px 52px 32px;
+    gap:6px;align-items:center;padding:3px 2px;background:var(--card)}
+  .tr-preserie-num{justify-self:center;min-width:26px;height:24px;padding:0 4px;border-radius:10px;
+    background:none;border:1px dashed var(--hair);color:var(--ink3);font-size:9.5px;font-weight:700;
+    letter-spacing:.02em;display:flex;align-items:center;justify-content:center}
+  .tr-preserie-lab{font-size:12.5px;color:var(--ink3);text-align:center}
+  .tr-preserie-vazio{font-size:12.5px;color:var(--ink3);text-align:center}
+  .tr-preserie-linha.feita{background:var(--fill2);border-radius:10px}
 
   /* nota por exercício - modal central clássico (merece atenção total, por
      isso continua com fundo escurecido e cartão centralizado). */
@@ -1525,10 +1542,14 @@
   </button>
   <button id="aba-progresso" aria-pressed="false" class="tabbar-item">
     <!-- fita métrica: ícone que o Carlos escolheu. É desenho preenchido (e não
-         traço como os outros três), então a viewBox foi ajustada pro contorno
-         real do desenho (medido: 8.8,8 até 89.1,88.7) em vez da original
-         0 0 100 125, que tinha folga sobrando e deixava ele menor que os vizinhos. -->
-    <svg class="tabbar-ico" viewBox="4 4 90 90" aria-hidden="true"><path fill="currentColor" d="M79.721,87.98c-2.188,0-4.255-0.811-5.857-2.291L24.309,60.628l0.631-1.706c2.997-8.105,7.641-15.34,13.805-21.505c5.85-5.847,12.669-10.331,20.274-13.328l1.729-0.682l25.321,50.077c1.482,1.601,2.293,3.667,2.293,5.857c0.003,2.305-0.898,4.475-2.53,6.108C84.197,87.081,82.027,87.98,79.721,87.98z M29.425,58.645l46.843,23.687l0.232,0.23c1.724,1.725,4.719,1.725,6.443,0c0.863-0.861,1.336-2.006,1.336-3.221s-0.473-2.359-1.336-3.221l-0.232-0.231L58.799,28.595c-6.395,2.77-12.164,6.703-17.17,11.707C36.318,45.614,32.219,51.778,29.425,58.645z M32.015,63.709l-7.655-2.828c0.335-0.91,0.695-1.815,1.076-2.712l7.511,3.195C32.613,62.141,32.306,62.921,32.015,63.709z M35.754,55.707l-7.082-4.054c0.481-0.841,0.984-1.674,1.51-2.497l6.879,4.394C36.605,54.261,36.17,54.98,35.754,55.707z M40.765,48.432l-6.317-5.166c0.611-0.749,1.243-1.485,1.896-2.211l6.065,5.459C41.844,47.143,41.296,47.783,40.765,48.432z M46.903,42.063l-5.394-6.125c0.73-0.644,1.475-1.268,2.226-1.872l5.108,6.367C48.186,40.958,47.541,41.502,46.903,42.063z M53.992,36.779l-4.319-6.925c0.826-0.517,1.665-1.012,2.513-1.484l3.978,7.126C55.433,35.905,54.709,36.333,53.992,36.779z M61.845,32.75L58.747,25.2l0.856-0.345l2.989,7.594L61.845,32.75z M79.721,87.3c-2.047,0-3.979-0.77-5.463-2.173L35.201,65.383l0.381-1.117c2.365-7.001,6.24-13.226,11.513-18.499c4.942-4.946,10.749-8.672,17.251-11.076l1.137-0.42l20.021,39.607c1.406,1.484,2.176,3.415,2.176,5.463c0.003,2.124-0.826,4.123-2.331,5.627C83.844,86.472,81.846,87.3,79.721,87.3z M38.549,64.027L75.864,82.89l0.154,0.153c1.98,1.981,5.425,1.981,7.407,0c0.989-0.99,1.533-2.305,1.533-3.703c0-1.397-0.544-2.712-1.535-3.702l-0.154-0.154L64.158,37.678c-5.676,2.271-10.764,5.636-15.141,10.013C44.324,52.384,40.807,57.876,38.549,64.027z M79.721,88.653c-2.238,0-4.479-0.8-6.246-2.398L14.137,56.251l-0.307-0.308c-1.764-1.761-2.732-4.101-2.732-6.588c0-2.488,0.969-4.828,2.732-6.589l3.846,3.848c-0.734,0.733-1.138,1.707-1.138,2.741c0,0.907,0.311,1.767,0.882,2.459l59.252,29.961l0.307,0.308c1.514,1.512,3.973,1.512,5.484,0c0.734-0.733,1.137-1.707,1.137-2.741c0-1.034-0.402-2.006-1.137-2.74l-0.309-0.308L52.193,17.04c-1.352-1.109-3.34-1.174-4.771-0.104l-3.258-4.358c3.682-2.753,8.91-2.38,12.161,0.87l0.308,0.308l30,59.338c1.557,1.716,2.407,3.917,2.407,6.248c0.003,2.487-0.968,4.827-2.729,6.589C84.494,87.745,82.107,88.653,79.721,88.653z M45.793,14.757 M44.883,21.654L39.518,10.32l4.918-2.329l5.365,11.333L44.883,21.654z M19.322,49.901L8.766,43.134l2.936-4.58l10.557,6.767L19.322,49.901z"/></svg>
+         traço como os outros três), então precisou de dois ajustes medidos:
+         1) viewBox apertada no contorno real (8.8,8 até 89.1,88.7) em vez da
+            original 0 0 100 125, que tinha folga sobrando e o deixava menor;
+         2) um contorno da própria cor pra engrossar: medido em 10x, o traço
+            saía com 1,40px contra 1,60px dos vizinhos. Como 1px na tela vale
+            90/21 = 4,29 unidades da viewBox, 0,2px de diferença pede
+            stroke-width 0.5 (achado testando 0,40 / 0,45 / 0,55 e medindo cada um). -->
+    <svg class="tabbar-ico" viewBox="4 4 90 90" aria-hidden="true"><path fill="currentColor" stroke="currentColor" stroke-width="0.5" stroke-linejoin="round" d="M79.721,87.98c-2.188,0-4.255-0.811-5.857-2.291L24.309,60.628l0.631-1.706c2.997-8.105,7.641-15.34,13.805-21.505c5.85-5.847,12.669-10.331,20.274-13.328l1.729-0.682l25.321,50.077c1.482,1.601,2.293,3.667,2.293,5.857c0.003,2.305-0.898,4.475-2.53,6.108C84.197,87.081,82.027,87.98,79.721,87.98z M29.425,58.645l46.843,23.687l0.232,0.23c1.724,1.725,4.719,1.725,6.443,0c0.863-0.861,1.336-2.006,1.336-3.221s-0.473-2.359-1.336-3.221l-0.232-0.231L58.799,28.595c-6.395,2.77-12.164,6.703-17.17,11.707C36.318,45.614,32.219,51.778,29.425,58.645z M32.015,63.709l-7.655-2.828c0.335-0.91,0.695-1.815,1.076-2.712l7.511,3.195C32.613,62.141,32.306,62.921,32.015,63.709z M35.754,55.707l-7.082-4.054c0.481-0.841,0.984-1.674,1.51-2.497l6.879,4.394C36.605,54.261,36.17,54.98,35.754,55.707z M40.765,48.432l-6.317-5.166c0.611-0.749,1.243-1.485,1.896-2.211l6.065,5.459C41.844,47.143,41.296,47.783,40.765,48.432z M46.903,42.063l-5.394-6.125c0.73-0.644,1.475-1.268,2.226-1.872l5.108,6.367C48.186,40.958,47.541,41.502,46.903,42.063z M53.992,36.779l-4.319-6.925c0.826-0.517,1.665-1.012,2.513-1.484l3.978,7.126C55.433,35.905,54.709,36.333,53.992,36.779z M61.845,32.75L58.747,25.2l0.856-0.345l2.989,7.594L61.845,32.75z M79.721,87.3c-2.047,0-3.979-0.77-5.463-2.173L35.201,65.383l0.381-1.117c2.365-7.001,6.24-13.226,11.513-18.499c4.942-4.946,10.749-8.672,17.251-11.076l1.137-0.42l20.021,39.607c1.406,1.484,2.176,3.415,2.176,5.463c0.003,2.124-0.826,4.123-2.331,5.627C83.844,86.472,81.846,87.3,79.721,87.3z M38.549,64.027L75.864,82.89l0.154,0.153c1.98,1.981,5.425,1.981,7.407,0c0.989-0.99,1.533-2.305,1.533-3.703c0-1.397-0.544-2.712-1.535-3.702l-0.154-0.154L64.158,37.678c-5.676,2.271-10.764,5.636-15.141,10.013C44.324,52.384,40.807,57.876,38.549,64.027z M79.721,88.653c-2.238,0-4.479-0.8-6.246-2.398L14.137,56.251l-0.307-0.308c-1.764-1.761-2.732-4.101-2.732-6.588c0-2.488,0.969-4.828,2.732-6.589l3.846,3.848c-0.734,0.733-1.138,1.707-1.138,2.741c0,0.907,0.311,1.767,0.882,2.459l59.252,29.961l0.307,0.308c1.514,1.512,3.973,1.512,5.484,0c0.734-0.733,1.137-1.707,1.137-2.741c0-1.034-0.402-2.006-1.137-2.74l-0.309-0.308L52.193,17.04c-1.352-1.109-3.34-1.174-4.771-0.104l-3.258-4.358c3.682-2.753,8.91-2.38,12.161,0.87l0.308,0.308l30,59.338c1.557,1.716,2.407,3.917,2.407,6.248c0.003,2.487-0.968,4.827-2.729,6.589C84.494,87.745,82.107,88.653,79.721,88.653z M45.793,14.757 M44.883,21.654L39.518,10.32l4.918-2.329l5.365,11.333L44.883,21.654z M19.322,49.901L8.766,43.134l2.936-4.58l10.557,6.767L19.322,49.901z"/></svg>
     <span>Evolução</span>
   </button>
 </nav>
@@ -2967,8 +2988,68 @@ const G = {
       return acc;
     }, [])},
   salada:{tipo:'igual',titulo:'Folhosas e verduras cruas liberadas',
-    opts:LEGUMES['Vegetais tipo A/B'].map(function(n){ return {n:n}; })}
+    opts:LEGUMES['Vegetais tipo A/B'].map(function(n){ return {n:n}; })},
+  /* O PDF do Pedro não traz tabela de ovo: a única linha que fala de ovo
+     inteiro está na lista do whey ("1 ovo inteiro + 3 claras = 100 g de filé
+     de frango"). Esta aqui foi montada por nós a partir da lista de proteínas
+     dele, equiparando por CALORIA: 2 ovos (100 g) = 143 kcal, praticamente as
+     mesmas 159 kcal de 100 g de filé de frango - por isso as quantidades são
+     as mesmas da tabela do frango. Em proteína o ovo entrega menos (13 g
+     contra 32 g), que é o preço de comer ovo no lugar de carne. */
+  ovos:{tipo:'escala',ref:100,titulo:'Equivalentes a 2 ovos (100 g)',
+    aviso:'Equiparação feita por caloria a partir da lista de proteínas do plano.',opts:[
+    {n:'Ovo de galinha',q:100},{n:'Frango, peito grelhado',q:100},{n:'Peru, peito',q:120},
+    {n:'Patinho magro cozido ou filé mignon',q:80},{n:'Coxão mole grelhado',q:80},
+    {n:'Lombo ou filé suíno',q:85},{n:'Tilápia, merluza ou peixe branco',q:130},
+    {n:'Atum em água, drenado',q:150},{n:'Camarão cozido',q:165},
+    {n:'Clara de ovo líquida',q:315},{n:'Whey protein (~80% de proteína)',q:40}]},
+  /* Sashimi e sushi: peixe por peixe, peça por peça. Os dois sashimis têm o
+     mesmo peso por fatia e o sushi e o makimono têm a mesma conta no plano. */
+  sashimi:{tipo:'igual',titulo:'Sashimi por sashimi, mesma quantidade de peças',
+    opts:[{n:'Sashimi de salmão'},{n:'Sashimi de atum'}]},
+  sushi:{tipo:'igual',titulo:'Peça por peça, mesma quantidade',
+    opts:[{n:'Sushi'},{n:'Makimono ou niguiri'}]},
+  /* A lista de sobremesa é a que o próprio plano traz junto do chocolate 70%
+     na porção de 20 g - aqui ela vira tabela pra valer pros outros chocolates. */
+  sobremesa:{tipo:'fixo',titulo:'Equivalentes a 20 g de chocolate amargo',opts:[
+    {n:'Chocolate amargo 70% cacau',t:'20 g'},{n:'Doce de leite',t:'35 g'},
+    {n:'Goiabada',t:'50 g'},{n:'Bombom',t:'1 un'},{n:'Paçoca',t:'1 un'}]}
 };
+
+/* Cada alimento precisa da SUA lista de troca. O PDF só traz tabela para
+   alguns grupos; os itens abaixo chegam sem grupo nenhum e ficavam sem nada
+   pra trocar. Aqui cada um entra na lista do grupo a que pertence, e `qb` diz
+   quanto DELE vale a porção de referência daquela lista (equiparação por
+   proteína nas carnes, por caloria nos carboidratos e laticínios).
+   Tempero, suplemento e alimento sem par (creatina, canela, castanha, pipoca,
+   ameixa, banana) ficam de fora de propósito: inventar uma tabela pra eles
+   seria pior do que não ter. */
+const GRUPO_AUTO = {
+  'ovos mexidos (2 un)':{g:'ovos'},
+  'ovo de galinha':{g:'ovos'},
+  'ovo de galinha inteiro':{g:'ovos'},
+  'filé de frango grelhado':{g:'frango'},
+  'salmão grelhado':{g:'frango',qb:135},
+  'contrafilé, entrecote, coração da alcatra, ancho ou filé mignon':{g:'frango',qb:105},
+  'patinho cru':{g:'frango',qb:145},
+  'hambúrguer cru':{g:'frango',qb:190},
+  'batata inglesa na air fryer':{g:'arroz',qb:115},
+  'pão de hambúrguer':{g:'pao'},
+  'queijo prato':{g:'iogurte',qb:15},
+  'sashimi de salmão':{g:'sashimi'},
+  'sashimi de atum':{g:'sashimi'},
+  'sushi':{g:'sushi'},
+  'makimono ou niguiri':{g:'sushi'},
+  'chocolate amargo 60% cacau':{g:'sobremesa'},
+  // estes dois já vêm com grupo do PDF; o que falta neles é só o `qb` - o
+  // nome do plano não bate com o nome da linha na tabela ("Filé mignon
+  // grelhado" x "Patinho magro cozido ou filé mignon", "Queijo muçarela" x
+  // "Muçarela"), e sem isso a conta saía 1 para 1.
+  'filé mignon grelhado':{qb:80},
+  'queijo muçarela':{qb:15}
+};
+const GRUPO_AUTO_N = {};
+Object.keys(GRUPO_AUTO).forEach(function(k){ GRUPO_AUTO_N[norm(k)] = GRUPO_AUTO[k]; });
 
 /* =========================================================
    2. FATORES DE COMPRA
@@ -3209,7 +3290,14 @@ function zipItem(a, c){
   const ref = c || a;                       // o dono da conta manda na grafia
   const alt = a || c;
   const out = { n: ref.n, i: a ? a.v : null, c: c ? c.v : null };
-  const g = ref.g !== undefined ? ref.g : alt.g;
+  let g = ref.g !== undefined ? ref.g : alt.g;
+  // alimento que veio do PDF sem tabela de troca ganha aqui a lista do grupo
+  // dele (ver GRUPO_AUTO); o que já veio com grupo fica como está.
+  const auto = GRUPO_AUTO_N[norm(ref.n)] || GRUPO_AUTO_N[norm(alt.n)];
+  if(auto){
+    if(g === undefined && auto.g) g = auto.g;
+    if(auto.qb) out.qb = auto.qb;
+  }
   const sub = ref.sub !== undefined ? ref.sub : alt.sub;
   const livre = ref.livre !== undefined ? ref.livre : alt.livre;
   if(g !== undefined) out.g = g;
@@ -3391,6 +3479,32 @@ function opcoesDo(item){
   });
   return lista;
 }
+/* Quanto do PRÓPRIO alimento do plano vale uma porção de referência da tabela.
+   Sem isso a conta partia do princípio de que o item do plano É o alimento de
+   referência da lista: "Filé mignon 120 g" virava "120 g de frango", quando a
+   tabela do Pedro diz que 80 g de filé mignon = 100 g de frango (ou seja,
+   120 g de mignon = 150 g de frango). Agora procura a linha do próprio item
+   na tabela; `qb` cobre os casos em que o nome do plano não bate com o nome
+   da linha (ex.: "Batata inglesa na air fryer"). */
+function refDoItemNoGrupo(item, g){
+  if(item.qb) return item.qb;
+  const alvo = norm(item.n);
+  for(let k=0; k<g.opts.length; k++){
+    const o = g.opts[k];
+    if(norm(o.n)===alvo && typeof o.q==='number') return o.q;
+  }
+  return g.ref;
+}
+/* porção em gramas, mesmo quando o plano pede "2 un" ou "1 fatia" */
+function baseEmGramas(item, base){
+  if(typeof base === 'number') return base;
+  const pv = parseVal(base);
+  if(!pv || pv.n===null) return null;
+  if(pv.u==='g') return pv.n;
+  const m = MACRO[norm(item.n)];
+  if(m && m.un) return pv.n * m.un;
+  return null;
+}
 function valorPara(item,opt,p){
   const base = item[p];
   if(base===null||base===undefined) return null;
@@ -3402,7 +3516,10 @@ function valorPara(item,opt,p){
   if('t' in opt) return opt.t;
   if(('q' in opt) && opt.grupo){
     const g = G[opt.grupo];
-    if(g.tipo==='escala' && typeof base==='number') return Math.round(base/g.ref*opt.q);
+    if(g.tipo==='escala'){
+      const bg = baseEmGramas(item, base);
+      if(bg!==null) return Math.round(bg / refDoItemNoGrupo(item, g) * opt.q);
+    }
     return opt.q+' g';
   }
   return base;
@@ -4662,6 +4779,30 @@ function renderCalendario(){
 }
 
 
+/* Quantidade que a tabela manda usar do alimento escolhido, no lugar do item
+   do plano. Devolve {q, u} pronto pros campos Quantidade / Unidade. */
+function qtdEquivalente(itemDoPlano, nome){
+  if(!itemDoPlano || !nome || nome===OUTRO) return null;
+  const p = chaveIC(diario.perfil);
+  if(!p) return null;
+  const lista = opcoesDo(itemDoPlano);
+  let escolhida = null;
+  for(let k=0; k<lista.length; k++){ if(norm(lista[k].n)===norm(nome)){ escolhida = lista[k]; break; } }
+  if(!escolhida) return null;
+  const v = valorPara(itemDoPlano, escolhida, p);
+  if(v===null || v===undefined) return null;
+  if(typeof v === 'number') return {q:v, u:'g'};
+  const s = String(v).trim();
+  const m = MACRO[norm(nome)];
+  let achou = s.match(/^(\d+(?:[.,]\d+)?)\s*(?:un\b|unidade|fatia|peça|pacote)/i);
+  if(achou && m && m.un) return {q:parseFloat(achou[1].replace(',','.')), u:'un'};
+  achou = s.match(/(\d+(?:[.,]\d+)?)\s*g\b/);
+  if(achou) return {q:parseFloat(achou[1].replace(',','.')), u:'g'};
+  achou = s.match(/^(\d+(?:[.,]\d+)?)/);
+  if(achou && m && m.un) return {q:parseFloat(achou[1].replace(',','.')), u:'un'};
+  return null;
+}
+
 /* Editor de uma troca: escolher o alimento, a quantidade e ver as calorias.
    Serve tanto para trocar um item do plano quanto para somar um extra. */
 /* `modoExtra` é o "+ adicionar à refeição": mesmo editor, mas sem cartão
@@ -4696,21 +4837,33 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover, modoExtra){
   let temEquivalente = false;
   if(itemDoPlano){
     const g1 = document.createElement('optgroup');
-    g1.label = 'Pode trocar por (lista do nutri)';
+    g1.label = 'Pode trocar por';
     opcoesDo(itemDoPlano).forEach(function(o){ jaListado[norm(o.n)] = 1; opt(o.n, o.n, g1); });
     if(g1.children.length > 1){ sel.appendChild(g1); temEquivalente = true; }
   }
-  const g3 = document.createElement('optgroup');
-  g3.label = temEquivalente ? 'Fora do plano' : 'Fora do plano (esse item não tem lista de troca)';
-  FORA_NOMES.forEach(function(n){ if(!jaListado[norm(n)]) opt(n, n, g3); });
-  sel.appendChild(g3);
-  const g4 = document.createElement('optgroup'); g4.label = 'Não está na lista';
-  opt(OUTRO, 'Outro alimento (digitar calorias)', g4);
-  sel.appendChild(g4);
+  // "Troquei" é troca DENTRO do plano: só aparece o que a tabela daquele
+  // alimento aceita no lugar dele. Comer uma coisa que não está na tabela não
+  // é troca, é "+ adicionar à refeição" - por isso a lista geral só continua
+  // aqui quando o alimento ainda não tem tabela nenhuma (senão ficaria sem
+  // opção pra escolher) e no próprio "adicionar à refeição".
+  if(!temEquivalente){
+    const g3 = document.createElement('optgroup');
+    g3.label = itemDoPlano ? 'Esse item ainda não tem lista de troca' : 'Alimentos';
+    FORA_NOMES.forEach(function(n){ if(!jaListado[norm(n)]) opt(n, n, g3); });
+    sel.appendChild(g3);
+    const g4 = document.createElement('optgroup'); g4.label = 'Não está na lista';
+    opt(OUTRO, 'Outro alimento (digitar calorias)', g4);
+    sel.appendChild(g4);
+  }
   if(!t.n){ sel.value = ''; sel.selectedIndex = -1; }
   sel.onchange = function(){
     t.n = sel.value;
     if(t.n!==OUTRO){ t.kcal=''; }
+    // a quantidade já sai pronta pela tabela: trocar mamão 100 g por morango
+    // dá 100 g de morango, e trocar por um alimento que tem conversão própria
+    // (frango -> tilápia, por exemplo) já mostra a quantidade convertida.
+    const eq = qtdEquivalente(itemDoPlano, t.n);
+    if(eq){ t.q = eq.q; t.u = eq.u; }
     // marca sozinho se a troca continua dentro do que o nutricionista
     // liberou (dá pra corrigir na mão no check logo abaixo).
     t.ok = trocaLiberadaNoPlano(itemDoPlano, t);
@@ -4734,7 +4887,9 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover, modoExtra){
     iK.oninput = function(){ t.kcal = iK.value; aoMudar(true); };
     cK.appendChild(lK); cK.appendChild(iK);
     box.appendChild(cNome); box.appendChild(cK);
-  } else if(t.n){
+  } else {
+    // Quantidade e Unidade aparecem desde o começo, junto do seletor - antes
+    // só nasciam depois de escolher o alimento e a caixa "pulava" de altura.
     const m = MACRO[norm(t.n)];
     const cQ = document.createElement('div'); cQ.className='campo pq';
     const lQ = document.createElement('label'); lQ.textContent='Quantidade';
@@ -4755,26 +4910,25 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover, modoExtra){
     box.appendChild(cQ); box.appendChild(cU);
   }
 
-  // Não é um controle: só avisa como aquela escolha foi contada. Quem decide
-  // é a lista de onde o alimento saiu (equivalência do item e listas do
-  // nutricionista contam como seguiu; o resto é adaptação).
-  if(itemDoPlano && t.n){
+  // Só avisa quando a troca SAIU do plano - e isso agora só acontece com item
+  // que ainda não tem tabela. Dizer "dentro do plano" quando a lista só mostra
+  // o que está no plano não informava nada: se está ali, está dentro.
+  if(itemDoPlano && t.n && !t.ok){
     const aviso = document.createElement('div');
-    aviso.className = 'troca-selo ' + (t.ok ? 'dentro' : 'fora');
-    aviso.textContent = t.ok
-      ? 'Dentro do plano - continua contando como seguiu'
-      : 'Fora do plano - essa refeição conta como adaptou';
+    aviso.className = 'troca-selo fora';
+    aviso.textContent = 'Fora do plano - essa refeição conta como adaptou';
     box.appendChild(aviso);
   }
 
   const mt = macrosDaTroca(t);
-  if(mt || !modoExtra){
+  // sem alimento escolhido não aparece nada: a linha em branco dizendo "escolha
+  // o alimento pra calcular" só ocupava espaço - o campo vazio já diz isso.
+  if(mt){
     const info = document.createElement('div'); info.className='kcal';
-    if(mt && mt.estimado) info.innerHTML = 'Contando <b>'+fmtKcal(mt.k)+' kcal</b>. Proteína, carboidrato e gordura ficam de fora, porque só as calorias foram informadas.';
-    else if(mt && modoExtra) info.textContent = 'Calorias '+fmtKcal(mt.k)
-      + ' · Carbo '+Math.round(mt.c)+' g · Proteína '+Math.round(mt.p)+' g · Gordura '+Math.round(mt.g)+' g';
-    else if(mt) info.innerHTML = 'Dá <b>'+fmtKcal(mt.k)+' kcal</b> - P '+Math.round(mt.p)+' g · C '+Math.round(mt.c)+' g · G '+Math.round(mt.g)+' g.';
-    else info.textContent = 'Escolha o alimento e a quantidade para calcular.';
+    if(mt.estimado) info.innerHTML = 'Contando <b>'+fmtKcal(mt.k)+' kcal</b>. Proteína, carboidrato e gordura ficam de fora, porque só as calorias foram informadas.';
+    else if(modoExtra) info.textContent = fmtKcal(mt.k)+' kcal'
+      + ' · C '+Math.round(mt.c)+' g · P '+Math.round(mt.p)+' g · G '+Math.round(mt.g)+' g';
+    else info.innerHTML = 'Dá <b>'+fmtKcal(mt.k)+' kcal</b> - P '+Math.round(mt.p)+' g · C '+Math.round(mt.c)+' g · G '+Math.round(mt.g)+' g.';
     box.appendChild(info);
   }
 
@@ -4954,13 +5108,17 @@ function renderDiaBox(){
           qt.textContent = quantidadeDaTroca(ex);
           // no lugar do tudo/metade/nada, o que interessa aqui é o que esse
           // alimento somou no dia
+          // Abreviado de propósito: por extenso ("Calorias ... Carbo ...") o
+          // pior caso realista (1.250 kcal, 180 g de carbo) mede 325px e a
+          // linha disponível numa tela de 320px é 232px - quebraria. Assim
+          // cabe em 215px e nunca quebra. P/C/G já é o padrão do resto do app.
           const macros = document.createElement('span'); macros.className='item-macros';
           macros.textContent = mt.estimado
-            ? 'Calorias ' + fmtKcal(mt.k)
-            : 'Calorias ' + fmtKcal(mt.k)
-              + ' · Carbo ' + Math.round(mt.c) + ' g'
-              + ' · Proteína ' + Math.round(mt.p) + ' g'
-              + ' · Gordura ' + Math.round(mt.g) + ' g';
+            ? fmtKcal(mt.k) + ' kcal'
+            : fmtKcal(mt.k) + ' kcal'
+              + ' · C ' + Math.round(mt.c) + ' g'
+              + ' · P ' + Math.round(mt.p) + ' g'
+              + ' · G ' + Math.round(mt.g) + ' g';
           li2.appendChild(nm); li2.appendChild(qt); li2.appendChild(macros);
           li2.onclick = function(ev){
             if(ev.target.closest('button')) return;
@@ -4971,23 +5129,8 @@ function renderDiaBox(){
           cx.appendChild(wrap);
           return;
         }
-        {
-          const li = document.createElement('div'); li.className='extra-linha';
-          const ok = document.createElement('button');
-          ok.type='button'; ok.className='btn-pill primario extra-ok';
-          ok.textContent = 'OK';
-          ok.disabled = !mt;
-          ok.onclick = function(){ extraAbertoChave = null; salvarDiario(); renderDiario(); };
-          li.appendChild(editorTroca(ex, null, function(soSalvar){
-            salvarDiario();
-            // digitar a quantidade não re-renderiza (senão o campo perde o
-            // foco no meio da digitação), então o OK é religado na mão.
-            if(soSalvar){ atualizaBalanco(); ok.disabled = !macrosDaTroca(ex); }
-            else renderDiario();
-          }, removerExtra, true));
-          li.appendChild(ok);
-          cx.appendChild(li);
-        }
+        // o que está sendo preenchido não entra aqui: ele é montado depois do
+        // botão "+ adicionar à refeição", que faz as vezes de título dele.
       });
       // a linha divisória do primeiro alimento não separa nada (não tem item
       // acima dele), então sai. Feito aqui, depois de tudo montado, porque o
@@ -5006,6 +5149,44 @@ function renderDiaBox(){
         salvarDiario(); renderDiario();
       };
       cx.appendChild(add);
+
+      // O editor abre LOGO ABAIXO do botão, que continua na tela e funciona
+      // como título dele. Assim, depois de dar OK num alimento, o botão já
+      // está ali pra adicionar o próximo sem procurar nada.
+      (function(){
+        const lista = extrasDa(reg, meal.id);
+        let kAberto = -1;
+        lista.forEach(function(_, k){ if(extraAbertoChave === meal.id+':'+k) kAberto = k; });
+        if(kAberto < 0) return;
+        const ex = lista[kAberto];
+        const chave = meal.id+':'+kAberto;
+        function removerExtra(){
+          const nova = extrasDa(reg, meal.id).slice();
+          nova.splice(kAberto,1); setExtras(reg, meal.id, nova);
+          if(extraAbertoChave===chave) extraAbertoChave = null;
+          salvarDiario(); renderDiario();
+        }
+        const li = document.createElement('div'); li.className='extra-linha';
+        const ok = document.createElement('button');
+        ok.type='button'; ok.className='btn-pill primario extra-ok';
+        ok.textContent = 'OK';
+        ok.disabled = !macrosDaTroca(ex);
+        ok.onclick = function(){ extraAbertoChave = null; salvarDiario(); renderDiario(); };
+        // sem botão "Remover": desistir é tocar no X do próprio editor? não -
+        // basta deixar sem alimento escolhido, que ele não é salvo. Alimento
+        // já salvo se tira arrastando a linha pra esquerda.
+        li.appendChild(editorTroca(ex, null, function(soSalvar){
+          salvarDiario();
+          // digitar a quantidade não re-renderiza (senão o campo perde o foco
+          // no meio da digitação), então o OK é religado na mão.
+          if(soSalvar){ atualizaBalanco(); ok.disabled = !macrosDaTroca(ex); }
+          else renderDiario();
+        }, null, true));
+        li.appendChild(ok);
+        cx.appendChild(li);
+        // se ficou sem alimento escolhido e a pessoa sai, o registro vazio some
+        li.__limpar = removerExtra;
+      })();
       box.appendChild(cx);
     }
   });
@@ -6477,10 +6658,10 @@ function temValorPlano(v){
   const s = String(v||'').trim();
   return !!s && s!=='—' && s!=='-';
 }
-// pré-série de aquecimento (ex.: "2x15") - mesma leitura da ativação: N
-// séries com a meta de reps fixa, em formato de checklist, antes das
-// séries que valem. Fica fora de .tr-serie-linha de propósito, ver
-// comentário no CSS de .tr-preserie-bloco.
+// pré-série de aquecimento (ex.: "2x15") - as primeiras linhas da mesma
+// tabela das séries, com "AQ" no lugar do número e um "-" no kg (aquecimento
+// não tem carga registrada). Fica fora de .tr-serie-linha de propósito, ver
+// comentário no CSS de .tr-preserie-linha.
 function preSerieAquecimentoHtml(aquecimentoTxt){
   const partes = /^(\d+)\s*x\s*(\d+)/i.exec(String(aquecimentoTxt||''));
   const nSets = partes ? Math.max(1, parseInt(partes[1],10)) : 1;
@@ -6488,11 +6669,14 @@ function preSerieAquecimentoHtml(aquecimentoTxt){
   let linhas = '';
   for(let s=0; s<nSets; s++){
     linhas += '<div class="tr-preserie-linha" data-serie="'+s+'">'
-      + '<span class="tr-serie-ativacao-label">'+(repsAlvo?repsAlvo+' reps':'')+'</span>'
+      + '<span class="tr-preserie-num">AQ</span>'
+      + '<span class="tr-preserie-lab">'+(repsAlvo?repsAlvo+' reps':'aquecimento')+'</span>'
+      + '<span class="tr-preserie-vazio">-</span>'
+      + '<span class="tr-preserie-vazio">-</span>'
       + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
       + '</div>';
   }
-  return '<div class="tr-preserie-bloco"><div class="tr-preserie-titulo">Aquecimento</div>' + linhas + '</div>';
+  return linhas;
 }
 
 
@@ -6808,9 +6992,9 @@ function montarSessaoTreino(){
         + legendaTipo
         + '<div class="tr-serie-nota" data-ex="'+idx+'" hidden></div>'
         + meta
-        + preSerie
         + '<div class="tr-serie-linhas">'
         + cabecalho
+        + preSerie
         + linhasSerie
         + '</div>'
         + '<button type="button" class="tr-serie-add" data-ex="'+idx+'" data-tipo="'+tipo+'">+ Adicionar série</button>'
