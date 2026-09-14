@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Dieta e treino</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
@@ -1113,23 +1113,35 @@
 
   /* painel de descanso: grande de propósito, pra ler de longe com o celular
      apoiado no banco. Nasce sozinho quando uma série é marcada. */
-  .tr-descanso-toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));
+  /* O CANTO DA TELA DO IPHONE é curvo (uns 50px de raio). Painel colado
+     embaixo e largo demais tem os cantos de baixo "comidos" por essa curva.
+     Dois cuidados: folga maior embaixo (e agora o env() funciona de verdade,
+     depois do viewport-fit=cover no <meta>) e 16px de margem lateral, pra o
+     painel acabar antes de onde a tela começa a curvar. O raio de 24px
+     também conversa melhor com o canto do aparelho. */
+  .tr-descanso-toast{position:fixed;left:50%;
+    bottom:calc(env(safe-area-inset-bottom,0px) + 24px);
     transform:translateX(-50%);z-index:120;background:var(--card);color:var(--ink);
-    width:min(420px, calc(100vw - 28px));border-radius:14px;padding:14px 16px 16px;
+    width:min(420px, calc(100vw - 32px));border-radius:24px;padding:14px 16px 16px;
     border:1px solid var(--hair);box-shadow:0 12px 34px rgba(0,0,0,.2)}
+  /* F4: anel com o tempo dentro à esquerda; rótulo, exercício e ações à direita */
+  .tr-desc-corpo{display:flex;align-items:center;gap:14px}
+  .tr-desc-anel{position:relative;flex:0 0 84px;width:84px;height:84px}
+  .tr-desc-anel svg{width:100%;height:100%;display:block;transform:rotate(-90deg)}
+  .tr-desc-anel-tr{fill:none;stroke:var(--fill);stroke-width:8}
+  .tr-desc-anel-pr{fill:none;stroke:var(--ok);stroke-width:8;stroke-linecap:round;
+    transition:stroke-dasharray 1s linear}
+  .tr-desc-col{flex:1 1 auto;min-width:0}
   .tr-desc-topo{display:flex;align-items:center;justify-content:space-between;gap:8px}
   .tr-desc-rot{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
-  .tr-desc-ex{font-size:13.5px;font-weight:600;color:var(--ink2);margin-top:2px;
+  .tr-desc-ex{font-size:13.5px;font-weight:600;color:var(--ink2);margin:4px 0 10px;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .tr-desc-tempo{font-size:52px;font-weight:800;line-height:1.05;letter-spacing:-.03em;
-    font-variant-numeric:tabular-nums;margin:4px 0 10px;text-align:center}
-  .tr-desc-trilho{height:8px;border-radius:10px;background:var(--fill);overflow:hidden}
-  .tr-desc-barra{height:100%;width:100%;border-radius:10px;background:var(--ok);
-    transition:width 1s linear}
-  .tr-descanso-toast.acabando .tr-desc-barra{background:var(--ad)}
+  .tr-desc-tempo{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:20px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .tr-descanso-toast.acabando .tr-desc-anel-pr{stroke:var(--ad)}
   .tr-descanso-toast.acabando .tr-desc-tempo{color:var(--ad)}
-  .tr-descanso-toast.fim .tr-desc-tempo{color:var(--ok)}
-  .tr-desc-acoes{display:flex;gap:8px;margin-top:12px}
+  .tr-descanso-toast.fim .tr-desc-tempo{color:var(--ok);font-size:17px}
+  .tr-desc-acoes{display:flex;gap:8px}
   .tr-desc-btn{flex:1 1 0;padding:11px;border-radius:var(--rc);border:1px solid var(--hair);
     background:var(--card);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
   .tr-desc-btn.forte{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -1141,15 +1153,19 @@
   .ico-sino{width:15px;height:15px;display:block}
   /* encolhido: pilulazinha só com o tempo, tocar nela abre de novo. O
      descanso continua correndo - encolher não é cancelar. */
-  .tr-descanso-toast.minimizado{width:auto;border-radius:10px;padding:10px 16px;cursor:pointer;
+  /* encolhida ela volta a ser bem redondinha, como era antes - é uma pílula
+     flutuante, não um cartão */
+  .tr-descanso-toast.minimizado{width:auto;border-radius:999px;padding:10px 16px;cursor:pointer;
     box-shadow:0 8px 24px rgba(0,0,0,.18)}
   .tr-descanso-toast.minimizado .tr-desc-ex,
-  .tr-descanso-toast.minimizado .tr-desc-trilho,
   .tr-descanso-toast.minimizado .tr-desc-acoes,
-  .tr-descanso-toast.minimizado .tr-descanso-min{display:none}
+  .tr-descanso-toast.minimizado .tr-descanso-min,
+  .tr-descanso-toast.minimizado .tr-desc-anel svg{display:none}
+  .tr-descanso-toast.minimizado .tr-desc-corpo{gap:10px;align-items:center}
+  .tr-descanso-toast.minimizado .tr-desc-anel{flex:0 0 auto;width:auto;height:auto}
+  .tr-descanso-toast.minimizado .tr-desc-tempo{position:static;font-size:20px}
   .tr-descanso-toast.minimizado .tr-desc-topo{gap:10px}
-  .tr-descanso-toast.minimizado .tr-desc-tempo{font-size:20px;margin:0;text-align:left}
-  .tr-descanso-toast.minimizado{display:flex;align-items:center;gap:10px}
+  .tr-descanso-toast.minimizado .tr-desc-col{display:flex;align-items:center;gap:10px}
   .pg-vazio{font-size:14px;color:var(--ink2);padding:8px 0}
   .tr-hist-linha{background:var(--card);border-radius:var(--rc);padding:10px 12px;margin-top:8px;box-shadow:var(--sh-min)}
   .tr-hist-linha:first-child{margin-top:0}
@@ -6184,10 +6200,11 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
   // se a data de início ainda não chegou, o certo é dizer "começa em" - o
   // plano aparece assim mesmo, pra dar pra conferir antes de entrar em vigor.
   const aindaNaoComecou = String(vigenteA||'').slice(0,10) > iso(new Date());
+  // sem a data da avaliação: ela é assunto da aba Evolução, aqui só polui a
+  // linha de quando o plano começa e quanto tempo dura.
   sub.textContent =
     (aindaNaoComecou ? 'Começa em ' : 'Vigente desde ') + brData(vigenteA) +
-    ' · ' + (c.periodo_semanas||4) + ' semanas' +
-    (c.data_avaliacao ? ' · avaliação de ' + brData(c.data_avaliacao) : '');
+    ' · ' + (c.periodo_semanas||4) + ' semanas';
   // atalho pra corrigir a data de início direto daqui (quem pode editar é
   // admin; o campo em si fica no painel de versões).
   const podeEditar = papelAtual === 'owner' || papelAtual === 'admin';
@@ -6801,7 +6818,9 @@ function montarSessaoTreino(){
       + semanaInfo
       + core
       + '<div class="tr-registro" id="sessao-treino-registro">'
-      + '<div class="tr-registro-head"><span class="tr-registro-tit">Registro de hoje</span></div>'
+      // sem "Registro de hoje": a tela inteira já é o treino de hoje, o título
+      // só repetia o óbvio e empurrava os exercícios pra baixo
+      + ''
       + blocos
       + '<button type="button" class="btn-pill primario" id="sessao-treino-salvar">Salvar treino de hoje</button>'
       + '<div class="erro-auth tr-erro-registro"></div>'
@@ -7084,19 +7103,29 @@ function parseDescansoSegundos(txt){
    Instagram. */
 function montarWavDescanso(segundos){
   const TAXA = 8000;                       // suficiente pra um bipe
-  const total = Math.max(1, Math.round(segundos * TAXA));
+  const RABO = 1.4;                        // sobra depois do fim, pro toque final
+  const total = Math.max(1, Math.round((segundos + RABO) * TAXA));
   const dados = new Int16Array(total);
-  const DUR_BIPE = 0.12, ESPACO = 0.28, FREQ = 880;
-  for(let b = 0; b < 3; b++){              // três bipes no último 1,2 s
-    const ini = total - Math.round((1.2 - b*ESPACO) * TAXA);
-    const fim = ini + Math.round(DUR_BIPE * TAXA);
+  // desenha um tom em `quando` (segundos a partir do início do descanso)
+  function tom(quando, duracao, freq, volume){
+    const ini = Math.round(quando * TAXA);
+    const fim = ini + Math.round(duracao * TAXA);
     for(let i = Math.max(0, ini); i < Math.min(total, fim); i++){
       const t = (i - ini) / TAXA;
       // rampa nas pontas pra não estalar
       const env = Math.min(1, (fim - i)/(0.02*TAXA), (i - ini)/(0.005*TAXA));
-      dados[i] = Math.round(Math.sin(2*Math.PI*FREQ*t) * 12000 * Math.max(0, env));
+      const v = Math.sin(2*Math.PI*freq*t) * volume * Math.max(0, env);
+      dados[i] = Math.max(-32000, Math.min(32000, dados[i] + Math.round(v)));
     }
   }
+  // contagem regressiva: três toques curtos, a 3, 2 e 1 segundo do fim
+  for(let b = 3; b >= 1; b--){
+    if(segundos - b > 0) tom(segundos - b, 0.13, 880, 26000);
+  }
+  // e o toque de "vai", na hora exata de começar a próxima série: mais longo
+  // e mais agudo, pra não confundir com os avisos
+  tom(segundos, 0.30, 1175, 30000);
+  tom(segundos + 0.38, 0.45, 1568, 30000);
   const buf = new ArrayBuffer(44 + dados.length*2);
   const dv = new DataView(buf);
   function txt(pos, str){ for(let i=0;i<str.length;i++) dv.setUint8(pos+i, str.charCodeAt(i)); }
@@ -7162,51 +7191,69 @@ function fecharDescanso(){
   pararSomDescanso();
   soltarTela();
   const el = document.getElementById('tr-descanso-toast');
-  if(el) el.remove();
+  if(el){
+    if(el.__aoVoltar){
+      document.removeEventListener('visibilitychange', el.__aoVoltar);
+      window.removeEventListener('focus', el.__aoVoltar);
+    }
+    el.remove();
+  }
 }
 /* Painel de descanso: aparece sozinho quando a série é marcada. É grande de
    propósito - dá pra ler o tempo de longe, com o celular apoiado no banco,
    sem precisar aproximar o rosto no meio da série. */
 function iniciarDescanso(txt, nomeExercicio){
   const total = parseDescansoSegundos(txt);
+  // O QUE MANDA É O RELÓGIO, não a contagem de batidas: em segundo plano o
+  // iOS congela o setInterval, então somar "-1 por tick" atrasava o número
+  // enquanto o áudio seguia no tempo real - o bipe parecia adiantado.
+  let fimEm = Date.now() + total * 1000;
   let restante = total;
   fecharDescanso();
   const el = document.createElement('div');
   el.id = 'tr-descanso-toast';
   el.className = 'tr-descanso-toast';
   el.setAttribute('role','status');
+  const BOTOES = '<span class="tr-desc-topo-btns">'
+    + '<button type="button" class="tr-desc-som" aria-label="Som do descanso"></button>'
+    + '<button type="button" class="tr-descanso-min" aria-label="Encolher">–</button></span>';
   el.innerHTML =
-      '<div class="tr-desc-topo">'
-    +   '<span class="tr-desc-rot">Descanso</span>'
-    +   '<span class="tr-desc-topo-btns">'
-    +     '<button type="button" class="tr-desc-som" aria-label="Som do descanso"></button>'
-    +     '<button type="button" class="tr-descanso-min" aria-label="Encolher">–</button>'
-    +   '</span>'
-    + '</div>'
-    + (nomeExercicio ? '<div class="tr-desc-ex"></div>' : '')
-    + '<div class="tr-desc-tempo"></div>'
-    + '<div class="tr-desc-trilho"><div class="tr-desc-barra"></div></div>'
-    + '<div class="tr-desc-acoes">'
-    +   '<button type="button" class="tr-desc-btn" data-acao="mais">+30 s</button>'
-    +   '<button type="button" class="tr-desc-btn forte" data-acao="pular">Pular</button>'
+      '<div class="tr-desc-corpo">'
+    +   '<div class="tr-desc-anel">'
+    +     '<svg viewBox="0 0 100 100" aria-hidden="true">'
+    +       '<circle class="tr-desc-anel-tr" cx="50" cy="50" r="46"></circle>'
+    +       '<circle class="tr-desc-anel-pr" id="tr-desc-arco" cx="50" cy="50" r="46"></circle>'
+    +     '</svg>'
+    +     '<span class="tr-desc-tempo"></span>'
+    +   '</div>'
+    +   '<div class="tr-desc-col">'
+    +     '<div class="tr-desc-topo"><span class="tr-desc-rot">Descanso</span>' + BOTOES + '</div>'
+    +     (nomeExercicio ? '<div class="tr-desc-ex"></div>' : '')
+    +     '<div class="tr-desc-acoes">'
+    +       '<button type="button" class="tr-desc-btn" data-acao="mais">+30 s</button>'
+    +       '<button type="button" class="tr-desc-btn forte" data-acao="pular">Pular</button>'
+    +     '</div>'
+    +   '</div>'
     + '</div>';
   document.body.appendChild(el);
   if(nomeExercicio) el.querySelector('.tr-desc-ex').textContent = nomeExercicio;
   const tempoEl = el.querySelector('.tr-desc-tempo');
-  const barra = el.querySelector('.tr-desc-barra');
+  const arco = el.querySelector('#tr-desc-arco');
+  const VOLTA = 2 * Math.PI * 46;          // circunferência do anel
   let maior = total;
   function pintar(){
     const mm = Math.floor(Math.max(0,restante)/60), ss = Math.max(0,restante)%60;
     tempoEl.textContent = mm + ':' + (ss<10?'0':'') + ss;
-    barra.style.width = maior > 0 ? Math.max(0, Math.min(100, restante/maior*100)) + '%' : '0%';
+    const fatia = maior > 0 ? Math.max(0, Math.min(1, restante/maior)) : 0;
+    arco.style.strokeDasharray = (VOLTA*fatia).toFixed(1) + ' ' + VOLTA.toFixed(1);
     el.classList.toggle('acabando', restante <= 5 && restante > 0);
   }
   function tick(){
-    restante--;
+    restante = Math.round((fimEm - Date.now()) / 1000);
     if(restante < 0){
       el.classList.add('fim');
       tempoEl.textContent = 'Vai!';
-      barra.style.width = '0%';
+      arco.style.strokeDasharray = '0 ' + VOLTA.toFixed(1);
       if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
       sessaoTreinoDescansoTimer = null;
       try{ if(navigator.vibrate) navigator.vibrate([120,70,120]); }catch(e){}
@@ -7221,6 +7268,12 @@ function iniciarDescanso(txt, nomeExercicio){
   }
   pintar();
   sessaoTreinoDescansoTimer = setInterval(tick, 1000);
+  // voltando do segundo plano, acerta o número imediatamente em vez de
+  // esperar a próxima batida
+  const aoVoltar = function(){ if(sessaoTreinoDescansoTimer) tick(); };
+  document.addEventListener('visibilitychange', aoVoltar);
+  window.addEventListener('focus', aoVoltar);
+  el.__aoVoltar = aoVoltar;
   tocarSomDescanso(total);
   segurarTela();
 
@@ -7255,7 +7308,9 @@ function iniciarDescanso(txt, nomeExercicio){
   Array.prototype.forEach.call(el.querySelectorAll('.tr-desc-btn'), function(b){
     b.onclick = function(){
       if(b.getAttribute('data-acao') === 'pular'){ fecharDescanso(); return; }
-      restante += 30; maior = Math.max(maior, restante); pintar();
+      fimEm += 30000;
+      restante = Math.round((fimEm - Date.now()) / 1000);
+      maior = Math.max(maior, restante); pintar();
       el.classList.remove('fim');
       // o áudio antigo tem o bipe na hora velha - refaz com o tempo novo
       tocarSomDescanso(restante);
