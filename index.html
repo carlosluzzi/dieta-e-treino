@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Dieta e treino</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
@@ -1113,14 +1113,12 @@
 
   /* painel de descanso: grande de propósito, pra ler de longe com o celular
      apoiado no banco. Nasce sozinho quando uma série é marcada. */
-  /* O CANTO DA TELA DO IPHONE é curvo (uns 50px de raio). Painel colado
-     embaixo e largo demais tem os cantos de baixo "comidos" por essa curva.
-     Dois cuidados: folga maior embaixo (e agora o env() funciona de verdade,
-     depois do viewport-fit=cover no <meta>) e 16px de margem lateral, pra o
-     painel acabar antes de onde a tela começa a curvar. O raio de 24px
-     também conversa melhor com o canto do aparelho. */
+  /* O canto da tela do iPhone é curvo (uns 50px de raio), e um painel colado
+     embaixo tem os cantos de baixo "comidos" por essa curva. Sobe um pouco
+     (34px de folga) e ganha raio maior, pra acompanhar a curva do aparelho
+     em vez de brigar com ela. Só isso - nada de mexer no viewport. */
   .tr-descanso-toast{position:fixed;left:50%;
-    bottom:calc(env(safe-area-inset-bottom,0px) + 24px);
+    bottom:calc(env(safe-area-inset-bottom,0px) + 34px);
     transform:translateX(-50%);z-index:120;background:var(--card);color:var(--ink);
     width:min(420px, calc(100vw - 32px));border-radius:24px;padding:14px 16px 16px;
     border:1px solid var(--hair);box-shadow:0 12px 34px rgba(0,0,0,.2)}
@@ -1526,7 +1524,11 @@
     <span>Treino</span>
   </button>
   <button id="aba-progresso" aria-pressed="false" class="tabbar-item">
-    <svg class="tabbar-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="12" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="9" y="2" width="6" height="3" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 17v-4M12 17v-7M15 17v-10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <!-- fita métrica: ícone que o Carlos escolheu. É desenho preenchido (e não
+         traço como os outros três), então a viewBox foi ajustada pro contorno
+         real do desenho (medido: 8.8,8 até 89.1,88.7) em vez da original
+         0 0 100 125, que tinha folga sobrando e deixava ele menor que os vizinhos. -->
+    <svg class="tabbar-ico" viewBox="4 4 90 90" aria-hidden="true"><path fill="currentColor" d="M79.721,87.98c-2.188,0-4.255-0.811-5.857-2.291L24.309,60.628l0.631-1.706c2.997-8.105,7.641-15.34,13.805-21.505c5.85-5.847,12.669-10.331,20.274-13.328l1.729-0.682l25.321,50.077c1.482,1.601,2.293,3.667,2.293,5.857c0.003,2.305-0.898,4.475-2.53,6.108C84.197,87.081,82.027,87.98,79.721,87.98z M29.425,58.645l46.843,23.687l0.232,0.23c1.724,1.725,4.719,1.725,6.443,0c0.863-0.861,1.336-2.006,1.336-3.221s-0.473-2.359-1.336-3.221l-0.232-0.231L58.799,28.595c-6.395,2.77-12.164,6.703-17.17,11.707C36.318,45.614,32.219,51.778,29.425,58.645z M32.015,63.709l-7.655-2.828c0.335-0.91,0.695-1.815,1.076-2.712l7.511,3.195C32.613,62.141,32.306,62.921,32.015,63.709z M35.754,55.707l-7.082-4.054c0.481-0.841,0.984-1.674,1.51-2.497l6.879,4.394C36.605,54.261,36.17,54.98,35.754,55.707z M40.765,48.432l-6.317-5.166c0.611-0.749,1.243-1.485,1.896-2.211l6.065,5.459C41.844,47.143,41.296,47.783,40.765,48.432z M46.903,42.063l-5.394-6.125c0.73-0.644,1.475-1.268,2.226-1.872l5.108,6.367C48.186,40.958,47.541,41.502,46.903,42.063z M53.992,36.779l-4.319-6.925c0.826-0.517,1.665-1.012,2.513-1.484l3.978,7.126C55.433,35.905,54.709,36.333,53.992,36.779z M61.845,32.75L58.747,25.2l0.856-0.345l2.989,7.594L61.845,32.75z M79.721,87.3c-2.047,0-3.979-0.77-5.463-2.173L35.201,65.383l0.381-1.117c2.365-7.001,6.24-13.226,11.513-18.499c4.942-4.946,10.749-8.672,17.251-11.076l1.137-0.42l20.021,39.607c1.406,1.484,2.176,3.415,2.176,5.463c0.003,2.124-0.826,4.123-2.331,5.627C83.844,86.472,81.846,87.3,79.721,87.3z M38.549,64.027L75.864,82.89l0.154,0.153c1.98,1.981,5.425,1.981,7.407,0c0.989-0.99,1.533-2.305,1.533-3.703c0-1.397-0.544-2.712-1.535-3.702l-0.154-0.154L64.158,37.678c-5.676,2.271-10.764,5.636-15.141,10.013C44.324,52.384,40.807,57.876,38.549,64.027z M79.721,88.653c-2.238,0-4.479-0.8-6.246-2.398L14.137,56.251l-0.307-0.308c-1.764-1.761-2.732-4.101-2.732-6.588c0-2.488,0.969-4.828,2.732-6.589l3.846,3.848c-0.734,0.733-1.138,1.707-1.138,2.741c0,0.907,0.311,1.767,0.882,2.459l59.252,29.961l0.307,0.308c1.514,1.512,3.973,1.512,5.484,0c0.734-0.733,1.137-1.707,1.137-2.741c0-1.034-0.402-2.006-1.137-2.74l-0.309-0.308L52.193,17.04c-1.352-1.109-3.34-1.174-4.771-0.104l-3.258-4.358c3.682-2.753,8.91-2.38,12.161,0.87l0.308,0.308l30,59.338c1.557,1.716,2.407,3.917,2.407,6.248c0.003,2.487-0.968,4.827-2.729,6.589C84.494,87.745,82.107,88.653,79.721,88.653z M45.793,14.757 M44.883,21.654L39.518,10.32l4.918-2.329l5.365,11.333L44.883,21.654z M19.322,49.901L8.766,43.134l2.936-4.58l10.557,6.767L19.322,49.901z"/></svg>
     <span>Evolução</span>
   </button>
 </nav>
