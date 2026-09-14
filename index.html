@@ -943,6 +943,10 @@
   .tr-cabecalho{text-align:center;padding:22px 8px 6px}
   .tr-cabecalho h2{font-size:15.5px;font-weight:800;text-transform:uppercase;letter-spacing:.11em;
     color:var(--azul);margin:0 0 8px}
+  /* o título do treino que está sendo feito usa o mesmo desenho do
+     "Atualização 1" lá do topo da aba Treino - é o mesmo tipo de título. */
+  .tr-sessao-titulo{font-size:15.5px;font-weight:800;text-transform:uppercase;letter-spacing:.11em;
+    color:var(--azul);text-align:center;margin:18px 0 10px;line-height:1.4}
   .tr-sub{font-size:13px;color:var(--ink2);margin:0;line-height:1.5}
   .tr-sub.editavel{cursor:pointer;text-decoration:underline;text-decoration-color:var(--hair);
     text-underline-offset:3px}
@@ -1060,11 +1064,16 @@
   /* o vermelho fica com a mesma folga e o mesmo raio da linha: encostando nos
      cantos, sobrava uma pontinha dele aparecendo por baixo do arredondado. */
   .tr-serie-linha-wrap .tr-serie-excluir{top:2px;bottom:2px;border-radius:10px}
-  /* puxando até o fim, o botão vira a linha inteira e o texto encosta à
-     direita, pra continuar embaixo do dedo. */
-  .tr-serie-excluir.pronto{justify-content:flex-end;padding-right:24px}
+  /* passou do ponto de soltar-e-apagar: só o vermelho escurece um tom, sem
+     mexer em nada de lugar. */
+  .tr-serie-excluir.pronto{background:#D92B23}
+  /* o texto fica ancorado na direita (a 14px da borda, exatamente onde ele já
+     nascia centralizado nos 76px do botão fechado). Assim, quando o botão
+     cresce junto com o arrasto, o "Excluir" não passeia pro meio e depois
+     pula de volta pra direita - ele simplesmente não sai do lugar. */
   .tr-serie-excluir{position:absolute;top:0;right:0;bottom:0;width:76px;border:none;background:#FF3B30;color:#fff;
-    font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0}
+    font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:flex-end;
+    padding:0 14px 0 0;white-space:nowrap}
   /* o raio aqui não é enfeite: o invólucro do gesto é arredondado e recorta o
      que está dentro dele, então uma linha de canto vivo deixava aparecer duas
      pontinhas vermelhas do botão Excluir que fica atrás. */
@@ -7102,7 +7111,7 @@ function montarSessaoTreino(){
         + '<button type="button" class="tr-serie-add" data-ex="'+idx+'" data-tipo="'+tipo+'">+ Adicionar série</button>'
         + '</div>';
     }).join('');
-    corpoTreino = '<h4 style="margin-top:18px">Treino '+sessaoTreinoChave+' - '+t.nome+'</h4>'
+    corpoTreino = '<h4 class="tr-sessao-titulo">Treino '+sessaoTreinoChave+' - '+t.nome+'</h4>'
       + semanaInfo
       + core
       + '<div class="tr-registro" id="sessao-treino-registro">'
