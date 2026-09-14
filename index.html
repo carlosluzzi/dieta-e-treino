@@ -96,7 +96,7 @@
     --ok:#2E9E52; --ad:#DE8C0A; --nao:#DB4436;
     --ok-soft:#E3F5E9; --ad-soft:#FCEEDA; --nao-soft:#FBE8E6;
     --pan:#3A3A3C; --azul:#AB181E; --azul-soft:#FBEAEB;
-    --r:12px; --rc:8px;
+    --r:14px; --rc:10px;
     --sh:0 1px 4px rgba(0,0,0,.05);
     --sh-min:0 1px 3px rgba(0,0,0,.06);
     --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
@@ -156,14 +156,18 @@
   .marca-logo svg{width:100%;height:100%;display:block}
   .marca small{min-width:0;font-size:18px;font-weight:700;color:var(--ink);
     letter-spacing:-.015em;line-height:1.2;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    /* "Carlos e Isabella" não tem letra descendente, então a mancha do texto
+       fica na parte de cima da linha e parece subir em relação à maçã.
+       Medido com print: 1,25px de diferença entre os dois centros. */
+    position:relative;top:1.25px}
   @media (max-width:360px){ .marca small{font-size:16px} }
 
   /* ---------- segmented control ---------- */
-  .switch{display:inline-flex;background:var(--fill);border-radius:8px;padding:2px;gap:2px}
+  .switch{display:inline-flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px}
   .estados{padding:1px;gap:1px}
   .switch button{font-size:14px;font-weight:500;letter-spacing:-.01em;color:var(--ink2);
-    background:none;border:0;padding:7px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;
+    background:none;border:0;padding:7px 14px;border-radius:10px;cursor:pointer;white-space:nowrap;
     transition:background .15s ease,color .15s ease}
   .switch button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--sh-min)}
   .switch button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
@@ -177,9 +181,9 @@
   .switch-dia button{flex:1 1 0;text-align:center}
 
   /* ---------- abas ---------- */
-  .abas{display:inline-flex;background:var(--fill);border-radius:8px;padding:2px;gap:2px;margin-top:16px}
+  .abas{display:inline-flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px;margin-top:16px}
   .abas button{font-size:15px;font-weight:500;letter-spacing:-.01em;color:var(--ink2);background:none;
-    border:0;padding:8px 22px;border-radius:8px;cursor:pointer}
+    border:0;padding:8px 22px;border-radius:10px;cursor:pointer}
   .abas button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--sh-min)}
   .abas button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
 
@@ -189,9 +193,9 @@
   .planejador span.rot{font-size:15px;font-weight:500}
   .planejador span.exp{font-size:13px;color:var(--ink2);flex:1 1 100%;line-height:1.4}
 
-  .stepper{display:inline-flex;align-items:center;background:var(--fill);border-radius:8px;padding:2px}
+  .stepper{display:inline-flex;align-items:center;background:var(--fill);border-radius:10px;padding:2px}
   .stepper button{width:32px;height:32px;font-size:20px;font-weight:400;line-height:1;background:var(--card);
-    border:0;border-radius:8px;color:var(--azul);cursor:pointer;box-shadow:var(--sh-min)}
+    border:0;border-radius:10px;color:var(--azul);cursor:pointer;box-shadow:var(--sh-min)}
   .stepper button:disabled{color:var(--ink3);box-shadow:none;background:none}
   .stepper button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
   .stepper .n{min-width:38px;text-align:center;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
@@ -210,10 +214,10 @@
   .vnome{flex:1;text-align:left;font-size:15px;font-weight:400;color:var(--ink2);background:none;
     border:0;padding:6px 0;cursor:pointer;min-width:0}
   .vnome[aria-pressed="true"]{color:var(--ink);font-weight:600}
-  .vnome::before{content:'';display:inline-block;width:8px;height:8px;border-radius:8px;
+  .vnome::before{content:'';display:inline-block;width:8px;height:8px;border-radius:10px;
     background:var(--hair);margin-right:9px;vertical-align:1px}
   .vnome[aria-pressed="true"]::before{background:var(--azul)}
-  .vnome:focus-visible{outline:2px solid var(--azul);outline-offset:2px;border-radius:6px}
+  .vnome:focus-visible{outline:2px solid var(--azul);outline-offset:2px;border-radius:7px}
   .vaviso{font-size:13px;font-weight:500;color:var(--ad);margin-top:8px}
 
   .cols,li.item{display:grid;grid-template-columns:minmax(0,1fr) 3.8rem 3.8rem 3.2rem;gap:0 8px}
@@ -236,7 +240,7 @@
   .val.i{color:var(--isa)} .val.c{color:var(--car)} .val.p{color:var(--ink)}
   .val.zero{color:var(--ink3);font-weight:400}
   .val.sep{font-size:12px;font-weight:500;color:var(--ink3)}
-  button.val{background:none;border:0;cursor:pointer;padding:3px 6px;margin:-3px -6px;border-radius:8px}
+  button.val{background:none;border:0;cursor:pointer;padding:3px 6px;margin:-3px -6px;border-radius:10px}
   button.val:focus-visible{outline:2px solid var(--azul);outline-offset:0}
   button.val.i[aria-expanded="true"]{background:var(--isa);color:#fff}
   button.val.c[aria-expanded="true"]{background:var(--car);color:#fff}
@@ -273,7 +277,7 @@
   .det{display:block;font-size:13px;color:var(--ink2);font-weight:400;margin-top:2px;line-height:1.4}
   .acoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
   .acoes button{font-size:15px;font-weight:500;letter-spacing:-.01em;background:var(--azul);color:#fff;
-    border:0;border-radius:8px;padding:11px 20px;cursor:pointer}
+    border:0;border-radius:10px;padding:11px 20px;cursor:pointer}
   .acoes button.sec{background:var(--fill);color:var(--ink)}
   .acoes button:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
   .aviso{font-size:13px;color:var(--ink2);margin-top:12px;line-height:1.5}
@@ -295,12 +299,12 @@
   th{font-size:12px;color:var(--ink2);font-weight:500;border-top:0}
   td.q{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
   .tags{display:flex;flex-wrap:wrap;gap:6px}
-  .tags span{background:var(--fill);border-radius:8px;padding:5px 11px;font-size:14px}
+  .tags span{background:var(--fill);border-radius:10px;padding:5px 11px;font-size:14px}
   .grupo-tit{font-size:13px;font-weight:600;color:var(--ink2);margin:16px 0 7px}
   .grupo-tit:first-child{margin-top:0}
 
   /* ---------- diálogo e balão ---------- */
-  dialog{border:0;border-radius:10px;padding:0;max-width:540px;width:calc(100% - 32px);
+  dialog{border:0;border-radius:12px;padding:0;max-width:540px;width:calc(100% - 32px);
     background:var(--card);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.22)}
   dialog::backdrop{background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
   .dlg-head{display:flex;justify-content:space-between;align-items:center;padding:15px 18px;
@@ -327,7 +331,7 @@
     line-height:1.5;border:0;border-radius:var(--rc);padding:12px;background:var(--fill);color:var(--ink);resize:vertical}
 
   .balao{position:absolute;z-index:60;width:274px;max-width:calc(100vw - 24px);background:var(--card);
-    border-radius:10px;box-shadow:0 10px 34px rgba(0,0,0,.18);padding:13px 15px}
+    border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.18);padding:13px 15px}
   .balao .seta{position:absolute;width:12px;height:12px;background:var(--card);transform:rotate(45deg)}
   .balao.abaixo .seta{top:-5px} .balao.acima .seta{bottom:-5px}
   .porcao .quem{font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:3px}
@@ -343,24 +347,24 @@
   .mes h2{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0}
   .mes .nav{display:flex;gap:6px;align-items:center}
   .mes .nav button{height:34px;min-width:34px;padding:0 12px;font-size:15px;font-weight:500;background:var(--card);
-    border:0;border-radius:8px;cursor:pointer;color:var(--azul);box-shadow:var(--sh-min)}
+    border:0;border-radius:10px;cursor:pointer;color:var(--azul);box-shadow:var(--sh-min)}
   .cal{background:var(--card);border-radius:var(--r);padding:10px;box-shadow:var(--sh)}
   .cal .sem{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
   .cal .cab span{font-size:12px;font-weight:500;color:var(--ink3);text-align:center;padding:4px 0}
   .cal button.d{position:relative;aspect-ratio:1;font-size:15px;font-weight:400;background:none;border:0;
-    border-radius:8px;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;
+    border-radius:10px;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:4px;padding:0;font-variant-numeric:tabular-nums}
   .cal button.d.fora{color:transparent;cursor:default}
   .cal button.d.hoje{font-weight:700;color:var(--azul)}
   .cal button.d[aria-pressed="true"]{background:var(--ink);color:#fff;font-weight:600}
-  .cal .barra{display:flex;width:60%;height:3px;border-radius:8px;overflow:hidden;background:var(--hair)}
+  .cal .barra{display:flex;width:60%;height:3px;border-radius:10px;overflow:hidden;background:var(--hair)}
   .cal button.d[aria-pressed="true"] .barra{background:rgba(255,255,255,.28)}
   .cal .barra i{display:block;height:100%}
   .b-ok{background:var(--ok)} .b-ad{background:var(--ad)} .b-nao{background:var(--nao)}
   .legenda{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:13px;color:var(--ink2);
     margin-top:12px;padding:0 4px}
   .legenda span{display:flex;align-items:center;gap:6px}
-  .legenda i{width:8px;height:8px;border-radius:8px;display:block}
+  .legenda i{width:8px;height:8px;border-radius:10px;display:block}
 
   .dia-box{background:var(--card);border-radius:var(--r);margin-top:16px;box-shadow:var(--sh);overflow:hidden}
   /* dentro do popup ele não é mais um cartão solto: sem margem, sem sombra e
@@ -389,10 +393,10 @@
   .ref .nm-btn[aria-expanded="true"]::after{transform:rotate(-135deg);margin-top:3px}
   .ref .estados{flex:0 0 auto}
 
-  .estados{display:inline-flex;background:var(--fill);border-radius:8px;padding:2px;gap:2px}
+  .estados{display:inline-flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px}
   .estados{flex-shrink:0}
   .estados button{font-size:13px;font-weight:500;background:none;border:0;padding:7px 10px;
-    border-radius:8px;cursor:pointer;color:var(--ink2);white-space:nowrap}
+    border-radius:10px;cursor:pointer;color:var(--ink2);white-space:nowrap}
   .estados button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--sh-min)}
   .estados button[aria-pressed="true"][data-e="ok"],.estados button[aria-pressed="true"][data-f="tudo"]{background:var(--ok);color:#fff}
   .estados button[aria-pressed="true"][data-e="ad"],.estados button[aria-pressed="true"][data-f="meia"]{background:var(--ad);color:#fff}
@@ -409,10 +413,11 @@
   /* "comi algo a mais" usa a mesma linha dos alimentos do plano, dentro de um
      invólucro que permite arrastar pra esquerda e revelar o Excluir - igual
      às séries do treino. */
-  .item-dia-wrap{position:relative;border-radius:8px;overflow:hidden}
+  .item-dia-wrap{position:relative;border-radius:10px;overflow:hidden}
   .item-dia-wrap .item-dia{background:var(--card);position:relative;z-index:1;
     padding-left:2px;padding-right:2px;touch-action:pan-y}
   .item-dia{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0;border-top:.5px solid var(--hair)}
+  .item-dia.sem-linha{border-top:0}
   .item-dia .idn{flex:1;min-width:96px;font-size:15px;letter-spacing:-.01em}
   .item-dia .idq{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink2)}
   .item-dia .idn{overflow:hidden;text-overflow:ellipsis}
@@ -433,7 +438,7 @@
     background:var(--fill);color:var(--ink);font-variant-numeric:tabular-nums}
   .troca-box input:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
   .troca-selo{flex:1 1 100%;font-size:12px;font-weight:600;line-height:1.35;padding:6px 10px;
-    border-radius:7px;margin-top:2px}
+    border-radius:8px;margin-top:2px}
   .troca-selo.dentro{background:var(--ok-soft);color:#1B6B36}
   .troca-selo.fora{background:var(--ad-soft);color:#8A5600}
   .troca-box .kcal{flex:1 1 100%;font-size:13px;color:var(--ink2);margin-top:-2px}
@@ -446,28 +451,35 @@
     background:none;border:0;padding:0;cursor:pointer;font-family:inherit}
   .extra-resumo-txt{flex:1 1 auto;font-size:14px;color:var(--ink);line-height:1.35}
   .extra-resumo-kcal{flex:0 0 auto;font-size:12.5px;color:var(--ink2)}
-  .extra-x{flex:0 0 auto;width:26px;height:26px;border-radius:8px;border:0;background:var(--fill);
+  .extra-x{flex:0 0 auto;width:26px;height:26px;border-radius:10px;border:0;background:var(--fill);
     color:var(--ink2);font-size:15px;line-height:1;cursor:pointer}
   .extra-ok{flex:1 1 100%;margin-top:4px}
   .extra-linha .tag{font-size:11px;font-weight:600;color:var(--azul);background:var(--car-soft);
-    border-radius:8px;padding:3px 9px}
+    border-radius:10px;padding:3px 9px}
   .rm{background:none;border:0;color:var(--nao);font-size:13px;cursor:pointer;padding:6px 8px;font-weight:500}
 
-  .obs{padding:14px 16px;border-top:.5px solid var(--hair)}
+  /* o <details> já vira cartão pela regra genérica lá de cima (fundo, raio e
+     sombra). A linha de separação que existia aqui era desenhada POR CIMA
+     desse cartão e o raio a recortava nas pontas - dava aquele arco solto
+     depois do campo. Dentro do popup ele fica só com um fundo levinho. */
+  .obs{padding:14px 16px;border-top:0;background:var(--fill2);box-shadow:none;margin:12px 0 0}
   .obs label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px}
   .obs > summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;
     font-size:13px;font-weight:600;color:var(--ink2)}
   .obs > summary::-webkit-details-marker{display:none}
   .obs > summary > span:first-child{flex:1 1 auto}
   .obs-marca{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--azul);background:var(--azul-soft);
-    padding:2px 7px;border-radius:7px}
+    padding:2px 7px;border-radius:8px}
   .obs > summary::after{content:'';flex:0 0 auto;width:7px;height:7px;
     border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);
     transform:rotate(45deg) translate(-2px,-2px);transition:transform .18s ease}
   .obs[open] > summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
   .obs[open] textarea{margin-top:8px}
   .obs textarea{width:100%;min-height:70px;font-size:15px;line-height:1.45;border:0;border-radius:var(--rc);
-    padding:11px;background:var(--fill);color:var(--ink);resize:vertical;
+    padding:11px;background:var(--card);color:var(--ink);
+    /* sem alça de redimensionar: o risquinho no canto parecia uma linha
+       sobrando embaixo do campo, e o campo já cresce o quanto precisa */
+    resize:none;
     font-family:var(--sans);letter-spacing:-.01em}
   .obs textarea::placeholder{color:var(--ink3);font-family:var(--sans);letter-spacing:-.01em}
   .obs textarea:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
@@ -493,7 +505,7 @@
   .calresumo b{font-size:22px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 
   .rodape{margin-top:26px;font-size:13px;color:var(--ink2);line-height:1.6}
-  .reset{font-size:15px;font-weight:500;background:var(--card);border:0;border-radius:8px;
+  .reset{font-size:15px;font-weight:500;background:var(--card);border:0;border-radius:10px;
     padding:11px 20px;cursor:pointer;color:var(--nao);box-shadow:var(--sh-min)}
   noscript{display:block;background:var(--card);border-radius:var(--r);padding:18px;margin-top:16px;box-shadow:var(--sh)}
 
@@ -522,9 +534,9 @@
      só o CSS que não deixava esconder de verdade) */
   .tela-cheia{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;
     align-items:center;justify-content:center;padding:24px 16px;overflow-y:auto}
-  .tela-cheia .cartao{width:100%;max-width:400px;background:var(--card);border-radius:12px;
+  .tela-cheia .cartao{width:100%;max-width:400px;background:var(--card);border-radius:14px;
     box-shadow:var(--sh);padding:28px 24px;text-align:center}
-  .tela-cheia .logo-app{width:64px;height:64px;border-radius:12px;margin:0 auto 16px;
+  .tela-cheia .logo-app{width:64px;height:64px;border-radius:14px;margin:0 auto 16px;
     display:flex;align-items:center;justify-content:center;overflow:hidden}
   .tela-cheia .logo-app img,.tela-cheia .logo-app svg{width:100%;height:100%;object-fit:contain;display:block}
   .tela-cheia h1{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0 0 6px}
@@ -542,13 +554,13 @@
     padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;
     background:rgba(255,255,255,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);
     backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid rgba(0,0,0,.08)}
-  .sessao-treino-head button{width:32px;height:32px;flex-shrink:0;border-radius:8px;border:0;
+  .sessao-treino-head button{width:32px;height:32px;flex-shrink:0;border-radius:10px;border:0;
     background:var(--fill);color:var(--ink);font-size:18px;line-height:1;cursor:pointer}
   .sessao-treino-head h1{font-size:18px;font-weight:700;letter-spacing:-.019em;margin:0}
   .sessao-treino-corpo{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
     overscroll-behavior-y:contain;max-width:720px;margin:0 auto;width:100%;
     padding:16px 16px calc(24px + env(safe-area-inset-bottom,0px))}
-  .tr-chip-sel{font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;
+  .tr-chip-sel{font-size:13px;font-weight:600;padding:8px 16px;border-radius:10px;
     background:var(--fill);color:var(--ink2);border:0;cursor:pointer}
   .tr-chip-sel[aria-pressed="true"]{background:var(--azul);color:#fff}
 
@@ -559,7 +571,7 @@
     padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 24px) 24px}
   #tela-instalar .cartao{background:none;box-shadow:none;border-radius:0;padding:0;max-width:432px}
   #tela-instalar h1{all:revert}
-  #tela-instalar .btn-pill{padding:10px;border-radius:8px;font-size:16px;font-weight:500;
+  #tela-instalar .btn-pill{padding:10px;border-radius:10px;font-size:16px;font-weight:500;
     letter-spacing:normal;margin-top:20px}
   /* campo nenhum herda a fonte do app sozinho - sem isto o textarea do "O que
      mudou nesse dia" e os inputs saem com a fonte padrão do navegador, que
@@ -567,7 +579,7 @@
   input,select,textarea,button{font-family:var(--sans)}
   .campo{margin-bottom:12px;text-align:left}
   .campo label{display:block;font-size:13px;font-weight:500;color:var(--ink2);margin:0 0 6px}
-  .campo input{width:100%;padding:6px 10px;border-radius:6px;border:0.5px solid var(--hair);
+  .campo input{width:100%;padding:6px 10px;border-radius:7px;border:0.5px solid var(--hair);
     background:#fff;font-size:16px;color:var(--ink);box-sizing:border-box}
   .campo input:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:transparent}
   /* campo de data: no Safari do iPhone o controle nativo tem uma largura
@@ -586,7 +598,7 @@
     -webkit-text-fill-color:var(--ink);
     caret-color:var(--ink);
     transition:background-color 5000s ease-in-out 0s}
-  .btn-pill{display:block;width:100%;padding:10px;border-radius:8px;border:0;
+  .btn-pill{display:block;width:100%;padding:10px;border-radius:10px;border:0;
     font-size:16px;font-weight:500;cursor:pointer;margin-top:4px;box-sizing:border-box}
   .btn-pill.primario{background:var(--azul);color:#fff}
   .btn-pill.primario:active{opacity:.85}
@@ -599,18 +611,18 @@
     transition:max-height .22s ease,margin-bottom .22s ease}
   .erro-auth.mostra{max-height:4.5em;margin-bottom:12px}
   .badge-convite{display:inline-block;font-size:12px;font-weight:600;color:var(--azul);
-    background:var(--car-soft);border-radius:8px;padding:5px 12px;margin-bottom:14px}
+    background:var(--car-soft);border-radius:10px;padding:5px 12px;margin-bottom:14px}
 
   /* ---------- conta / convite ---------- */
-  .conta-btn{width:34px;height:34px;border-radius:8px;border:0;background:var(--fill);
+  .conta-btn{width:34px;height:34px;border-radius:10px;border:0;background:var(--fill);
     color:var(--ink);font-size:14px;font-weight:700;cursor:pointer;display:flex;
     align-items:center;justify-content:center;flex:0 0 auto}
-  #dlg-conta{border:0;border-radius:10px;padding:0;max-width:340px;width:90vw;box-shadow:var(--sh)}
+  #dlg-conta{border:0;border-radius:12px;padding:0;max-width:340px;width:90vw;box-shadow:var(--sh)}
   #dlg-conta::backdrop{background:rgba(0,0,0,.28)}
   .conta-corpo{padding:22px;max-height:80vh;overflow-y:auto;overflow-x:hidden;touch-action:pan-y}
   .conta-nome{font-size:17px;font-weight:700;letter-spacing:-.02em;margin:0 0 2px}
   .conta-papel{font-size:13px;color:var(--ink2);margin:0 0 18px}
-  .conta-acao{display:block;width:100%;text-align:left;padding:12px 14px;border-radius:8px;
+  .conta-acao{display:block;width:100%;text-align:left;padding:12px 14px;border-radius:10px;
     border:0;background:var(--fill2);font-size:15px;color:var(--ink);cursor:pointer;margin-bottom:8px}
   .conta-acao.sair{color:var(--nao)}
   .conv-intro{font-size:13.5px;color:var(--ink2);line-height:1.5;margin:0 0 16px}
@@ -618,7 +630,7 @@
   .conv-passos b{color:var(--ink)}
   .convite-link-box[hidden]{display:none}
   .convite-link-box{display:flex;gap:8px;align-items:center;background:var(--fill2);
-    border-radius:8px;padding:10px 12px;margin:10px 0;word-break:break-all;font-size:13px}
+    border-radius:10px;padding:10px 12px;margin:10px 0;word-break:break-all;font-size:13px}
   .convite-link-box button{flex:0 0 auto;width:auto;padding:8px 14px;margin:0}
 
   /* ---------- barra de abas (navegação principal) ---------- */
@@ -637,7 +649,7 @@
   .tabbar-ico{width:21px;height:21px}
   .tabbar-item span{font-size:10px;font-weight:500;letter-spacing:-.005em;white-space:nowrap;line-height:1.2}
   .tabbar-item[aria-pressed="true"]{color:var(--azul);background:var(--fill)}
-  .tabbar-item:focus-visible{outline:2px solid var(--azul);outline-offset:1px;border-radius:8px}
+  .tabbar-item:focus-visible{outline:2px solid var(--azul);outline-offset:1px;border-radius:10px}
 
   /* ---------- aba Hoje ---------- */
   .hoje-cabecalho{padding:20px 0 4px}
@@ -648,8 +660,8 @@
   .hoje-cartao-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
   .hoje-cartao-tit{font-size:18px;font-weight:700;letter-spacing:-.015em}
   .hoje-cartao-num{font-size:14px;color:var(--ink2);font-weight:500}
-  .hoje-cartao-barra{height:8px;border-radius:8px;background:var(--fill);overflow:hidden}
-  .hoje-cartao-barra-fill{height:100%;background:var(--ok);border-radius:8px;transition:width .3s ease}
+  .hoje-cartao-barra{height:8px;border-radius:10px;background:var(--fill);overflow:hidden}
+  .hoje-cartao-barra-fill{height:100%;background:var(--ok);border-radius:10px;transition:width .3s ease}
   /* treinos já registrados no dia, com saída pra apagar */
   .hoje-treino-feitos[hidden]{display:none}
   .hoje-treino-feitos{display:flex;flex-direction:column;gap:6px;margin:8px 0 2px}
@@ -658,9 +670,9 @@
   .hoje-treino-feito-txt{flex:1 1 auto;min-width:0;font-size:13px;font-weight:600;color:var(--ink2);
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .hoje-treino-apagar{flex:0 0 auto;border:0;background:none;color:var(--nao);
-    font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:4px 6px;border-radius:7px}
+    font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:4px 6px;border-radius:8px}
   .hoje-treino-apagar:disabled{color:var(--ink3)}
-  .hoje-cartao-cta{margin-top:12px;width:100%;padding:10px 14px;border-radius:8px;border:0;
+  .hoje-cartao-cta{margin-top:12px;width:100%;padding:10px 14px;border-radius:10px;border:0;
     background:var(--fill2);color:var(--azul);font-size:14px;font-weight:600;cursor:pointer}
   .hoje-cartao-nota{font-size:13px;color:var(--ink2);margin:0;line-height:1.4}
   /* Orçamento de calorias do dia no card Dieta: medidor em arco no meio
@@ -686,7 +698,7 @@
   .orc-centro-rot{font-size:12.5px;color:var(--ink2)}
   .orc-macros{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 14px}
   .orc-macro{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
-  .orc-ponto{width:9px;height:9px;border-radius:8px;flex-shrink:0;margin-bottom:2px}
+  .orc-ponto{width:9px;height:9px;border-radius:10px;flex-shrink:0;margin-bottom:2px}
   .orc-ponto-g{background:#E3B341}
   .orc-ponto-c{background:#5BA8D8}
   .orc-ponto-p{background:#7B5EC7}
@@ -697,15 +709,15 @@
      clicar abre o modal de troca (trocarTreinoDlg). */
   .hoje-treino-chave{flex-shrink:0;border:none;cursor:pointer;font-family:inherit;
     background:var(--azul-soft);color:var(--azul);font-size:13px;font-weight:700;
-    padding:5px 12px;border-radius:8px;display:flex;align-items:center;gap:5px}
+    padding:5px 12px;border-radius:10px;display:flex;align-items:center;gap:5px}
   .hoje-treino-chave::after{content:'›';font-size:15px;line-height:1;opacity:.75}
   /* display:flex na classe passa por cima do [hidden] do navegador */
   .hoje-treino-chave[hidden]{display:none}
   .tr-troca-lista{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
   .tr-troca-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;
-    border:1px solid var(--hair);background:var(--card);border-radius:8px;padding:11px 13px;font-family:inherit}
+    border:1px solid var(--hair);background:var(--card);border-radius:10px;padding:11px 13px;font-family:inherit}
   .tr-troca-item[aria-pressed="true"]{border-color:var(--azul);background:var(--azul-soft)}
-  .tr-troca-chave{flex-shrink:0;width:34px;height:34px;border-radius:8px;background:var(--fill);
+  .tr-troca-chave{flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--fill);
     color:var(--ink);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
   .tr-troca-item[aria-pressed="true"] .tr-troca-chave{background:var(--azul);color:#fff}
   .tr-troca-nome{font-size:14px;color:var(--ink);font-weight:500;line-height:1.3}
@@ -741,7 +753,7 @@
   .progresso-form-card .pg-linha3 .campo label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .progresso-historico{margin-top:20px}
   .pg-linha{display:flex;justify-content:space-between;align-items:baseline;background:var(--card);
-    border-radius:8px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--sh-min)}
+    border-radius:10px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--sh-min)}
   .pg-linha .pg-data{font-size:13px;color:var(--ink2)}
   .pg-linha .pg-vals{font-size:14px;font-weight:600;text-align:right}
   /* painel de enviar plano: escolher PDF e pronto */
@@ -749,20 +761,20 @@
   .vs-intro{font-size:13.5px;color:var(--ink2);line-height:1.5;margin:0 0 16px}
   .vs-status{margin-top:12px;display:flex;flex-direction:column;gap:6px}
   .vs-item{display:flex;align-items:baseline;gap:8px;font-size:13px;padding:9px 11px;
-    border-radius:8px;background:var(--fill2)}
+    border-radius:10px;background:var(--fill2)}
   .vs-item-nome{flex:1 1 auto;min-width:0;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .vs-item-res{flex:0 0 auto;font-weight:600;color:var(--ink2)}
   .vs-item.ok{background:var(--ok-soft)} .vs-item.ok .vs-item-res{color:#1B6B36}
   .vs-item.falhou{background:var(--ad-soft)} .vs-item.falhou .vs-item-res{color:#8A5600}
   .vs-tipo{flex:0 0 auto;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
-    color:var(--ink2);background:var(--fill);padding:4px 8px;border-radius:7px;min-width:74px;text-align:center}
+    color:var(--ink2);background:var(--fill);padding:4px 8px;border-radius:8px;min-width:74px;text-align:center}
   .vs-btn-mini{flex:0 0 auto;border:0;background:var(--fill);color:var(--ink2);font-family:inherit;
-    font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:8px;cursor:pointer}
+    font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:10px;cursor:pointer}
   .vs-btn-mini.perigo{color:var(--nao)}
   .vs-linha-editavel{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 0;
     border-bottom:.5px solid var(--hair)}
   .vs-linha-editavel:last-child{border-bottom:0}
-  .vs-linha-editavel .vs-vigente-edit{font-size:14px;padding:6px 8px;border-radius:8px;
+  .vs-linha-editavel .vs-vigente-edit{font-size:14px;padding:6px 8px;border-radius:10px;
     border:1px solid var(--hair);background:var(--fill2);
     /* pode encolher: antes era flex:0 0 auto e o campo esticava a linha */
     flex:1 1 150px;min-width:0;max-width:100%;box-sizing:border-box}
@@ -792,18 +804,18 @@
   .evo-card-situacao.alto{color:var(--nao)}
   .evo-card-semfaixa{font-size:11.5px;color:var(--ink3);margin-top:8px}
   .evo-barra{position:relative;height:16px;margin-top:10px}
-  .evo-barra-trilho{position:absolute;left:0;right:0;top:5px;height:6px;border-radius:8px;overflow:hidden;background:var(--fill)}
+  .evo-barra-trilho{position:absolute;left:0;right:0;top:5px;height:6px;border-radius:10px;overflow:hidden;background:var(--fill)}
   .evo-barra-zona{position:absolute;top:0;bottom:0}
   .evo-zona-abaixo{background:var(--ad-soft)}
   .evo-zona-normal{background:var(--ok-soft)}
   .evo-zona-alto{background:var(--nao-soft)}
   .evo-barra-marcador{position:absolute;top:8px;width:12px;height:12px;margin-left:-6px;margin-top:-6px;
-    border-radius:8px;background:var(--azul);border:2px solid var(--card);box-shadow:var(--sh-min)}
+    border-radius:10px;background:var(--azul);border:2px solid var(--card);box-shadow:var(--sh-min)}
   .evo-link{display:block;background:none;border:0;padding:10px 2px;margin:0;color:var(--azul);
     font-size:13px;font-weight:600;cursor:pointer;text-align:left}
   .evo-secao{margin-top:24px}
   .evo-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:12px}
-  .evo-chip{flex:0 0 auto;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:8px;
+  .evo-chip{flex:0 0 auto;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:10px;
     background:var(--fill);color:var(--ink2);border:0;cursor:pointer;white-space:nowrap}
   .evo-chip[aria-pressed="true"]{background:var(--azul);color:#fff}
   .evo-grafico-wrap{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:14px 8px;overflow-x:auto}
@@ -825,17 +837,17 @@
   .switch-semana{display:flex;width:100%}
   .switch-semana button{flex:1 1 0;text-align:center;padding:8px 6px}
   .tr-semana-cartao{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:12px;
-    background:var(--fill);border-radius:10px;overflow:hidden}
+    background:var(--fill);border-radius:12px;overflow:hidden}
   .tr-sem-celula{display:flex;flex-direction:column;align-items:center;gap:3px;
     background:var(--card);padding:12px 6px;min-width:0}
   .tr-sem-rot{display:flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:var(--ink3);
     text-transform:uppercase;letter-spacing:.03em;text-align:center;line-height:1.2}
   .tr-sem-val{font-size:13.5px;font-weight:700;color:var(--ink);text-align:center;line-height:1.25}
-  .tr-dica-btn{width:15px;height:15px;flex-shrink:0;border:0;border-radius:8px;background:var(--azul-soft);
+  .tr-dica-btn{width:15px;height:15px;flex-shrink:0;border:0;border-radius:10px;background:var(--azul-soft);
     color:var(--azul);font-size:10px;font-weight:800;line-height:1;cursor:pointer;padding:0;
     display:flex;align-items:center;justify-content:center;font-family:inherit}
   .dica{position:absolute;z-index:130;width:270px;max-width:calc(100vw - 24px);background:var(--card);
-    border-radius:10px;box-shadow:0 10px 34px rgba(0,0,0,.2);border:1px solid var(--hair);padding:12px 14px}
+    border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.2);border:1px solid var(--hair);padding:12px 14px}
   .dica b{display:block;font-size:13px;color:var(--ink);margin-bottom:4px}
   .dica p{margin:0;font-size:12.5px;color:var(--ink2);line-height:1.5}
   .dica-seta{position:absolute;width:11px;height:11px;background:var(--card);transform:rotate(45deg);
@@ -846,7 +858,7 @@
   .tr-divisao{display:flex;gap:6px;flex-wrap:wrap}
   #tr-divisao{flex-wrap:nowrap}
   #tr-divisao .tr-chip{flex:1 1 0}
-  .tr-chip{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:8px;background:var(--fill);color:var(--ink2);text-align:center}
+  .tr-chip{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:10px;background:var(--fill);color:var(--ink2);text-align:center}
   .tr-chip.off{background:transparent;color:var(--ink3);border:1px dashed var(--hair)}
   .tr-treino-card{background:var(--card);border-radius:var(--r);padding:16px;margin-top:12px;box-shadow:var(--sh)}
   .tr-treino-card h4{font-size:16px;font-weight:700;letter-spacing:-.01em;margin:0 0 12px}
@@ -870,7 +882,7 @@
   .tr-tabela td.tr-num{text-align:center;white-space:nowrap;color:var(--ink2)}
   .tr-core{margin-top:10px;padding-top:10px;border-top:1px dashed var(--hair);font-size:12.5px;color:var(--ink2);line-height:1.5}
   .tr-core b{color:var(--ink)}
-  .tr-aero-linha{background:var(--card);border-radius:8px;padding:12px 14px;margin-top:8px;box-shadow:var(--sh-min)}
+  .tr-aero-linha{background:var(--card);border-radius:10px;padding:12px 14px;margin-top:8px;box-shadow:var(--sh-min)}
   .tr-aero-linha .tr-aero-mod{font-weight:600;font-size:14px}
   .tr-aero-linha .tr-aero-det{font-size:12.5px;color:var(--ink2);margin-top:2px}
   .tr-detalhes{margin-top:20px;background:var(--card);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
@@ -885,7 +897,7 @@
   .tr-registro-linha{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--fill)}
   .tr-registro-linha:last-of-type{border-bottom:0}
   .tr-registro-nome{font-size:13px;color:var(--ink);flex:1 1 auto}
-  .tr-carga-input{width:70px;flex:0 0 auto;padding:8px 10px;border-radius:8px;border:1px solid var(--hair);
+  .tr-carga-input{width:70px;flex:0 0 auto;padding:8px 10px;border-radius:10px;border:1px solid var(--hair);
     font-size:16px;text-align:center;background:var(--fill2)}
   .tr-carga-input:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:transparent}
   .tr-registro .btn-pill{margin-top:10px}
@@ -906,13 +918,13 @@
      davam ~24px de texto numa caixa de 26px sem padding, e a folga sumia no
      Safari. Agora o botão centraliza de verdade (flex), a letra é menor e o
      espaço extra que sobrava DEPOIS do último ponto é compensado no recuo. */
-  .tr-serie-menu-btn{flex-shrink:0;width:28px;height:28px;border-radius:8px;border:none;background:var(--fill);
+  .tr-serie-menu-btn{flex-shrink:0;width:28px;height:28px;border-radius:10px;border:none;background:var(--fill);
     color:var(--azul);font-size:12px;font-weight:800;line-height:1;cursor:pointer;letter-spacing:1.5px;
     display:flex;align-items:center;justify-content:center;padding:0;overflow:hidden;text-indent:1.5px}
-  .tr-serie-nota{margin:-2px 0 10px;padding:8px 10px;border-radius:8px;background:#FFF6D8;color:#8A6D1A;
+  .tr-serie-nota{margin:-2px 0 10px;padding:8px 10px;border-radius:10px;background:#FFF6D8;color:#8A6D1A;
     font-size:12.5px;line-height:1.4;white-space:pre-wrap}
   .tr-serie-meta{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 10px}
-  .tr-meta-tag{font-size:10.5px;font-weight:500;padding:4px 9px;border-radius:8px;background:var(--fill);color:var(--ink2);white-space:nowrap}
+  .tr-meta-tag{font-size:10.5px;font-weight:500;padding:4px 9px;border-radius:10px;background:var(--fill);color:var(--ink2);white-space:nowrap}
   .tr-meta-tag b{font-weight:700;color:var(--ink3);margin-right:4px;text-transform:uppercase;font-size:9.5px;letter-spacing:.02em}
 
   .tr-serie-linhas{display:flex;flex-direction:column;gap:6px}
@@ -920,18 +932,18 @@
     font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.02em}
   .tr-serie-header-row span{text-align:center}
 
-  .tr-serie-linha-wrap{position:relative;border-radius:8px;overflow:hidden}
+  .tr-serie-linha-wrap{position:relative;border-radius:10px;overflow:hidden}
   .tr-serie-excluir{position:absolute;top:0;right:0;bottom:0;width:76px;border:none;background:#FF3B30;color:#fff;
     font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0}
   .tr-serie-linha,.tr-aquecimento-linha{position:relative;display:grid;grid-template-columns:32px 1fr 52px 52px 32px;
     gap:6px;align-items:center;padding:3px 2px;background:var(--card);touch-action:pan-y}
-  .tr-serie-linha.feita{background:var(--fill2);border-radius:8px}
-  .tr-serie-num{justify-self:center;min-width:26px;height:24px;padding:0 4px;border-radius:8px;background:var(--fill);
+  .tr-serie-linha.feita{background:var(--fill2);border-radius:10px}
+  .tr-serie-num{justify-self:center;min-width:26px;height:24px;padding:0 4px;border-radius:10px;background:var(--fill);
     color:var(--ink2);font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
   .tr-aquecimento-linha .tr-serie-num{background:transparent;color:var(--ink3);font-size:9px;letter-spacing:.02em}
   .tr-serie-anterior{font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;
     text-overflow:ellipsis;text-align:center}
-  .tr-serie-kg,.tr-serie-reps{width:100%;padding:7px 3px;border-radius:8px;border:none;background:var(--fill);
+  .tr-serie-kg,.tr-serie-reps{width:100%;padding:7px 3px;border-radius:10px;border:none;background:var(--fill);
     font-size:15px;text-align:center;color:var(--ink)}
   .tr-serie-kg:focus,.tr-serie-reps:focus{outline:2px solid var(--azul);outline-offset:1px}
   /* quadradinho, não bolinha - e com o mesmo arredondamento que o resto do
@@ -941,7 +953,7 @@
     color:var(--ink3);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;padding:0}
   .tr-serie-check[aria-pressed="true"]{background:var(--ok);color:#fff;box-shadow:var(--sh-min)}
-  .tr-serie-add{margin-top:6px;width:100%;padding:9px;border-radius:8px;border:1px dashed var(--hair);
+  .tr-serie-add{margin-top:6px;width:100%;padding:9px;border-radius:10px;border:1px dashed var(--hair);
     background:none;color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer}
   /* ativação (ex.: Wall Slide) - sem kg/reps/anterior, só um checklist de
      séries com a meta de repetições fixa do plano. */
@@ -957,7 +969,7 @@
      fundo colorido - só a bolinha separa ativação de isométrico. */
   .tr-ex-tipo{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:600;
     text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin:-3px 0 7px}
-  .tr-ex-tipo::before{content:'';width:5px;height:5px;border-radius:8px;flex-shrink:0}
+  .tr-ex-tipo::before{content:'';width:5px;height:5px;border-radius:10px;flex-shrink:0}
   .tr-ex-tipo-ativacao::before{background:#2E4C6D}
   .tr-ex-tipo-isometrico::before{background:#9A4B00}
   /* números do plano em duas colunas alinhadas, embaixo do nome */
@@ -980,7 +992,7 @@
   .tr-preserie-bloco{display:flex;flex-direction:column;gap:5px;margin:-2px 0 10px}
   .tr-preserie-titulo{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink3)}
   .tr-preserie-linha{display:flex;align-items:center;justify-content:space-between;gap:8px;
-    padding:6px 10px;border-radius:8px;background:var(--fill2)}
+    padding:6px 10px;border-radius:10px;background:var(--fill2)}
   .tr-preserie-linha.feita{background:var(--fill)}
   .tr-preserie-linha.feita .tr-serie-ativacao-label{color:var(--ink3)}
 
@@ -995,23 +1007,23 @@
      botão que abriu (ver abrirMenuExercicio), não mais um cartão solto
      embaixo da tela. Sem "Cancelar": clicar fora já fecha. */
   .tr-opcoes-backdrop{position:fixed;inset:0;z-index:120;background:transparent}
-  .tr-opcoes-card{position:absolute;background:var(--card);border-radius:10px;overflow:hidden;
+  .tr-opcoes-card{position:absolute;background:var(--card);border-radius:12px;overflow:hidden;
     border:1px solid var(--hair);box-shadow:0 10px 30px rgba(0,0,0,.16)}
   .tr-opcoes-item{display:block;width:100%;text-align:left;padding:12px 14px;border:none;
     border-top:.5px solid var(--hair);background:none;color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
   .tr-opcoes-item:first-child{border-top:none}
   .tr-opcoes-item.perigo{color:var(--nao)}
-  .tr-nota-card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  .tr-nota-card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
   /* popup de explicação do exercício (figura padronizada + texto), aberto
      ao tocar no nome do exercício - ver abrirExplicacaoExercicio. */
-  .tr-exp-card{position:relative;width:100%;max-width:340px;background:var(--card);border-radius:12px;
+  .tr-exp-card{position:relative;width:100%;max-width:340px;background:var(--card);border-radius:14px;
     padding:22px 20px 18px;box-shadow:0 8px 30px rgba(0,0,0,.32)}
-  .tr-exp-fechar{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:8px;border:none;
+  .tr-exp-fechar{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:10px;border:none;
     background:var(--fill);color:var(--ink2);font-size:16px;line-height:1;cursor:pointer}
   .tr-exp-titulo{font-size:16px;font-weight:700;color:var(--ink);text-align:center;margin-bottom:8px}
   .tr-exp-texto{font-size:13.5px;color:var(--ink2);line-height:1.55;text-align:left}
   .tr-nota-titulo{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px}
-  .tr-nota-input{width:100%;min-height:90px;border-radius:8px;border:1px solid var(--hair);background:var(--fill2);
+  .tr-nota-input{width:100%;min-height:90px;border-radius:10px;border:1px solid var(--hair);background:var(--fill2);
     padding:10px;font-size:14px;color:var(--ink);resize:vertical;font-family:inherit}
   .tr-nota-botoes{display:flex;gap:8px;margin-top:12px}
   .tr-nota-botoes .btn-pill{flex:1 1 0;margin-top:0;padding:10px}
@@ -1020,7 +1032,7 @@
      apoiado no banco. Nasce sozinho quando uma série é marcada. */
   .tr-descanso-toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));
     transform:translateX(-50%);z-index:120;background:var(--card);color:var(--ink);
-    width:min(420px, calc(100vw - 28px));border-radius:12px;padding:14px 16px 16px;
+    width:min(420px, calc(100vw - 28px));border-radius:14px;padding:14px 16px 16px;
     border:1px solid var(--hair);box-shadow:0 12px 34px rgba(0,0,0,.2)}
   .tr-desc-topo{display:flex;align-items:center;justify-content:space-between;gap:8px}
   .tr-desc-rot{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
@@ -1028,8 +1040,8 @@
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tr-desc-tempo{font-size:52px;font-weight:800;line-height:1.05;letter-spacing:-.03em;
     font-variant-numeric:tabular-nums;margin:4px 0 10px;text-align:center}
-  .tr-desc-trilho{height:8px;border-radius:8px;background:var(--fill);overflow:hidden}
-  .tr-desc-barra{height:100%;width:100%;border-radius:8px;background:var(--ok);
+  .tr-desc-trilho{height:8px;border-radius:10px;background:var(--fill);overflow:hidden}
+  .tr-desc-barra{height:100%;width:100%;border-radius:10px;background:var(--ok);
     transition:width 1s linear}
   .tr-descanso-toast.acabando .tr-desc-barra{background:var(--ad)}
   .tr-descanso-toast.acabando .tr-desc-tempo{color:var(--ad)}
@@ -1039,14 +1051,14 @@
     background:var(--card);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
   .tr-desc-btn.forte{background:var(--ink);color:#fff;border-color:var(--ink)}
   .tr-desc-topo-btns{display:flex;align-items:center;gap:6px;flex-shrink:0}
-  .tr-descanso-min,.tr-desc-som{width:26px;height:26px;border-radius:8px;border:none;background:var(--fill);
+  .tr-descanso-min,.tr-desc-som{width:26px;height:26px;border-radius:10px;border:none;background:var(--fill);
     color:var(--ink2);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;padding:0}
   .tr-descanso-min{font-size:17px;font-weight:700;padding-bottom:3px}
   .ico-sino{width:15px;height:15px;display:block}
   /* encolhido: pilulazinha só com o tempo, tocar nela abre de novo. O
      descanso continua correndo - encolher não é cancelar. */
-  .tr-descanso-toast.minimizado{width:auto;border-radius:8px;padding:10px 16px;cursor:pointer;
+  .tr-descanso-toast.minimizado{width:auto;border-radius:10px;padding:10px 16px;cursor:pointer;
     box-shadow:0 8px 24px rgba(0,0,0,.18)}
   .tr-descanso-toast.minimizado .tr-desc-ex,
   .tr-descanso-toast.minimizado .tr-desc-trilho,
@@ -1083,7 +1095,7 @@
       background:var(--card);border-top:0;border-right:.5px solid rgba(0,0,0,.08);
       backdrop-filter:none;-webkit-backdrop-filter:none;padding:20px 14px;gap:6px}
     .tabbar-item{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;
-      margin:0;padding:11px 14px;border-radius:8px;width:100%}
+      margin:0;padding:11px 14px;border-radius:10px;width:100%}
     .tabbar-item span{font-size:15px}
     .tabbar-item[aria-pressed="true"]{background:var(--fill)}
   }
@@ -4670,6 +4682,11 @@ function renderDiaBox(){
           cx.appendChild(li);
         }
       });
+      // a linha divisória do primeiro alimento não separa nada (não tem item
+      // acima dele), então sai. Feito aqui, depois de tudo montado, porque o
+      // que vem antes varia: seletor de versão, aviso de refeição sem itens...
+      const primeiro = cx.querySelector('.item-dia');
+      if(primeiro) primeiro.classList.add('sem-linha');
       const add = document.createElement('button');
       add.type='button'; add.className='add-extra';
       add.textContent = '+ adicionar à refeição';
