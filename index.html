@@ -3070,6 +3070,29 @@ const G = {
     opts:[{n:'Sushi'},{n:'Makimono ou niguiri'}]},
   /* A lista de sobremesa é a que o próprio plano traz junto do chocolate 70%
      na porção de 20 g - aqui ela vira tabela pra valer pros outros chocolates. */
+  /* Oleaginosa por oleaginosa, equiparando por caloria (a porção do plano são
+     2 castanhas-do-pará, ~8 g / 51 kcal). Não tem tabela do Pedro pra isso:
+     foi montada por nós a partir da caloria de cada uma. */
+  oleaginosas:{tipo:'escala',ref:10,titulo:'Equivalentes a 10 g de castanha-do-pará',
+    aviso:'Equiparação por caloria, feita por nós - o plano não traz tabela pra este item.',opts:[
+    {n:'Castanha-do-pará sem sal',q:10},{n:'Castanha-de-caju',q:11},{n:'Amêndoa',q:11},
+    {n:'Nozes',q:9},{n:'Amendoim',q:11},{n:'Macadâmia',q:9},{n:'Avelã',q:10},{n:'Pistache',q:11}]},
+  /* Fruta seca por fruta seca, em gramas (o plano pede "1 ameixa", mas "1
+     uva-passa" não seria resposta pra nada). Todas ficam entre 240 e 300 kcal
+     por 100 g, então as quantidades saem parecidas. */
+  fruta_seca:{tipo:'escala',ref:10,titulo:'Equivalentes a 10 g de ameixa seca',
+    aviso:'Equiparação por caloria, feita por nós - o plano não traz tabela pra este item.',opts:[
+    {n:'Ameixa preta seca',q:10},{n:'Damasco seco',q:10},{n:'Figo seco',q:10},
+    {n:'Tâmara',q:8},{n:'Uva-passa',q:8}]},
+  /* A banana não entra na lista de frutas do Pedro (a dele é de frutas até
+     50 kcal por 100 g, e a banana tem 92). Então ela tem a sua própria, com a
+     quantidade ajustada pela caloria: 100 g de banana valem 230 g de mamão. */
+  banana:{tipo:'escala',ref:100,titulo:'Equivalentes a 100 g de banana',
+    aviso:'A banana tem quase o dobro da caloria das frutas da lista do plano, então a quantidade muda.',opts:[
+    {n:'Banana',q:100},{n:'Uva',q:135},{n:'Maçã',q:165},{n:'Kiwi',q:180},{n:'Abacaxi',q:185},
+    {n:'Laranja',q:205},{n:'Frutas vermelhas (amora, framboesa, mirtilo)',q:205},
+    {n:'Mamão',q:230},{n:'Pêssego',q:235},{n:'Melão',q:270},{n:'Acerola in natura',q:280},
+    {n:'Morango',q:290},{n:'Melancia',q:305}]},
   sobremesa:{tipo:'fixo',titulo:'Equivalentes a 20 g de chocolate amargo',opts:[
     {n:'Chocolate amargo 70% cacau',t:'20 g'},{n:'Doce de leite',t:'35 g'},
     {n:'Goiabada',t:'50 g'},{n:'Bombom',t:'1 un'},{n:'Paçoca',t:'1 un'}]}
@@ -3105,7 +3128,14 @@ const GRUPO_AUTO = {
   // grelhado" x "Patinho magro cozido ou filé mignon", "Queijo muçarela" x
   // "Muçarela"), e sem isso a conta saía 1 para 1.
   'filé mignon grelhado':{qb:80},
-  'queijo muçarela':{qb:15}
+  'queijo muçarela':{qb:15},
+  'castanha-do-pará sem sal':{g:'oleaginosas'},
+  'ameixa preta seca':{g:'fruta_seca'},
+  'banana':{g:'banana'},
+  // pipoca é carboidrato: entra na lista do arroz, com a quantidade de cada
+  // uma que equivale a 100 g de arroz cozido (128 kcal).
+  'milho para pipoca':{g:'arroz',qb:35},
+  'pipoca salgada':{g:'arroz',qb:27}
 };
 const GRUPO_AUTO_N = {};
 Object.keys(GRUPO_AUTO).forEach(function(k){ GRUPO_AUTO_N[norm(k)] = GRUPO_AUTO[k]; });
@@ -4393,6 +4423,19 @@ const MACRO_RAW = {
   'castanha-do-pará sem sal':M(643,14.5,3.5,63.5,4),
 
   /* diversos */
+  /* oleaginosas e frutas secas: entraram pra dar lista de troca pros itens do
+     plano que eram desse grupo e não tinham com o que ser trocados. */
+  'castanha-de-caju':M(570,18,30,44,2),
+  'amêndoa':M(580,21,22,50,1.2),
+  'nozes':M(690,15,14,65,4),
+  'amendoim':M(570,26,16,49),
+  'macadâmia':M(720,8,14,76,2.5),
+  'avelã':M(630,15,17,61,1.2),
+  'pistache':M(560,20,28,45,0.8),
+  'uva-passa':M(300,3,79,0.5),
+  'damasco seco':M(240,3.4,63,0.5,8),
+  'tâmara':M(282,2.5,75,0.4,8),
+  'figo seco':M(250,3.3,64,0.9,8),
   'psyllium (fibras solúveis)':M(100,1,80,0.5),
   'cacau em pó 100% puro':M(228,20,57,13.7),
   'canela em pó':M(247,4,81,1.2),
@@ -4906,12 +4949,22 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover, modoExtra){
   }
   // "Troquei" é troca DENTRO do plano: só aparece o que a tabela daquele
   // alimento aceita no lugar dele. Comer uma coisa que não está na tabela não
-  // é troca, é "+ adicionar à refeição" - por isso a lista geral só continua
-  // aqui quando o alimento ainda não tem tabela nenhuma (senão ficaria sem
-  // opção pra escolher) e no próprio "adicionar à refeição".
-  if(!temEquivalente){
-    const g3 = document.createElement('optgroup');
-    g3.label = itemDoPlano ? 'Esse item ainda não tem lista de troca' : 'Alimentos';
+  // é troca, é "+ adicionar à refeição".
+  // A lista geral de alimentos NUNCA aparece aqui - era ela que deixava trocar
+  // ameixa por batata frita e castanha por brigadeiro. Item que não tem tabela
+  // (tempero, creatina, psyllium: coisas que não têm por que ter) fica só com
+  // ele mesmo e com "outro alimento", pra dar conta de um caso raro sem
+  // sugerir besteira.
+  if(!temEquivalente && itemDoPlano){
+    const g2 = document.createElement('optgroup');
+    g2.label = 'Esse item não tem troca prevista no plano';
+    opt(itemDoPlano.n, itemDoPlano.n, g2);
+    opt(OUTRO, 'Outro alimento (digitar calorias)', g2);
+    sel.appendChild(g2);
+  } else if(!itemDoPlano){
+    // "+ adicionar à refeição": aqui sim vale qualquer alimento, porque é
+    // justamente comida que entrou por fora do plano.
+    const g3 = document.createElement('optgroup'); g3.label = 'Alimentos';
     FORA_NOMES.forEach(function(n){ if(!jaListado[norm(n)]) opt(n, n, g3); });
     sel.appendChild(g3);
     const g4 = document.createElement('optgroup'); g4.label = 'Não está na lista';
@@ -4930,7 +4983,12 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover, modoExtra){
     // marca sozinho se a troca continua dentro do que o nutricionista
     // liberou (dá pra corrigir na mão no check logo abaixo).
     t.ok = trocaLiberadaNoPlano(itemDoPlano, t);
-    aoMudar();
+    // troca SÓ o editor de lugar, em vez de remontar a tela inteira do
+    // Diário: remontando, o calendário, os cartões e a lista toda nasciam de
+    // novo e a tela dava um pulo bem na hora de escolher o alimento.
+    const novo = editorTroca(t, itemDoPlano, aoMudar, aoRemover, modoExtra);
+    if(box.parentNode) box.parentNode.replaceChild(novo, box);
+    aoMudar(true);
   };
   if(lAli) cAli.appendChild(lAli);
   cAli.appendChild(sel);
