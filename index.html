@@ -937,9 +937,9 @@
     background:var(--fill);border-radius:12px;overflow:hidden}
   .tr-sem-celula{display:flex;flex-direction:column;align-items:center;gap:3px;
     background:var(--card);padding:12px 6px;min-width:0}
-  .tr-sem-rot{display:flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:var(--ink3);
+  .tr-sem-rot{display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:var(--ink3);
     text-transform:uppercase;letter-spacing:.03em;text-align:center;line-height:1.2}
-  .tr-sem-val{font-size:13.5px;font-weight:700;color:var(--ink);text-align:center;line-height:1.25}
+  .tr-sem-val{font-size:15px;font-weight:700;color:var(--ink);text-align:center;line-height:1.25}
   .tr-dica-btn{width:15px;height:15px;flex-shrink:0;border:0;border-radius:10px;background:var(--azul-soft);
     color:var(--azul);font-size:10px;font-weight:800;line-height:1;cursor:pointer;padding:0;
     display:flex;align-items:center;justify-content:center;font-family:inherit}
@@ -1009,7 +1009,7 @@
   .tr-serie-cab:has(+ .tr-ex-tipo){margin-bottom:4px}
   .tr-serie-bloco .tr-ex-tipo{margin:0 0 8px}
   .tr-serie-titulo-wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1 1 auto;min-width:0}
-  .tr-serie-titulo{font-size:14.5px;font-weight:700;color:var(--azul);margin:0;
+  .tr-serie-titulo{font-size:15.5px;font-weight:700;color:var(--azul);margin:0;
     border:none;background:none;padding:0;font-family:inherit;text-align:left;cursor:pointer}
   /* os três pontinhos não cabiam no quadradinho: 14px + letter-spacing de 1px
      davam ~24px de texto numa caixa de 26px sem padding, e a folga sumia no
@@ -1026,7 +1026,7 @@
 
   .tr-serie-linhas{display:flex;flex-direction:column;gap:6px}
   .tr-serie-header-row{display:grid;grid-template-columns:32px 1fr 52px 52px 32px;gap:6px;padding:0 2px 2px;
-    font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.02em}
+    font-size:11.5px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.02em}
   .tr-serie-header-row span{text-align:center}
 
   .tr-serie-linha-wrap{position:relative;border-radius:10px;overflow:hidden}
@@ -1036,9 +1036,9 @@
     gap:6px;align-items:center;padding:3px 2px;background:var(--card);touch-action:pan-y}
   .tr-serie-linha.feita{background:var(--fill2);border-radius:10px}
   .tr-serie-num{justify-self:center;min-width:26px;height:24px;padding:0 4px;border-radius:10px;background:var(--fill);
-    color:var(--ink2);font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+    color:var(--ink2);font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
   .tr-aquecimento-linha .tr-serie-num{background:transparent;color:var(--ink3);font-size:9px;letter-spacing:.02em}
-  .tr-serie-anterior{font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;
+  .tr-serie-anterior{font-size:13px;color:var(--ink3);white-space:nowrap;overflow:hidden;
     text-overflow:ellipsis;text-align:center}
   .tr-serie-kg,.tr-serie-reps{width:100%;padding:7px 3px;border-radius:10px;border:none;background:var(--fill);
     font-size:15px;text-align:center;color:var(--ink)}
@@ -1064,7 +1064,7 @@
   .tr-ex-item .tr-serie-meta{margin:0}
   /* tipo do exercício na aba Treino: legenda miúda embaixo do nome, sem
      fundo colorido - só a bolinha separa ativação de isométrico. */
-  .tr-ex-tipo{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:600;
+  .tr-ex-tipo{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
     text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin:-3px 0 7px}
   .tr-ex-tipo::before{content:'';width:5px;height:5px;border-radius:10px;flex-shrink:0}
   .tr-ex-tipo-ativacao::before{background:#2E4C6D}
@@ -1073,13 +1073,13 @@
   .tr-ex-grade{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
   .tr-ex-campo{display:flex;align-items:baseline;justify-content:space-between;gap:8px;min-width:0;
     border-bottom:1px dotted var(--hair);padding-bottom:2px}
-  .tr-ex-rot{font-size:11px;color:var(--ink3);white-space:nowrap}
-  .tr-ex-val{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap}
+  .tr-ex-rot{font-size:12.5px;color:var(--ink3);white-space:nowrap}
+  .tr-ex-val{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap}
   @media(max-width:359px){ .tr-ex-grade{grid-template-columns:1fr} }
   /* mesma grade dentro da sessão de treino, só com o respiro daquele bloco */
   .tr-ex-grade-sessao{margin:-2px 0 10px}
   .tr-linha-ativacao{grid-template-columns:32px 1fr 32px}
-  .tr-serie-ativacao-label{font-size:13px;color:var(--ink2)}
+  .tr-serie-ativacao-label{font-size:14px;color:var(--ink2)}
   .tr-semana-cartao-sessao{margin:0 0 14px;box-shadow:var(--sh-min)}
   /* pré-série de aquecimento (ex.: "2x15" antes da carga que vale): entra
      como as primeiras linhas da MESMA tabela das séries, com "AQ" no lugar do
@@ -1090,10 +1090,10 @@
   .tr-preserie-linha{position:relative;display:grid;grid-template-columns:32px 1fr 52px 52px 32px;
     gap:6px;align-items:center;padding:3px 2px;background:var(--card)}
   .tr-preserie-num{justify-self:center;min-width:26px;height:24px;padding:0 4px;border-radius:10px;
-    background:none;border:1px dashed var(--hair);color:var(--ink3);font-size:9.5px;font-weight:700;
+    background:none;border:1px dashed var(--hair);color:var(--ink3);font-size:10.5px;font-weight:700;
     letter-spacing:.02em;display:flex;align-items:center;justify-content:center}
-  .tr-preserie-lab{font-size:12.5px;color:var(--ink3);text-align:center}
-  .tr-preserie-vazio{font-size:12.5px;color:var(--ink3);text-align:center}
+  .tr-preserie-lab{font-size:13px;color:var(--ink3);text-align:center}
+  .tr-preserie-vazio{font-size:13px;color:var(--ink3);text-align:center}
   .tr-preserie-linha.feita{background:var(--fill2);border-radius:10px}
 
   /* nota por exercício - modal central clássico (merece atenção total, por
