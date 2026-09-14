@@ -402,7 +402,9 @@
   .estados button[aria-pressed="true"][data-e="ad"],.estados button[aria-pressed="true"][data-f="meia"]{background:var(--ad);color:#fff}
   .estados button[aria-pressed="true"][data-e="nao"],.estados button[aria-pressed="true"][data-f="nada"]{background:var(--nao);color:#fff}
   .estados button[aria-pressed="true"][data-f="troca"]{background:var(--azul);color:#fff}
-  .estados button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
+  /* mesmo motivo do campo de kg: a linha do alimento também mora num
+     invólucro que recorta o que passa da borda (o Excluir do arrasto). */
+  .estados button:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--azul)}
   .estados.fr button{font-size:12px;padding:6px 10px}
 
   /* sem tapete cinza: os itens da refeição ficam no mesmo fundo do cartão,
@@ -467,7 +469,7 @@
     border-radius:8px;margin-top:2px}
   .troca-selo.dentro{background:var(--ok-soft);color:#1B6B36}
   .troca-selo.fora{background:var(--ad-soft);color:#8A5600}
-  .troca-box .kcal{flex:1 1 100%;font-size:13px;color:var(--ink2);margin-top:-2px}
+  .troca-box .kcal{flex:1 1 100%;font-size:13px;color:var(--ink2);margin-top:-2px;min-height:18px}
   .troca-box .kcal b{color:var(--ink)}
   .add-extra{margin-top:10px;font-size:14px;font-weight:500;color:var(--azul);background:none;
     border:0;padding:6px 0;cursor:pointer}
@@ -953,7 +955,9 @@
     background:var(--card);padding:12px 6px;min-width:0}
   .tr-sem-rot{display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:var(--ink3);
     text-transform:uppercase;letter-spacing:.03em;text-align:center;line-height:1.2}
-  .tr-sem-val{font-size:15px;font-weight:700;color:var(--ink);text-align:center;line-height:1.25}
+  .tr-sem-val{font-size:15px;font-weight:700;color:var(--ink);text-align:center;line-height:1.25;
+    white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  @media(max-width:359px){ .tr-sem-val{font-size:13.5px} }
   .tr-dica-btn{width:15px;height:15px;flex-shrink:0;border:0;border-radius:10px;background:var(--azul-soft);
     color:var(--azul);font-size:10px;font-weight:800;line-height:1;cursor:pointer;padding:0;
     display:flex;align-items:center;justify-content:center;font-family:inherit}
@@ -1047,6 +1051,9 @@
   .tr-serie-header-row span{text-align:center}
 
   .tr-serie-linha-wrap{position:relative;border-radius:10px;overflow:hidden}
+  /* o vermelho fica com a mesma folga e o mesmo raio da linha: encostando nos
+     cantos, sobrava uma pontinha dele aparecendo por baixo do arredondado. */
+  .tr-serie-linha-wrap .tr-serie-excluir{top:2px;bottom:2px;border-radius:10px}
   .tr-serie-excluir{position:absolute;top:0;right:0;bottom:0;width:76px;border:none;background:#FF3B30;color:#fff;
     font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0}
   /* o raio aqui não é enfeite: o invólucro do gesto é arredondado e recorta o
@@ -1062,7 +1069,11 @@
     text-overflow:ellipsis;text-align:center}
   .tr-serie-kg,.tr-serie-reps{width:100%;height:30px;padding:0 3px;border-radius:10px;border:none;background:var(--fill);
     font-size:15px;text-align:center;color:var(--ink)}
-  .tr-serie-kg:focus,.tr-serie-reps:focus{outline:2px solid var(--azul);outline-offset:1px}
+  /* anel de foco POR DENTRO do campo. Por fora ele era cortado em cima e
+     embaixo: a linha mora num invólucro com overflow:hidden (o que esconde o
+     botão Excluir do arrasto), e o anel, que sobra 3px pra fora, batia nessa
+     borda. Por dentro nunca é cortado e não empurra nada de lugar. */
+  .tr-serie-kg:focus,.tr-serie-reps:focus{outline:none;box-shadow:inset 0 0 0 2px var(--azul)}
   /* quadradinho, não bolinha - e com o mesmo arredondamento que o resto do
      app usa nos botões de marcar (os de seguiu/adaptou/não fiz do diário),
      pra não ter um raio só dele. Marcado fica verde, igual "seguiu". */
@@ -1070,11 +1081,8 @@
     color:var(--ink3);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;padding:0}
   .tr-serie-check[aria-pressed="true"]{background:var(--ok);color:#fff;box-shadow:var(--sh-min)}
-  /* barra cinza cheia, do mesmo cinza dos campos e do número da série - o
-     contorno tracejado era o único elemento "vazado" no meio da lista. */
-  .tr-serie-add{margin-top:10px;width:100%;padding:11px;border-radius:10px;border:0;
-    background:var(--fill);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
-  .tr-serie-add:active{opacity:.8}
+  .tr-serie-add{margin-top:6px;width:100%;padding:9px;border-radius:10px;border:1px dashed var(--hair);
+    background:none;color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
   /* ativação (ex.: Wall Slide) - sem kg/reps/anterior, só um checklist de
      séries com a meta de repetições fixa do plano. */
   /* lista de exercícios da aba Treino: cada um num bloco, nome ocupando a
@@ -1101,7 +1109,6 @@
   @media(max-width:359px){ .tr-ex-grade{grid-template-columns:1fr} }
   /* mesma grade dentro da sessão de treino, só com o respiro daquele bloco */
   .tr-ex-grade-sessao{margin:-2px 0 10px}
-  .tr-linha-ativacao{grid-template-columns:38px 1fr 32px}
   .tr-serie-ativacao-label{font-size:14px;color:var(--ink2)}
   .tr-semana-cartao-sessao{margin:0 0 14px;box-shadow:var(--sh-min)}
   /* pré-série de aquecimento (ex.: "2x15" antes da carga que vale): entra
@@ -1112,10 +1119,9 @@
      "Anterior" da próxima vez e não é salva no registro. */
   .tr-preserie-linha{position:relative;display:grid;grid-template-columns:38px 1fr 52px 52px 32px;
     gap:6px;align-items:center;padding:2px;background:var(--card)}
-  .tr-preserie-num{justify-self:center;min-width:34px;height:30px;padding:0 4px;border-radius:10px;
-    background:none;border:1px dashed var(--hair);color:var(--ink3);font-size:10.5px;font-weight:700;
-    letter-spacing:.02em;display:flex;align-items:center;justify-content:center}
-  .tr-preserie-lab{font-size:13px;color:var(--ink3);text-align:center}
+  /* o "AQ" usa o mesmo balãozinho cinza do número da série - só a letra é
+     menor, porque são duas letras no lugar de um algarismo. */
+  .tr-serie-num.aq{font-size:11px;color:var(--ink3);letter-spacing:.02em}
   .tr-preserie-vazio{font-size:13px;color:var(--ink3);text-align:center}
   .tr-preserie-linha.feita{background:var(--fill2);border-radius:10px}
 
@@ -4948,14 +4954,20 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover, modoExtra){
   }
 
   const mt = macrosDaTroca(t);
-  // sem alimento escolhido não aparece nada: a linha em branco dizendo "escolha
-  // o alimento pra calcular" só ocupava espaço - o campo vazio já diz isso.
-  if(mt){
+  // Na troca de um item do plano a conta não aparece: a quantidade já vem da
+  // tabela de substituição, então o resultado é equivalente ao que estava
+  // planejado por definição - mostrar "dá 166 kcal" não informa nada.
+  // No "+ adicionar à refeição" continua aparecendo, porque ali é comida que
+  // entrou por fora e o número é justamente o que interessa. E quando só as
+  // calorias foram digitadas, o aviso fica em qualquer um dos dois.
+  if(modoExtra || mt){
+    // a linha nasce junto com o editor, mesmo vazia: o espaço dela já fica
+    // reservado, então preencher a quantidade não empurra o resto da tela
+    // pra baixo do nada.
     const info = document.createElement('div'); info.className='kcal';
-    if(mt.estimado) info.innerHTML = 'Contando <b>'+fmtKcal(mt.k)+' kcal</b>. Proteína, carboidrato e gordura ficam de fora, porque só as calorias foram informadas.';
-    else if(modoExtra) info.textContent = fmtKcal(mt.k)+' kcal'
+    if(mt && mt.estimado) info.innerHTML = 'Contando <b>'+fmtKcal(mt.k)+' kcal</b>. Proteína, carboidrato e gordura ficam de fora, porque só as calorias foram informadas.';
+    else if(mt && (modoExtra || mt.estimado)) info.textContent = fmtKcal(mt.k)+' kcal'
       + ' · C '+Math.round(mt.c)+' g · P '+Math.round(mt.p)+' g · G '+Math.round(mt.g)+' g';
-    else info.innerHTML = 'Dá <b>'+fmtKcal(mt.k)+' kcal</b> - P '+Math.round(mt.p)+' g · C '+Math.round(mt.c)+' g · G '+Math.round(mt.g)+' g.';
     box.appendChild(info);
   }
 
@@ -6481,12 +6493,12 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
   if(semAtual){
     cartaoSem.innerHTML =
         '<div class="tr-sem-celula"><span class="tr-sem-rot">Séries válidas</span>'
-      + '<span class="tr-sem-val">'+semAtual.reps+'</span></div>'
+      + '<span class="tr-sem-val">'+valorCurtoSemana(semAtual.reps)+'</span></div>'
       + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intensidade'
       + '<button type="button" class="tr-dica-btn" id="tr-dica-rir" aria-label="O que é RIR">?</button>'
-      + '</span><span class="tr-sem-val">'+semAtual.rir+'</span></div>'
+      + '</span><span class="tr-sem-val">'+valorCurtoSemana(semAtual.rir)+'</span></div>'
       + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intervalo</span>'
-      + '<span class="tr-sem-val">'+semAtual.intervalo+'</span></div>';
+      + '<span class="tr-sem-val">'+valorCurtoSemana(semAtual.intervalo)+'</span></div>';
     const bt = document.getElementById('tr-dica-rir');
     if(bt) bt.onclick = function(ev){
       ev.stopPropagation();
@@ -6720,6 +6732,20 @@ function temValorPlano(v){
 // tabela das séries, com "AQ" no lugar do número e um "-" no kg (aquecimento
 // não tem carga registrada). Fica fora de .tr-serie-linha de propósito, ver
 // comentário no CSS de .tr-preserie-linha.
+/* O cartão da semana tem três células dividindo a largura da tela, então o
+   valor de cada uma precisa caber numa linha só. "8-10 repetições" não cabe
+   ("repetições" sozinho já estoura a célula) e quebrava em duas linhas,
+   desalinhando o cartão inteiro. Aqui as palavras longas viram a abreviação
+   que todo mundo usa na academia - o sentido é o mesmo. */
+function valorCurtoSemana(txt){
+  return String(txt == null ? '' : txt)
+    .replace(/repetiç(ões|ao|ão)/gi, 'reps')
+    .replace(/\brepeti(ç|c)oes\b/gi, 'reps')
+    .replace(/\bsegundos?\b/gi, 's')
+    .replace(/\bminutos?\b/gi, 'min')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 function preSerieAquecimentoHtml(aquecimentoTxt){
   const partes = /^(\d+)\s*x\s*(\d+)/i.exec(String(aquecimentoTxt||''));
   const nSets = partes ? Math.max(1, parseInt(partes[1],10)) : 1;
@@ -6727,10 +6753,10 @@ function preSerieAquecimentoHtml(aquecimentoTxt){
   let linhas = '';
   for(let s=0; s<nSets; s++){
     linhas += '<div class="tr-preserie-linha" data-serie="'+s+'">'
-      + '<span class="tr-preserie-num">AQ</span>'
-      + '<span class="tr-preserie-lab">'+(repsAlvo?repsAlvo+' reps':'aquecimento')+'</span>'
+      + '<span class="tr-serie-num aq">AQ</span>'
+      + '<span class="tr-serie-anterior">-</span>'
       + '<span class="tr-preserie-vazio">-</span>'
-      + '<span class="tr-preserie-vazio">-</span>'
+      + '<span class="tr-preserie-vazio">'+(repsAlvo||'-')+'</span>'
       + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
       + '</div>';
   }
@@ -6961,12 +6987,12 @@ function montarSessaoTreino(){
     const semanaInfo = semAtual
       ? '<div class="tr-semana-cartao tr-semana-cartao-sessao">'
         + '<div class="tr-sem-celula"><span class="tr-sem-rot">Séries válidas</span>'
-        + '<span class="tr-sem-val">'+semAtual.reps+'</span></div>'
+        + '<span class="tr-sem-val">'+valorCurtoSemana(semAtual.reps)+'</span></div>'
         + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intensidade'
         + '<button type="button" class="tr-dica-btn" id="tr-dica-rir-sessao" aria-label="O que é RIR">?</button>'
-        + '</span><span class="tr-sem-val">'+semAtual.rir+'</span></div>'
+        + '</span><span class="tr-sem-val">'+valorCurtoSemana(semAtual.rir)+'</span></div>'
         + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intervalo</span>'
-        + '<span class="tr-sem-val">'+semAtual.intervalo+'</span></div></div>'
+        + '<span class="tr-sem-val">'+valorCurtoSemana(semAtual.intervalo)+'</span></div></div>'
       : '';
     // intervalo da semana serve de reserva pro descanso de exercícios que não
     // trazem "Descanso" próprio no plano
@@ -7006,18 +7032,25 @@ function montarSessaoTreino(){
       let linhasSerie = '';
       let cabecalho = '';
       if(tipo==='ativacao'){
-        // ativação (ex.: Wall Slide) não tem teste de carga nem série válida
-        // de verdade - só um número fixo de repetições no aquecimento (ex.:
-        // "2x15"). Mostra um checklist simples, sem kg/reps/anterior.
+        // ativação (ex.: Wall Slide) não tem carga nem série válida de
+        // verdade - só um número fixo de repetições (ex.: "2x15"). Mesmo
+        // desenho das outras séries, com "-" onde não existe valor: ter duas
+        // tabelas diferentes na mesma tela não ajudava ninguém.
         const partes = /^(\d+)\s*x\s*(\d+)/i.exec(String(e[1]||''));
         const nSets = partes ? Math.max(1, parseInt(partes[1],10)) : 2;
         const repsAlvo = partes ? partes[2] : '';
+        cabecalho = '<div class="tr-serie-header-row"><span>Série</span><span>Anterior</span><span>kg</span><span>Reps</span><span></span></div>';
         for(let s=0; s<nSets; s++){
+          const ant = serieAnterior(e[0], s);
+          const antTxt = (ant && (ant.kg!=null || ant.reps!=null))
+            ? (ant.kg!=null?fmtNum(ant.kg,1):'-')+' kg × '+(ant.reps!=null?ant.reps:'-') : '-';
           linhasSerie += '<div class="tr-serie-linha-wrap">'
             + '<button type="button" class="tr-serie-excluir">Excluir</button>'
-            + '<div class="tr-serie-linha tr-linha-ativacao" data-serie="'+s+'">'
+            + '<div class="tr-serie-linha" data-serie="'+s+'">'
             + '<span class="tr-serie-num">'+(s+1)+'</span>'
-            + '<span class="tr-serie-ativacao-label">'+(repsAlvo?repsAlvo+' reps':'')+'</span>'
+            + '<span class="tr-serie-anterior">'+antTxt+'</span>'
+            + '<span class="tr-preserie-vazio">-</span>'
+            + '<span class="tr-preserie-vazio">'+(repsAlvo||'-')+'</span>'
             + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
             + '</div></div>';
         }
@@ -7042,7 +7075,9 @@ function montarSessaoTreino(){
             + '</div></div>';
         }
       }
+      const alvoReps = (/^(\d+)\s*x\s*(\d+)/i.exec(String(e[1]||'')) || [])[2] || '';
       return '<div class="tr-serie-bloco" data-ex="'+idx+'" data-tipo="'+tipo+'"'
+        + ' data-repsalvo="'+alvoReps+'"'
         + ' data-descanso="'+String(e[4]||'').replace(/"/g,'&quot;')+'"'
         + ' data-nome="'+String(e[0]||'').replace(/"/g,'&quot;')+'">'
         + '<div class="tr-serie-cab"><span class="tr-serie-titulo-wrap"><button type="button" class="tr-serie-titulo" data-nome="'+e[0].replace(/"/g,'&quot;')+'">'+e[0]+'</button></span>'
@@ -7103,10 +7138,15 @@ function montarSessaoTreino(){
       const wrap = document.createElement('div');
       wrap.className = 'tr-serie-linha-wrap';
       if(tipo==='ativacao'){
+        // mesma linha das outras séries, com "-" onde não existe valor; o
+        // alvo de repetições vem guardado no próprio bloco.
+        const alvo = bloco.getAttribute('data-repsalvo') || '-';
         wrap.innerHTML = '<button type="button" class="tr-serie-excluir">Excluir</button>'
-          + '<div class="tr-serie-linha tr-linha-ativacao" data-serie="'+s+'">'
+          + '<div class="tr-serie-linha" data-serie="'+s+'">'
           + '<span class="tr-serie-num">'+(s+1)+'</span>'
-          + '<span class="tr-serie-ativacao-label"></span>'
+          + '<span class="tr-serie-anterior">-</span>'
+          + '<span class="tr-preserie-vazio">-</span>'
+          + '<span class="tr-preserie-vazio">'+alvo+'</span>'
           + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
           + '</div>';
       } else {
@@ -7145,12 +7185,16 @@ function ligarCheckSerie(btn){
     if(linha) linha.classList.toggle('feita', feita);
     // terminou a série: já começa a contar o descanso pra próxima, com o
     // tempo que o plano manda naquele exercício (e, na falta dele, o
-    // intervalo da semana). Desmarcar não dispara nada.
+    // intervalo da semana).
     if(feita){
       const bloco = btn.closest('.tr-serie-bloco');
       const txt = (bloco && bloco.getAttribute('data-descanso')) || sessaoTreinoIntervaloSemana;
       const nome = (bloco && bloco.getAttribute('data-nome')) || '';
       if(temValorPlano(txt) || sessaoTreinoIntervaloSemana) iniciarDescanso(txt, nome);
+    } else {
+      // desmarcou: a série não foi feita (marcou sem querer), então o descanso
+      // que ela abriu não tem mais razão de existir e sai da tela junto.
+      fecharDescanso();
     }
   };
 }
