@@ -3098,8 +3098,9 @@ const G = {
     {n:'Mamão',q:230},{n:'Pêssego',q:235},{n:'Melão',q:270},{n:'Acerola in natura',q:280},
     {n:'Morango',q:290},{n:'Melancia',q:305}]},
   sobremesa:{tipo:'fixo',titulo:'Equivalentes a 20 g de chocolate amargo',opts:[
-    {n:'Chocolate amargo 70% cacau',t:'20 g'},{n:'Doce de leite',t:'35 g'},
-    {n:'Goiabada',t:'50 g'},{n:'Bombom',t:'1 un'},{n:'Paçoca',t:'1 un'}]}
+    {n:'Chocolate amargo 70% cacau',t:'20 g'},{n:'Chocolate ao leite',t:'20 g'},
+    {n:'Doce de leite',t:'35 g'},{n:'Goiabada',t:'50 g'},
+    {n:'Bombom',t:'1 un'},{n:'Paçoca',t:'1 un'}]}
 };
 
 /* Cada alimento precisa da SUA lista de troca. O PDF só traz tabela para
@@ -4446,6 +4447,10 @@ const MACRO_RAW = {
   'canela em pó':M(247,4,81,1.2),
   'chocolate amargo 70% cacau':M(560,8,34,40),
   'chocolate amargo 60% cacau':M(530,6,45,35),
+  /* chocolate ao leite de barra fina (~33% de cacau, manteiga de cacau de
+     verdade e sem gordura vegetal): 545 kcal por 100 g. O quadradinho padrão
+     dessas barras pesa 10 g, que é o que vale a unidade aqui. */
+  'chocolate ao leite':M(545,7,57,32,10),
   'doce de leite':M(315,6,55,7),
   'goiabada':M(270,0.4,68,0.1),
   'bombom':M(580,7,45,40,13),
@@ -4681,7 +4686,8 @@ const FORA_RAW = {
   'Torta salgada, fatia':M(250,9,24,13,120),
   'Iogurte com sabor':M(85,3,14,2,170),
   'Whey de outro sabor ou marca':M(380,75,10,5),
-  'Ovo frito':M(196,13,0.8,15,55)
+  'Ovo frito':M(196,13,0.8,15,55),
+  'Chocolate ao leite':M(545,7,57,32,10)
 };
 Object.keys(FORA_RAW).forEach(function(k){ MACRO[norm(k)] = FORA_RAW[k]; });
 const FORA_NOMES = Object.keys(FORA_RAW).sort(function(a,b){ return a.localeCompare(b,'pt'); });
