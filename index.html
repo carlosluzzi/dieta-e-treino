@@ -1682,8 +1682,12 @@ document.querySelectorAll('.logo-svg-slot').forEach(function(el){ el.innerHTML =
    0. ARMAZENAMENTO LOCAL (funciona fora do app Claude também)
    ========================================================= */
 if(!window.storage){
+  // devolve {value: ...}, o mesmo formato do armazenamento do app. Antes
+  // devolvia a string crua e quem lia fazia `r.value` - ou seja, a cópia
+  // local NUNCA era lida de volta. Era o pneu step furado: quando o banco
+  // não respondia, não tinha de onde restaurar o que já estava marcado.
   window.storage = {
-    get: function(k){ return Promise.resolve(localStorage.getItem(k)); },
+    get: function(k){ return Promise.resolve({ value: localStorage.getItem(k) }); },
     set: function(k,v){ localStorage.setItem(k,v); return Promise.resolve(); }
   };
 }
@@ -3326,7 +3330,8 @@ async function carregar(){
   }catch(e){}
   try{
     const r = await window.storage.get(STORE_KEY);
-    if(r && r.value) aplicar(JSON.parse(r.value));
+    const txt = r && (r.value !== undefined ? r.value : r);
+    if(txt) aplicar(JSON.parse(txt));
   }catch(e){}
 }
 
@@ -4542,6 +4547,20 @@ function contaDia(dia, perfil){
   return c;
 }
 
+/* dia sem nada dentro: não vale uma linha no banco (era assim que nasciam
+   dezenas de registros vazios, um pra cada dia que alguém só abriu) */
+function diaVazio(reg){
+  if(!reg) return true;
+  if(reg.obs) return false;
+  if(reg.r && Object.keys(reg.r).length) return false;
+  if(reg.itens && Object.keys(reg.itens).length) return false;
+  if(reg.extras && Object.keys(reg.extras).length) return false;
+  if(reg.versao && Object.keys(reg.versao).length) return false;
+  return true;
+}
+// dias que já existem no banco: um dia que ficou vazio depois de ter tido
+// coisa precisa ser gravado assim mesmo, pra apagar de verdade lá.
+const diasNoBanco = {};
 async function salvarDiario(){
   try{ await window.storage.set(DIARIO_KEY, JSON.stringify({perfil:diario.perfil, log:diario.log})); }catch(e){}
   try{
@@ -4550,6 +4569,8 @@ async function salvarDiario(){
       Object.keys(diario.log).forEach(function(p){
         var porDia = diario.log[p] || {};
         Object.keys(porDia).forEach(function(dia){
+          if(diaVazio(porDia[dia]) && !diasNoBanco[p+'|'+dia]) return;
+          diasNoBanco[p+'|'+dia] = 1;
           linhas.push({
             organization_id: orgAtiva.id,
             user_id: p,
@@ -4566,29 +4587,52 @@ async function salvarDiario(){
   }catch(e){}
 }
 async function carregarDiario(){
+  // 1) começa pela cópia local. Ela é o que garante que uma atualização do
+  //    app (ou o banco demorando pra responder) não apague o que já estava
+  //    marcado no dia: antes o banco ENTRAVA NO LUGAR do que havia, e se ele
+  //    viesse vazio o app seguia como se nada tivesse sido marcado - e a
+  //    primeira marcação seguinte gravava o dia por cima, já sem o resto.
+  let local = null;
+  try{
+    const r = await window.storage.get(DIARIO_KEY);
+    const txt = r && (r.value !== undefined ? r.value : r);
+    if(txt){
+      const d = JSON.parse(txt);
+      if(d && d.log) local = d.log;
+      if(d && d.perfil) diario.perfil = d.perfil;
+    }
+  }catch(e){}
+  if(local) diario.log = local;
+
+  // 2) o banco manda no que ele tem, dia a dia (e não substituindo o pacote
+  //    inteiro): dia que só existe aqui no aparelho continua existindo.
+  let veioDoBanco = false;
   try{
     if(db && orgAtiva){
       const r = await db.from('diario_dias').select('user_id,dia,registro').eq('organization_id', orgAtiva.id);
-      if(r && r.data && r.data.length){
-        const log = {};
+      if(r && r.data){
+        veioDoBanco = true;
         r.data.forEach(function(row){
-          if(!log[row.user_id]) log[row.user_id] = {};
-          log[row.user_id][row.dia] = row.registro;
+          const dia = String(row.dia).slice(0,10);
+          if(!diario.log[row.user_id]) diario.log[row.user_id] = {};
+          diario.log[row.user_id][dia] = row.registro;
+          diasNoBanco[row.user_id+'|'+dia] = 1;
         });
-        diario.log = log;
-        try{ await window.storage.set(DIARIO_KEY, JSON.stringify({perfil:diario.perfil, log:diario.log})); }catch(e){}
-        return;
       }
     }
   }catch(e){}
-  try{
-    const r = await window.storage.get(DIARIO_KEY);
-    if(r && r.value){
-      const d = JSON.parse(r.value);
-      if(d.log) diario.log = Object.assign({}, d.log);
-      if(d.perfil) diario.perfil = d.perfil;
-    }
-  }catch(e){}
+  // 3) o que só existia no aparelho sobe pro banco agora (marcação feita sem
+  //    internet, por exemplo).
+  if(veioDoBanco && local){
+    let faltando = false;
+    Object.keys(local).forEach(function(p){
+      Object.keys(local[p] || {}).forEach(function(dia){
+        if(!diasNoBanco[p+'|'+dia] && !diaVazio(local[p][dia])) faltando = true;
+      });
+    });
+    if(faltando) salvarDiario();
+  }
+  try{ await window.storage.set(DIARIO_KEY, JSON.stringify({perfil:diario.perfil, log:diario.log})); }catch(e){}
 }
 
 
@@ -4760,6 +4804,15 @@ function setExtras(reg, mealId, lista){
   reg.extras[mealId] = lista;
   if(!lista.length) delete reg.extras[mealId];
 }
+/* "a mais" que ficou pela metade: abriu o "+ adicionar à refeição" e saiu sem
+   escolher alimento nenhum. Não soma caloria, não aparece na lista - mas
+   ficava guardado e era contado no +N do nome da refeição (foi o que fez o
+   jantar da Isabella mostrar "+3" tendo um Mate Leão só). */
+function extraVazio(e){
+  if(!e) return true;
+  if(e.n === OUTRO) return !(e.livre || e.kcal);
+  return !e.n;
+}
 /* Trava contra caloria fantasma: refeição com "comi algo a mais" dentro nunca
    pode ficar sem marcação. Sem isso dá pra acabar com um dia somando calorias
    e com todos os botões apagados na tela - foi o que aconteceu com o amendoim
@@ -4767,6 +4820,14 @@ function setExtras(reg, mealId, lista){
 function normalizarExtras(reg, meals){
   let mudou = false;
   (meals||[]).forEach(function(m){
+    const lista = extrasDa(reg, m.id);
+    // limpa os vazios - menos quando o editor daquela refeição está aberto,
+    // que é justamente o momento em que existe um vazio legítimo na lista.
+    const editandoAqui = extraAbertoChave && String(extraAbertoChave).indexOf(m.id + ':') === 0;
+    if(lista.length && !editandoAqui){
+      const limpa = lista.filter(function(e){ return !extraVazio(e); });
+      if(limpa.length !== lista.length){ setExtras(reg, m.id, limpa); mudou = true; }
+    }
     if(extrasDa(reg, m.id).length && !reg.r[m.id]){ reg.r[m.id] = 'ad'; mudou = true; }
   });
   return mudou;
@@ -5111,7 +5172,7 @@ function renderDiaBox(){
     // vira expoente colado no nome ("Almoço⁺¹"): não ocupa espaço de layout,
     // então não empurra o chevron nem espreme o nome, e continua avisando
     // que tem algo a mais guardado ali dentro.
-    const qExtras = extrasDa(reg, meal.id).length;
+    const qExtras = extrasDa(reg, meal.id).filter(function(e){ return !extraVazio(e); }).length;
     if(qExtras){
       const sup = document.createElement('sup'); sup.className='nm-extra';
       sup.textContent = '+' + qExtras;
@@ -5309,9 +5370,12 @@ function renderDiaBox(){
       add.textContent = '+ adicionar à refeição';
       add.onclick = function(){
         const lista = extrasDa(reg, meal.id).slice();
-        lista.push({n:'', q:'', u:'g'});
+        // se já tem um em branco esperando, abre ele em vez de criar mais um
+        let k = -1;
+        for(let i=0; i<lista.length; i++){ if(extraVazio(lista[i])){ k = i; break; } }
+        if(k < 0){ lista.push({n:'', q:'', u:'g'}); k = lista.length - 1; }
         setExtras(reg, meal.id, lista);
-        extraAbertoChave = meal.id+':'+(lista.length-1);
+        extraAbertoChave = meal.id+':'+k;
         if(!reg.r[meal.id]) reg.r[meal.id]='ad';
         salvarDiario(); renderDiario();
       };
@@ -7773,7 +7837,38 @@ function setPerfil(p){
   renderDiario();
   const vistaTreino = document.getElementById('vista-treino');
   if(vistaTreino && !vistaTreino.hidden) renderTreino();
+  // olhar o diário do outro tem que mostrar o que ELE marcou agora há pouco,
+  // e não o que este aparelho tinha guardado da última vez.
+  sincronizarDoBanco();
 }
+
+/* Puxa de novo o diário do banco e redesenha. É o que mantém os dois
+   aparelhos falando a mesma coisa: o que a Isabella marca no dela aparece no
+   do Carlos quando ele troca de perfil, volta pro app ou muda de aba.
+   O `emAndamento` evita duas buscas ao mesmo tempo e o intervalo mínimo evita
+   ficar batendo no banco a cada toque. */
+let sincEmAndamento = false, sincUltima = 0;
+async function sincronizarDoBanco(forcar){
+  if(sincEmAndamento) return;
+  if(!db || !orgAtiva) return;
+  const agora = Date.now();
+  if(!forcar && agora - sincUltima < 8000) return;
+  sincEmAndamento = true;
+  try{
+    await carregarDiario();
+    sincUltima = Date.now();
+    renderDiario();
+    const vistaTreino = document.getElementById('vista-treino');
+    if(vistaTreino && !vistaTreino.hidden) renderTreino();
+    if(typeof atualizarCardTreinoHoje === 'function') atualizarCardTreinoHoje();
+  }catch(e){}
+  sincEmAndamento = false;
+}
+// voltar pro app (trocar de aplicativo no celular e voltar) também atualiza
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible') sincronizarDoBanco();
+});
+window.addEventListener('focus', function(){ sincronizarDoBanco(); });
 /* Troca de mês do calendário com transição suave (o mês sai deslizando pro
    lado e o novo entra do lado oposto, em vez de trocar cortado), usada tanto
    pelas setas ‹ › quanto pelo gesto de arrastar o calendário com o dedo. */
