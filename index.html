@@ -798,26 +798,19 @@
   .orc.passou .orc-centro-val{color:var(--nao)}
   .orc-centro-rot{font-size:12.5px;color:var(--ink2)}
   .orc-macros{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 14px}
-  .orc-macro{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
+  /* tocar na coluna troca "32 / 49 g" pelo percentual - o número dos dois
+     lados ao mesmo tempo não cabia na terça parte do card. */
+  .orc-macro{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;
+    cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .orc-macro:focus-visible{outline:none}
+  .orc-macro:focus-visible .orc-macro-val{box-shadow:inset 0 0 0 2px var(--azul);border-radius:6px}
+  .orc-macro.pct .orc-macro-val{color:var(--ink2)}
   .orc-ponto{width:9px;height:9px;border-radius:10px;flex-shrink:0;margin-bottom:2px}
   .orc-ponto-g{background:#E3B341}
   .orc-ponto-c{background:#5BA8D8}
   .orc-ponto-p{background:#7B5EC7}
   .orc-macro-rot{font-size:11.5px;color:var(--ink3)}
-  .orc-macro-val{font-size:13px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;
-    white-space:nowrap}
-  /* quanto do previsto já entrou, no mesmo desenho do anel grande das
-     calorias, em miniatura. O percentual do lado do valor ("188 / 213 g
-     (88%)") não cabia na terça parte do card e vazava da coluna. */
-  .orc-anel{position:relative;width:38px;height:38px;margin-bottom:3px}
-  .orc-anel svg{width:38px;height:38px;transform:rotate(-90deg)}
-  .orc-anel circle{fill:none;stroke-width:4}
-  .orc-anel-tr{stroke:var(--fill)}
-  .orc-anel-pr{stroke-linecap:round;stroke-dasharray:0 106.8;transition:stroke-dasharray .35s ease}
-  .orc-anel-g{stroke:#E3B341} .orc-anel-c{stroke:#5BA8D8} .orc-anel-p{stroke:#7B5EC7}
-  .orc-anel-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    font-size:10.5px;font-weight:700;color:var(--ink2);font-variant-numeric:tabular-nums}
-  @media(max-width:359px){ .orc-macro-val{font-size:12px} .orc-anel,.orc-anel svg{width:34px;height:34px} }
+  .orc-macro-val{font-size:13px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
   .cal-palco{overflow:hidden;touch-action:pan-y}
   /* treino do dia na mesma linha do título "Treino", do lado direito -
      clicar abre o modal de troca (trocarTreinoDlg). */
@@ -1424,17 +1417,11 @@
       </div>
 
       <div class="orc-macros" id="hoje-orc-macros">
-        <div class="orc-macro">
-          <span class="orc-anel"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="orc-anel-tr" cx="20" cy="20" r="17"></circle><circle class="orc-anel-pr orc-anel-g" id="orc-anel-g" cx="20" cy="20" r="17"></circle></svg><span class="orc-anel-pct" id="orc-pct-g"></span></span>
-          <i class="orc-ponto orc-ponto-g"></i>
+        <div class="orc-macro" data-macro="g" role="button" tabindex="0" title="Toque pra ver o percentual"><i class="orc-ponto orc-ponto-g"></i>
           <span class="orc-macro-rot">Gordura</span><span class="orc-macro-val" id="orc-gordura"></span></div>
-        <div class="orc-macro">
-          <span class="orc-anel"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="orc-anel-tr" cx="20" cy="20" r="17"></circle><circle class="orc-anel-pr orc-anel-c" id="orc-anel-c" cx="20" cy="20" r="17"></circle></svg><span class="orc-anel-pct" id="orc-pct-c"></span></span>
-          <i class="orc-ponto orc-ponto-c"></i>
+        <div class="orc-macro" data-macro="c" role="button" tabindex="0" title="Toque pra ver o percentual"><i class="orc-ponto orc-ponto-c"></i>
           <span class="orc-macro-rot">Carbos</span><span class="orc-macro-val" id="orc-carbo"></span></div>
-        <div class="orc-macro">
-          <span class="orc-anel"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="orc-anel-tr" cx="20" cy="20" r="17"></circle><circle class="orc-anel-pr orc-anel-p" id="orc-anel-p" cx="20" cy="20" r="17"></circle></svg><span class="orc-anel-pct" id="orc-pct-p"></span></span>
-          <i class="orc-ponto orc-ponto-p"></i>
+        <div class="orc-macro" data-macro="p" role="button" tabindex="0" title="Toque pra ver o percentual"><i class="orc-ponto orc-ponto-p"></i>
           <span class="orc-macro-rot">Proteína</span><span class="orc-macro-val" id="orc-proteina"></span></div>
       </div>
 
@@ -5897,25 +5884,37 @@ function atualizarCardDieta(diaIso, feitas, total){
     // com traço arredondado, comprimento zero ainda pinta uma bolinha
     arco.style.opacity = fatia > 0 ? '1' : '0';
 
-    const VOLTA_MACRO = 2 * Math.PI * 17;     // circunferência do anelzinho
-    function macro(id, letra, feito, alvo){
-      document.getElementById(id).textContent = Math.round(feito)+' / '+Math.round(alvo)+' g';
-      const arco = document.getElementById('orc-anel-'+letra);
-      const txt = document.getElementById('orc-pct-'+letra);
-      const pct = alvo > 0 ? Math.round(feito/alvo*100) : 0;
-      if(txt) txt.textContent = alvo > 0 ? pct+'%' : '-';
-      if(arco){
-        // passou de 100%? o anel fecha a volta e para - quem avisa do excesso
-        // é o número.
-        const fatia = Math.max(0, Math.min(1, alvo > 0 ? feito/alvo : 0));
-        arco.style.strokeDasharray = (VOLTA_MACRO*fatia).toFixed(1)+' '+VOLTA_MACRO.toFixed(1);
-      }
-    }
-    macro('orc-gordura', 'g', c.real.g, c.plan.g);
-    macro('orc-carbo', 'c', c.real.c, c.plan.c);
-    macro('orc-proteina', 'p', c.real.p, c.plan.p);
+    macroValores.g = {id:'orc-gordura', feito:c.real.g, alvo:c.plan.g};
+    macroValores.c = {id:'orc-carbo', feito:c.real.c, alvo:c.plan.c};
+    macroValores.p = {id:'orc-proteina', feito:c.real.p, alvo:c.plan.p};
+    ['g','c','p'].forEach(pintarMacro);
   }catch(e){ /* sem plano carregado ainda - o card fica com os zeros */ }
 }
+/* Os macros mostram gramas; tocando na coluna, ela troca pelo percentual do
+   que já entrou (e volta no toque seguinte). Os dois ao mesmo tempo não
+   cabiam - "188 / 213 g (88%)" vazava da terça parte do card. */
+const macroValores = {}, macroMostraPct = {};
+function pintarMacro(letra){
+  const v = macroValores[letra];
+  if(!v) return;
+  const el = document.getElementById(v.id);
+  if(!el) return;
+  const col = el.closest('.orc-macro');
+  if(macroMostraPct[letra]){
+    el.textContent = v.alvo > 0 ? Math.round(v.feito/v.alvo*100)+'%' : '-';
+  } else {
+    el.textContent = Math.round(v.feito)+' / '+Math.round(v.alvo)+' g';
+  }
+  if(col) col.classList.toggle('pct', !!macroMostraPct[letra]);
+}
+Array.prototype.forEach.call(document.querySelectorAll('.orc-macro[data-macro]'), function(col){
+  const letra = col.getAttribute('data-macro');
+  function alternar(){ macroMostraPct[letra] = !macroMostraPct[letra]; pintarMacro(letra); }
+  col.onclick = alternar;
+  col.onkeydown = function(ev){
+    if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); alternar(); }
+  };
+});
 document.getElementById('hoje-ir-diario').onclick = function(){
   // abre o popup no dia que a tela está mostrando (o que foi escolhido no
   // calendário), não necessariamente hoje.
