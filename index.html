@@ -804,7 +804,13 @@
   .orc-ponto-c{background:#5BA8D8}
   .orc-ponto-p{background:#7B5EC7}
   .orc-macro-rot{font-size:11.5px;color:var(--ink3)}
-  .orc-macro-val{font-size:13px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+  .orc-macro-val{font-size:13px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;
+    white-space:nowrap}
+  .orc-macro-pct{margin-left:4px;font-weight:500;color:var(--ink3)}
+  /* com o percentual do lado a linha cresce; em tela estreita ela encolhe um
+     ponto em vez de vazar da coluna (medido com "188 / 213 g (88%)"). */
+  @media(max-width:400px){ .orc-macro-val{font-size:12px} .orc-macro-pct{font-size:11px;margin-left:3px} }
+  @media(max-width:359px){ .orc-macro-val{font-size:11px} .orc-macro-pct{font-size:10px;margin-left:2px} }
   .cal-palco{overflow:hidden;touch-action:pan-y}
   /* treino do dia na mesma linha do título "Treino", do lado direito -
      clicar abre o modal de troca (trocarTreinoDlg). */
@@ -3098,7 +3104,7 @@ const G = {
     {n:'Mamão',q:230},{n:'Pêssego',q:235},{n:'Melão',q:270},{n:'Acerola in natura',q:280},
     {n:'Morango',q:290},{n:'Melancia',q:305}]},
   sobremesa:{tipo:'fixo',titulo:'Equivalentes a 20 g de chocolate amargo',opts:[
-    {n:'Chocolate amargo 70% cacau',t:'20 g'},{n:'Chocolate ao leite',t:'20 g'},
+    {n:'Chocolate 70% cacau',t:'20 g'},{n:'Chocolate ao leite',t:'20 g'},
     {n:'Doce de leite',t:'35 g'},{n:'Goiabada',t:'50 g'},
     {n:'Bombom',t:'1 un'},{n:'Paçoca',t:'1 un'}]}
 };
@@ -3128,6 +3134,11 @@ const GRUPO_AUTO = {
   'sushi':{g:'sushi'},
   'makimono ou niguiri':{g:'sushi'},
   'chocolate amargo 60% cacau':{g:'sobremesa'},
+  // o 70% já vem do PDF com as trocas dele (doce de leite, bombom, goiabada,
+  // paçoca); o grupo entra por cima pra somar o chocolate ao leite, que a
+  // lista do Pedro não tinha. Nomes repetidos não duplicam.
+  'chocolate 70% cacau':{g:'sobremesa'},
+  'chocolate amargo 70% cacau':{g:'sobremesa'},
   // estes dois já vêm com grupo do PDF; o que falta neles é só o `qb` - o
   // nome do plano não bate com o nome da linha na tabela ("Filé mignon
   // grelhado" x "Patinho magro cozido ou filé mignon", "Queijo muçarela" x
@@ -3144,6 +3155,17 @@ const GRUPO_AUTO = {
 };
 const GRUPO_AUTO_N = {};
 Object.keys(GRUPO_AUTO).forEach(function(k){ GRUPO_AUTO_N[norm(k)] = GRUPO_AUTO[k]; });
+
+/* Nome que o app mostra no lugar do que veio escrito no PDF. Fica aqui, na
+   leitura do plano, e não no banco: assim vale pro plano de hoje e pros
+   próximos PDFs que ainda venham com a grafia antiga, sem reescrever nada do
+   que já está gravado. */
+const NOMES_TROCADOS = {
+  'chocolate amargo 70% cacau': 'Chocolate 70% cacau'
+};
+function nomeDoAlimento(n){
+  return NOMES_TROCADOS[norm(n)] || n;
+}
 
 /* =========================================================
    2. FATORES DE COMPRA
@@ -3384,11 +3406,11 @@ function zipOpts(oI, oC){
 function zipItem(a, c){
   const ref = c || a;                       // o dono da conta manda na grafia
   const alt = a || c;
-  const out = { n: ref.n, i: a ? a.v : null, c: c ? c.v : null };
+  const out = { n: nomeDoAlimento(ref.n), i: a ? a.v : null, c: c ? c.v : null };
   let g = ref.g !== undefined ? ref.g : alt.g;
   // alimento que veio do PDF sem tabela de troca ganha aqui a lista do grupo
   // dele (ver GRUPO_AUTO); o que já veio com grupo fica como está.
-  const auto = GRUPO_AUTO_N[norm(ref.n)] || GRUPO_AUTO_N[norm(alt.n)];
+  const auto = GRUPO_AUTO_N[norm(out.n)] || GRUPO_AUTO_N[norm(ref.n)] || GRUPO_AUTO_N[norm(alt.n)];
   if(auto){
     if(g === undefined && auto.g) g = auto.g;
     if(auto.qb) out.qb = auto.qb;
@@ -3556,7 +3578,14 @@ function parseVal(v){
   if(v===null||v===undefined) return null;
   if(typeof v==='number') return {n:v,u:'g'};
   const m = String(v).match(/^(\d+(?:[.,]\d+)?)\s*(.*)$/);
-  if(m) return {n:parseFloat(m[1].replace(',','.')), u:(m[2]||'').replace(/\s*\(.*\)\s*/,'').trim()||'un'};
+  if(m){
+    let u = (m[2]||'').replace(/\s*\(.*\)\s*/,'').trim() || 'un';
+    // porção escrita como soma ("100 g + 20 g", da fruta com leite condensado):
+    // o que vale é a primeira parte, em gramas. Sem isto a unidade virava
+    // "g + 20 g", não batia com nada e o item não somava caloria nenhuma.
+    if(/^g($|\s|\+|,|\.)/.test(u)) u = 'g';
+    return {n:parseFloat(m[1].replace(',','.')), u:u};
+  }
   return {n:null,u:String(v)};
 }
 function fmt(v){ if(v===null||v===undefined) return '-'; return typeof v==='number' ? v+' g' : String(v); }
@@ -4445,13 +4474,21 @@ const MACRO_RAW = {
   'psyllium (fibras solúveis)':M(100,1,80,0.5),
   'cacau em pó 100% puro':M(228,20,57,13.7),
   'canela em pó':M(247,4,81,1.2),
-  'chocolate amargo 70% cacau':M(560,8,34,40),
+  'chocolate 70% cacau':M(560,8,34,40),
+  'chocolate amargo 70% cacau':M(560,8,34,40),   /* nome antigo: o que já foi registrado continua contando */
   'chocolate amargo 60% cacau':M(530,6,45,35),
   /* chocolate ao leite de barra fina (~33% de cacau, manteiga de cacau de
      verdade e sem gordura vegetal): 545 kcal por 100 g. O quadradinho padrão
      dessas barras pesa 10 g, que é o que vale a unidade aqui. */
   'chocolate ao leite':M(545,7,57,32,10),
   'doce de leite':M(315,6,55,7),
+  'leite condensado':M(321,7.9,55,8),
+  /* "Fruta + leite condensado" é uma linha só na lista de sobremesa do plano,
+     e a porção dele é 100 g de fruta + 20 g de leite condensado. Os valores
+     abaixo são os do CONJUNTO nessa porção (fruta 48 + condensado 64 = 112
+     kcal, praticamente as 112 dos 20 g de chocolate 70%). Sem isso o item
+     existia na lista mas não somava caloria nenhuma quando escolhido. */
+  'fruta + leite condensado':M(112,1.6,25,0.5),
   'goiabada':M(270,0.4,68,0.1),
   'bombom':M(580,7,45,40,13),
   'paçoca':M(460,9,60,20,20),
@@ -4687,7 +4724,8 @@ const FORA_RAW = {
   'Iogurte com sabor':M(85,3,14,2,170),
   'Whey de outro sabor ou marca':M(380,75,10,5),
   'Ovo frito':M(196,13,0.8,15,55),
-  'Chocolate ao leite':M(545,7,57,32,10)
+  'Chocolate ao leite':M(545,7,57,32,10),
+  'Leite condensado':M(321,7.9,55,8)
 };
 Object.keys(FORA_RAW).forEach(function(k){ MACRO[norm(k)] = FORA_RAW[k]; });
 const FORA_NOMES = Object.keys(FORA_RAW).sort(function(a,b){ return a.localeCompare(b,'pt'); });
@@ -5836,7 +5874,16 @@ function atualizarCardDieta(diaIso, feitas, total){
     arco.style.opacity = fatia > 0 ? '1' : '0';
 
     function macro(id, feito, alvo){
-      document.getElementById(id).textContent = Math.round(feito)+' / '+Math.round(alvo)+' g';
+      const el = document.getElementById(id);
+      el.textContent = Math.round(feito)+' / '+Math.round(alvo)+' g';
+      // quanto do previsto já entrou, em número redondo - o "32 / 49 g"
+      // sozinho não dizia de cara se isso é pouco ou muito.
+      if(alvo > 0){
+        const pct = document.createElement('span');
+        pct.className = 'orc-macro-pct';
+        pct.textContent = '(' + Math.round(feito/alvo*100) + '%)';
+        el.appendChild(pct);
+      }
     }
     macro('orc-gordura', c.real.g, c.plan.g);
     macro('orc-carbo', c.real.c, c.plan.c);
@@ -7094,11 +7141,58 @@ const FIGURA_POSES = {
 // nome do exercício (igual ao do plano) -> figura padronizada gerada por
 // código acima (não é foto, ver comentário do FIG). O texto de explicação
 // de cada um vem de conteudo.biblioteca_exercicios (banco de dados).
+/* Explicações que o app traz de fábrica. Servem de rede pros exercícios que
+   o PDF não trouxe descritos - o plano da Isabella, por exemplo, veio sem
+   biblioteca nenhuma. A do plano sempre vem na frente desta aqui; esta só
+   entra quando o exercício não tem texto lá. */
+const BIBLIOTECA_PADRAO_RAW = {
+  'Leg Press horizontal':'Costas e quadril colados no encosto, pés na largura dos ombros no meio da plataforma. Desça até o joelho chegar perto de 90° sem deixar o quadril sair do banco e empurre sem travar o joelho no fim.',
+  'Hack Machine linear':'Costas inteiras apoiadas e pés um pouco à frente do quadril. Desça controlada até a coxa ficar paralela à plataforma e suba empurrando pelo meio do pé, sem travar o joelho no topo.',
+  'Cadeira extensora':'Ajuste o encosto pra alinhar o joelho ao eixo do aparelho, estenda a perna sem "jogar" o corpo pra trás no final, e desça controlado sem deixar o peso bater.',
+  'Mesa flexora':'Deitada de barriga pra baixo, joelho alinhado ao eixo do aparelho e o rolo logo acima do calcanhar. Puxe o calcanhar na direção do glúteo sem tirar o quadril do apoio e volte segurando o peso.',
+  'Flexora vertical máquina unilateral':'Em pé, uma perna de cada vez, com o quadril firme contra o apoio. Flexione o joelho levando o calcanhar ao glúteo sem deixar o quadril rodar nem o tronco cair pra frente.',
+  'Ativação: retração escapular':'Só as omoplatas trabalham: puxe juntando uma na outra, sem dobrar o cotovelo e sem usar o braço. Carga leve e movimento curto - é preparação, não série que vale.',
+  'Retração escapular':'Junte as omoplatas sem dobrar o cotovelo; o braço só acompanha. Carga leve e foco na escápula - é o aquecimento do ombro pro que vem depois.',
+  'Ativação: depressão escapular':'Ombro pra baixo e pra trás, como se fosse guardar a omoplata no bolso de trás da calça. O braço fica esticado o tempo todo: quem faz o movimento é o ombro descendo, não o cotovelo dobrando.',
+  'Puxada supinada':'Pegada supinada (palmas viradas pra você) na largura dos ombros. Puxe a barra até a parte de cima do peito levando o cotovelo pra baixo e pra trás, peito aberto, sem jogar o tronco.',
+  'Remada máquina apoiada pegada neutra':'Peito apoiado no encosto e pegada neutra (palmas viradas uma pra outra). Puxe levando o cotovelo rente ao corpo e juntando as omoplatas no fim; volte esticando sem deixar o ombro ir embora junto com o peso.',
+  'High Row máquina':'Pegada mais alta que a da remada: o cotovelo sobe na diagonal, na altura do ombro. Puxe até as mãos chegarem perto do peito alto, segure um instante no fim e volte controlada.',
+  'Crucifixo invertido máquina':'Peito no apoio e braços quase esticados. Abra os braços pro lado em arco, como um abraço ao contrário, sem dobrar o cotovelo no meio do caminho. O movimento acaba quando as omoplatas se encontram.',
+  'Tríceps Pulley':'Cotovelo colado no corpo e parado: só o antebraço desce. Estenda até o braço ficar reto, segure um instante embaixo e volte sem deixar o cotovelo abrir pra frente.',
+  'Ativação: elevação pélvica no solo + band':'Deitada, pés apoiados e o elástico logo acima do joelho. Suba o quadril até o corpo ficar em linha do joelho ao ombro, empurrando o joelho contra o elástico o tempo todo, e aperte o glúteo em cima.',
+  'Ativação: pose de ostra + band':'Deitada de lado, joelhos dobrados e o elástico acima do joelho. Abra o joelho de cima sem deixar o quadril rodar pra trás - os pés continuam encostados um no outro.',
+  'Cadeira abdutora':'Costas no encosto, abra as pernas contra o apoio até o limite confortável e volte segurando o peso. Não jogue o tronco pra frente pra ganhar amplitude.',
+  'Elevação pélvica máquina':'Almofada na dobra do quadril e pés na largura do quadril. Suba até o corpo ficar em linha reta do joelho ao ombro, apertando o glúteo no topo, e desça sem largar o peso de uma vez.',
+  'Stiff com barra':'Joelho levemente dobrado e fixo, barra rente à perna. Empurre o quadril pra trás até sentir o puxão atrás da coxa, com a coluna reta, e volte empurrando o quadril pra frente.',
+  'Extensão de quadril na polia média sobre o Step':'Em pé sobre o step, com a polia presa na perna de trabalho. Leve a perna pra trás com o joelho quase esticado, só até onde o quadril não roda, e aperte o glúteo no fim.',
+  'Panturrilhas máquina em pé':'Pé na borda da plataforma e joelho esticado, sem travar. Suba o máximo na ponta do pé, segure em cima e desça devagar até sentir o alongamento - sem quicar.',
+  'Supino máquina deitada':'Ajuste o banco pra pegada ficar na altura do meio do peito. Empurre até quase esticar o braço sem tirar o ombro do encosto e volte controlada, até sentir o peito alongar.',
+  'Desenvolvimento máquina pegada aberta':'Costas apoiadas e pegada mais aberta que o ombro. Empurre pra cima até quase esticar o cotovelo, sem levantar o ombro na direção da orelha, e desça até a mão ficar na altura da orelha.',
+  'Elevação lateral com halteres':'Halteres ao lado do corpo, suba os braços até a altura dos ombros com o cotovelo levemente flexionado, sem impulso do tronco. Pense em "derramar água" dos punhos - isso mantém o ombro no comando, não o trapézio.',
+  'Rosca direta unilateral com halteres':'Um braço de cada vez, cotovelo colado no tronco e parado. Suba o halter até a altura do ombro sem balançar o corpo e desça controlado até esticar o braço.'
+};
+const BIBLIOTECA_PADRAO = {};
+Object.keys(BIBLIOTECA_PADRAO_RAW).forEach(function(k){ BIBLIOTECA_PADRAO[norm(k)] = BIBLIOTECA_PADRAO_RAW[k]; });
+/* Texto do exercício: primeiro o que veio no plano da pessoa, depois o nosso.
+   O nome é comparado sem acento e sem maiúscula, e ainda tenta de novo sem o
+   que estiver entre parênteses - é assim que "Remada máquina apoiada pegada
+   neutra (La Pierre)" acha a explicação da remada apoiada. */
+function explicacaoDoExercicio(nome){
+  const c = sessaoTreinoConteudo || treinoConteudoAtual || treinoHojeConteudo;
+  const bib = (c && c.biblioteca_exercicios) || {};
+  if(bib[nome] && bib[nome].explicacao) return bib[nome].explicacao;
+  const alvo = norm(nome);
+  const chave = Object.keys(bib).find(function(k){ return norm(k) === alvo; });
+  if(chave && bib[chave].explicacao) return bib[chave].explicacao;
+  if(BIBLIOTECA_PADRAO[alvo]) return BIBLIOTECA_PADRAO[alvo];
+  const semParenteses = norm(String(nome).replace(/\s*\(.*?\)\s*/g, ' '));
+  if(BIBLIOTECA_PADRAO[semParenteses]) return BIBLIOTECA_PADRAO[semParenteses];
+  return null;
+}
 function abrirExplicacaoExercicio(nome){
   // funciona tanto na sessão de treino quanto na aba Treino (que carrega o
   // plano numa variável própria) e no card do Diário.
-  const c = sessaoTreinoConteudo || treinoConteudoAtual || treinoHojeConteudo;
-  const info = c && c.biblioteca_exercicios && c.biblioteca_exercicios[nome];
+  const texto = explicacaoDoExercicio(nome);
   const wrap = document.createElement('div');
   wrap.className = 'tr-menu-backdrop';
   // sem desenho: as figuras genéricas não ajudavam a entender o movimento,
@@ -7106,7 +7200,7 @@ function abrirExplicacaoExercicio(nome){
   wrap.innerHTML = '<div class="tr-exp-card">'
     + '<button type="button" class="tr-exp-fechar" aria-label="Fechar">×</button>'
     + '<div class="tr-exp-titulo">'+nome+'</div>'
-    + '<div class="tr-exp-texto">'+((info && info.explicacao) || 'Ainda não tem explicação cadastrada pra esse exercício.')+'</div>'
+    + '<div class="tr-exp-texto">'+(texto || 'Ainda não tem explicação cadastrada pra esse exercício.')+'</div>'
     + '</div>';
   document.body.appendChild(wrap);
   wrap.addEventListener('click', function(ev){
@@ -7650,16 +7744,31 @@ function pararSomDescanso(){
   if(descansoAudio){ try{ descansoAudio.pause(); }catch(e){} descansoAudio = null; }
   if(descansoAudioUrl){ try{ URL.revokeObjectURL(descansoAudioUrl); }catch(e){} descansoAudioUrl = null; }
 }
+let descansoUltimoArme = 0;
 function tocarSomDescanso(segundos){
   pararSomDescanso();
   if(!descansoSomLigado || !(segundos > 0)) return;
   try{
+    descansoUltimoArme = Date.now();
     descansoAudioUrl = URL.createObjectURL(montarWavDescanso(segundos));
     descansoAudio = new Audio(descansoAudioUrl);
     descansoAudio.preload = 'auto';
+    // o iPhone às vezes trata um áudio novo como "mídia" e para a música de
+    // quem estiver ouvindo; isto pede pra ele não roubar a sessão de áudio.
+    descansoAudio.setAttribute('playsinline','');
     const pr = descansoAudio.play();
     if(pr && pr.catch) pr.catch(function(){ /* navegador barrou: fica só o visual */ });
   }catch(e){ pararSomDescanso(); }
+}
+/* Remonta o bipe com o tempo que ainda falta. É o conserto pro caso em que o
+   iPhone pausa o áudio enquanto o app está em segundo plano (ou outro app
+   toma a saída de som): sem isto o descanso seguia contando na tela, mas o
+   aviso nunca mais tocava - que é exatamente o que aconteceu. */
+function rearmarSomDescanso(restante){
+  if(!descansoSomLigado || !(restante > 0)) return;
+  // um rearme a cada 3s no máximo, pra não virar rajada se o play for barrado
+  if(Date.now() - descansoUltimoArme < 3000) return;
+  tocarSomDescanso(restante);
 }
 /* segura a tela acesa durante o descanso - com o app aberto, é o que evita
    perder o contador de vista. Não existe no iOS antigo, daí o try. */
@@ -7686,6 +7795,7 @@ function fecharDescanso(){
     if(el.__aoVoltar){
       document.removeEventListener('visibilitychange', el.__aoVoltar);
       window.removeEventListener('focus', el.__aoVoltar);
+      window.removeEventListener('pageshow', el.__aoVoltar);
     }
     el.remove();
   }
@@ -7693,7 +7803,14 @@ function fecharDescanso(){
 /* Painel de descanso: aparece sozinho quando a série é marcada. É grande de
    propósito - dá pra ler o tempo de longe, com o celular apoiado no banco,
    sem precisar aproximar o rosto no meio da série. */
+let descansoComecouEm = 0;
 function iniciarDescanso(txt, nomeExercicio){
+  // trava contra começar duas vezes: um toque que vira "touch + click" no
+  // iPhone, ou o app voltando do segundo plano com o evento repetido, zerava
+  // um descanso que já estava correndo.
+  const agoraMs = Date.now();
+  if(agoraMs - descansoComecouEm < 1500 && document.getElementById('tr-descanso-toast')) return;
+  descansoComecouEm = agoraMs;
   const total = parseDescansoSegundos(txt);
   // O QUE MANDA É O RELÓGIO, não a contagem de batidas: em segundo plano o
   // iOS congela o setInterval, então somar "-1 por tick" atrasava o número
@@ -7741,6 +7858,10 @@ function iniciarDescanso(txt, nomeExercicio){
   }
   function tick(){
     restante = Math.round((fimEm - Date.now()) / 1000);
+    // o bipe caiu no meio do caminho? refaz com o tempo que falta.
+    if(restante > 0 && descansoSomLigado && (!descansoAudio || descansoAudio.paused || descansoAudio.ended)){
+      rearmarSomDescanso(restante);
+    }
     if(restante < 0){
       el.classList.add('fim');
       tempoEl.textContent = 'Vai!';
@@ -7761,9 +7882,16 @@ function iniciarDescanso(txt, nomeExercicio){
   sessaoTreinoDescansoTimer = setInterval(tick, 1000);
   // voltando do segundo plano, acerta o número imediatamente em vez de
   // esperar a próxima batida
-  const aoVoltar = function(){ if(sessaoTreinoDescansoTimer) tick(); };
+  const aoVoltar = function(){
+    if(!sessaoTreinoDescansoTimer) return;
+    tick();
+    // voltar pro app é gesto do usuário: é a hora mais segura de remontar o
+    // áudio, caso o sistema tenha pausado o anterior enquanto estava fora.
+    if(restante > 0) rearmarSomDescanso(restante);
+  };
   document.addEventListener('visibilitychange', aoVoltar);
   window.addEventListener('focus', aoVoltar);
+  window.addEventListener('pageshow', aoVoltar);
   el.__aoVoltar = aoVoltar;
   tocarSomDescanso(total);
   segurarTela();
