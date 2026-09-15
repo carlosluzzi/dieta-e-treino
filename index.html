@@ -1145,6 +1145,12 @@
   @media(max-width:359px){ .tr-ex-grade{grid-template-columns:1fr} }
   /* mesma grade dentro da sessão de treino, só com o respiro daquele bloco */
   .tr-ex-grade-sessao{margin:-2px 0 10px}
+  /* alongamento / mobilidade: mesma grade de duas colunas dos números do
+     plano, um bloco por lista */
+  .tr-along-bloco{margin-bottom:16px}
+  .tr-along-bloco:last-child{margin-bottom:0}
+  .tr-along-tit{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+    color:var(--ink3);margin:0 0 6px}
   .tr-serie-ativacao-label{font-size:14px;color:var(--ink2)}
   .tr-semana-cartao-sessao{margin:0 0 8px}
   /* pré-série de aquecimento (ex.: "2x15" antes da carga que vale): entra
@@ -1539,6 +1545,11 @@
 
       <div id="tr-treinos"></div>
 
+      <section class="tr-secao" id="tr-secao-alongamento" hidden>
+        <h3>Alongamento e mobilidade</h3>
+        <div id="tr-alongamento"></div>
+      </section>
+
       <section class="tr-secao">
         <h3>Aeróbico</h3>
         <div id="tr-aerobico"></div>
@@ -1551,7 +1562,7 @@
       </section>
 
       <details class="tr-detalhes">
-        <summary>Anamnese, diagnóstico, alongamento e mobilidade</summary>
+        <summary>Anamnese e diagnóstico</summary>
         <div id="tr-extra"></div>
       </details>
     </div>
@@ -6447,6 +6458,63 @@ function contarItensPlano(conteudo){
   return n;
 }
 
+/* O PDF da Isabella traz o core de cada treino dentro da lista de mobilidade
+   ("Treino A: Prancha abdominal - 3x30-40 s. | Prancha lateral - ..."), e o
+   app esperava isso em `core_por_treino`. Aqui essas linhas são separadas na
+   leitura: viram o bloco de Core do treino certo e saem da mobilidade, que
+   volta a ser só mobilidade. Não mexe no que está gravado no banco. */
+function arrumarPlanoTreino(c){
+  if(!c || c.__arrumado) return c;
+  c.__arrumado = true;
+  const mob = c.mobilidade || [];
+  if(!mob.length) return c;
+  const core = c.core_por_treino || {};
+  const sobra = [];
+  mob.forEach(function(par){
+    const nome = String((par && par[0]) || '');
+    const m = /^Treino\s+([A-Z])(?:\s*b[oô]nus)?\s*:\s*(.+)$/i.exec(nome);
+    if(!m){ sobra.push(par); return; }
+    const chave = m[1].toUpperCase();
+    const partes = String((par && par[1]) || '').split('|').map(function(x){ return x.trim(); }).filter(Boolean);
+    const lista = core[chave] || [];
+    // a primeira prescrição pertence ao exercício que está no nome
+    lista.push([m[2].trim(), (partes.shift() || '').replace(/\.$/, '')]);
+    partes.forEach(function(t){
+      const d = t.split(/\s+[-–—]\s+/);
+      if(d.length >= 2) lista.push([d[0].trim(), d.slice(1).join(' - ').trim().replace(/\.$/, '')]);
+      else lista.push([t.replace(/\.$/, ''), '']);
+    });
+    core[chave] = lista;
+  });
+  if(Object.keys(core).length) c.core_por_treino = core;
+  c.mobilidade = sobra;
+
+  const treinos = c.treinos || {};
+  Object.keys(treinos).forEach(function(chave){
+    const t = treinos[chave];
+    if(!t || !t.ex) return;
+    // 1) fora as linhas que não são exercício: no PDF da Isabella a legenda
+    //    dos treinos ("A", "B", "C", "D", "E bônus") virou exercício com
+    //    séries pra marcar.
+    t.ex = t.ex.filter(function(e){
+      const n = String((e && e[0]) || '').trim();
+      return n && !/^[A-Z]$/.test(n) && !/^[A-Z]\s*b[oô]nus$/i.test(n);
+    });
+    // 2) o core daquele treino entra como exercício, com prescrição e
+    //    quadradinho pra marcar - do mesmo jeito que a prancha do Carlos, que
+    //    já vem assim no PDF dele.
+    (core[chave] || []).forEach(function(par){
+      const nome = par[0];
+      if(t.ex.some(function(e){ return norm(e[0]) === norm(nome); })) return;
+      const presc = par[1] || '';
+      // prescrição em segundos = isométrico (a coluna de reps vira "Segundos")
+      const tipo = /\bs\b|segundo/i.test(presc) ? 'isometrico' : 'normal';
+      t.ex.push([nome, '', '', presc, '', tipo]);
+    });
+  });
+  return c;
+}
+
 async function buscarPlanoGenerico(tabela, uid){
   if(!db || !orgAtiva || !uid) return null;
   try{
@@ -6454,7 +6522,9 @@ async function buscarPlanoGenerico(tabela, uid){
       .select('conteudo,vigente_a_partir,versao_label')
       .eq('organization_id', orgAtiva.id).eq('user_id', uid)
       .order('vigente_a_partir', { ascending:false }).limit(20);
-    return escolherVigente(r && r.data);
+    const linha = escolherVigente(r && r.data);
+    if(linha && tabela === 'planos_treino') arrumarPlanoTreino(linha.conteudo);
+    return linha;
   }catch(e){ return null; }
 }
 
@@ -6612,6 +6682,7 @@ async function renderTreino(){
     }catch(e){ registros = []; }
     vazio.hidden = true;
     conteudoBox.hidden = false;
+    arrumarPlanoTreino(linha.conteudo);
     montarTreino(linha.conteudo, linha.versao_label, linha.vigente_a_partir, registros);
   }catch(e){
     vazioTxt.textContent = 'Não deu pra carregar o treino agora.';
@@ -6819,11 +6890,27 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
     if(!arr || !arr.length) return '';
     return '<h5>'+titulo+'</h5><ul>'+arr.map(function(x){ return '<li>'+x[0]+' - '+x[1]+'</li>'; }).join('')+'</ul>';
   }
+  // Alongamento, mobilidade e ativação saem de dentro do "Anamnese,
+  // diagnóstico..." e ganham seção própria: é coisa pra fazer no treino, não
+  // papelada pra ler uma vez.
+  function grade(titulo, arr){
+    if(!arr || !arr.length) return '';
+    return '<div class="tr-along-bloco"><h4 class="tr-along-tit">'+titulo+'</h4>'
+      + '<div class="tr-ex-grade">' + arr.map(function(x){
+          return '<div class="tr-ex-campo"><span class="tr-ex-rot">'+x[0]+'</span>'
+            + '<span class="tr-ex-val">'+comSinalDeVezes(x[1]||'-')+'</span></div>';
+        }).join('') + '</div></div>';
+  }
+  const along = grade('Alongamentos', c.alongamentos) + grade('Mobilidade', c.mobilidade)
+    + grade('Ativação / controle escapular', c.ativacao)
+    + (c.nota_ativacao ? '<p class="tr-nota">'+c.nota_ativacao+'</p>' : '');
+  const secaoAlong = document.getElementById('tr-secao-alongamento');
+  document.getElementById('tr-alongamento').innerHTML = along;
+  if(secaoAlong) secaoAlong.hidden = !along;
+
   document.getElementById('tr-extra').innerHTML =
     bloco('Anamnese', c.anamnese) + bloco('Diagnóstico', c.diagnostico) + bloco('Objetivo da fase', c.objetivo_fase) +
-    bloco('Estratégia inicial', c.estrategia_inicial) + blocoPares('Alongamentos', c.alongamentos) +
-    blocoPares('Mobilidade', c.mobilidade) + blocoPares('Ativação / controle escapular', c.ativacao) +
-    (c.nota_ativacao ? '<p class="tr-nota">'+c.nota_ativacao+'</p>' : '') +
+    bloco('Estratégia inicial', c.estrategia_inicial) +
     (c.liberacao_nota ? '<h5>Liberação</h5><p class="tr-nota">'+c.liberacao_nota+'</p>' : '');
 }
 
@@ -6898,7 +6985,7 @@ async function abrirSessaoTreino(chaveInicial){
       corpo.innerHTML = '<p class="pg-vazio">Ainda não tem periodização cadastrada. Peça pro admin cadastrar em "Gerenciar versões de plano".</p>';
       return;
     }
-    sessaoTreinoConteudo = linha.conteudo;
+    sessaoTreinoConteudo = arrumarPlanoTreino(linha.conteudo);
     if(sessaoTreinoChaveInicial && sessaoTreinoConteudo.treinos && sessaoTreinoConteudo.treinos[sessaoTreinoChaveInicial]){
       sessaoTreinoChave = sessaoTreinoChaveInicial;
     }
@@ -7169,7 +7256,15 @@ const BIBLIOTECA_PADRAO_RAW = {
   'Supino máquina deitada':'Ajuste o banco pra pegada ficar na altura do meio do peito. Empurre até quase esticar o braço sem tirar o ombro do encosto e volte controlada, até sentir o peito alongar.',
   'Desenvolvimento máquina pegada aberta':'Costas apoiadas e pegada mais aberta que o ombro. Empurre pra cima até quase esticar o cotovelo, sem levantar o ombro na direção da orelha, e desça até a mão ficar na altura da orelha.',
   'Elevação lateral com halteres':'Halteres ao lado do corpo, suba os braços até a altura dos ombros com o cotovelo levemente flexionado, sem impulso do tronco. Pense em "derramar água" dos punhos - isso mantém o ombro no comando, não o trapézio.',
-  'Rosca direta unilateral com halteres':'Um braço de cada vez, cotovelo colado no tronco e parado. Suba o halter até a altura do ombro sem balançar o corpo e desça controlado até esticar o braço.'
+  'Rosca direta unilateral com halteres':'Um braço de cada vez, cotovelo colado no tronco e parado. Suba o halter até a altura do ombro sem balançar o corpo e desça controlado até esticar o braço.',
+  'Prancha abdominal':'Apoio nos antebraços e pontas dos pés, corpo em linha reta da cabeça ao calcanhar, sem deixar o quadril cair ou subir demais. Respire normal e contraia o abdômen e o glúteo o tempo todo - é isometria, não precisa (e não deve) se mexer.',
+  'Prancha abdominal com carga':'Mesma prancha de antebraços de sempre, agora com uma anilha apoiada na parte alta das costas ou no quadril. Mantenha a postura neutra sem deixar o peso desequilibrar o quadril pra um lado.',
+  'Prancha lateral':'Apoiada num antebraço, corpo de lado em linha reta da cabeça aos pés, quadril erguido sem deixar cair. Se ficar muito difícil, apoie o joelho de baixo no chão pra reduzir a alavanca.',
+  'Pallof Press isométrico':'De lado pra polia, segure o cabo na altura do peito e estenda os braços à frente, resistindo à rotação que o cabo tenta fazer no seu tronco. O trabalho é não deixar o corpo girar - quanto mais parada, melhor.',
+  'Abdominal canoa isométrica':'Sentada em V, tronco reclinado e pernas estendidas suspensas do chão, braços à frente na linha das pernas. Segure a posição contraindo o abdômen - quanto mais reto e alto o peito, mais intenso.',
+  'Abdominal supra máquina':'Ajuste o encosto na altura do peito, flexione o tronco contraindo o abdômen (não puxando com o pescoço) e volte controlada sem soltar o peso de uma vez.',
+  'Abdominal supra no solo com carga':'Joelhos flexionados, pés no chão, anilha ou peso apoiado no peito. Flexione o tronco contraindo o abdômen até as escápulas saírem do chão e desça controlada.',
+  'Ponte unilateral isométrica':'Deitada, uma perna apoiada no chão e a outra estendida no ar. Suba o quadril até o corpo ficar em linha do joelho ao ombro e segure ali, sem deixar um lado do quadril cair.'
 };
 const BIBLIOTECA_PADRAO = {};
 Object.keys(BIBLIOTECA_PADRAO_RAW).forEach(function(k){ BIBLIOTECA_PADRAO[norm(k)] = BIBLIOTECA_PADRAO_RAW[k]; });
