@@ -765,11 +765,40 @@
   .hoje-cartao-barra-fill{height:100%;background:var(--ok);border-radius:10px;transition:width .3s ease}
   /* treinos já registrados no dia, com saída pra apagar */
   .hoje-treino-feitos[hidden]{display:none}
+  /* Card "Atividade": o que veio do app Saúde do iPhone pelo atalho. É
+     informativo - não mexe no orçamento de calorias da dieta, que já foi
+     montado contando que a pessoa treina. */
+  .at-cab{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:10px 0 8px}
+  .at-cab:first-child{margin-top:4px}
+  .at-tit{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3)}
+  .at-tot{font-size:12.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+  .at-queima{display:flex;align-items:center;gap:14px}
+  .at-anel{position:relative;flex:0 0 auto;width:58px;height:58px}
+  .at-anel svg{width:58px;height:58px;transform:rotate(-90deg)}
+  .at-anel circle{fill:none;stroke-width:7}
+  .at-anel .tr{stroke:var(--fill)}
+  .at-anel .pr{stroke:var(--azul);stroke-linecap:round;transition:stroke-dasharray .35s ease}
+  .at-anel b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+  .at-lado{flex:1 1 auto;min-width:0}
+  /* sem fio entre as linhas: o espaçamento sozinho já separa, e o pontilhado
+     picotava o bloco inteiro. O padding continua o mesmo pra altura não mudar. */
+  .at-l{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--ink2);padding:5px 0}
+  .at-l b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+  .at-l.forte b{font-weight:800}
+  .at-l span:last-child{flex:0 0 auto;color:var(--ink3);font-variant-numeric:tabular-nums}
+  .at-nota{font-size:11.5px;color:var(--ink3);margin:8px 0 0;line-height:1.4}
   .hoje-treino-feitos{display:flex;flex-direction:column;gap:6px;margin:8px 0 2px}
   .hoje-treino-feito{display:flex;align-items:center;gap:8px;background:var(--fill2);
     border-radius:var(--rc);padding:8px 10px}
   .hoje-treino-feito-txt{flex:1 1 auto;min-width:0;font-size:13px;font-weight:600;color:var(--ink2);
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hoje-treino-feito-val{flex:0 0 auto;font-size:12.5px;color:var(--ink3);font-variant-numeric:tabular-nums}
+  .hoje-treino-tag{flex:0 0 auto;font-size:10px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.04em;color:var(--ink3);background:var(--fill);border-radius:8px;padding:3px 7px}
+  /* em tela estreita a etiqueta sai pra não espremer o nome da atividade -
+     o valor do lado já mostra que aquilo veio de fora do app. */
+  @media(max-width:359px){ .hoje-treino-tag{display:none} }
   .hoje-treino-apagar{flex:0 0 auto;border:0;background:none;color:var(--nao);
     font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:4px 6px;border-radius:8px}
   .hoje-treino-apagar:disabled{color:var(--ink3)}
@@ -1436,6 +1465,11 @@
       <p class="hoje-cartao-nota" id="hoje-treino-nota"></p>
       <div class="hoje-treino-feitos" id="hoje-treino-feitos" hidden></div>
       <button class="hoje-cartao-cta" id="hoje-ir-iniciar-treino">Iniciar treino</button>
+    </div>
+
+    <div class="hoje-cartao" id="hoje-atividade" hidden>
+      <div class="hoje-cartao-head"><span class="hoje-cartao-tit">Atividade</span></div>
+      <div id="hoje-atividade-corpo"></div>
     </div>
 
     <div class="hoje-cartao" id="hoje-habitos">
@@ -5950,6 +5984,116 @@ function proximoTreinoSugerido(conteudo, ultimoFeito){
 let treinoHojeEscolhido = null;
 let treinoHojeEscolhidoDia = null;
 let treinoHojeConteudo = null;
+/* Atividade do dia vinda do app Saúde (o atalho do iPhone grava em
+   saude_dias). Fica dentro do card de Treino e é só informação: o orçamento
+   de calorias da dieta continua sendo o do plano, porque ele já foi montado
+   contando que você treina. */
+/* Meta de queima do dia pela fórmula de Katch-McArdle, que é a que usa
+   composição corporal - e é justamente o que o app já tem na aba Evolução:
+     TMB = 370 + 21,6 x massa magra (kg)
+     meta = TMB x fator de atividade
+   Katch-McArdle em vez de Mifflin-St Jeor de propósito: Mifflin não pergunta
+   percentual de gordura e subestima quem é pesado e magro (no caso do Carlos,
+   96 kg com 12,5%, dá quase 300 kcal a menos).
+   O fator 1,375 é "treino leve, 1 a 3x por semana"; dá pra trocar depois num
+   ajuste do app. Enquanto não houver medição cadastrada, o bloco de queima
+   simplesmente não aparece - melhor não mostrar do que mostrar chutado. */
+const FATOR_ATIVIDADE = 1.375;
+let _metaQueimaCache = {};
+async function metaDeQueima(uid){
+  if(_metaQueimaCache[uid] !== undefined) return _metaQueimaCache[uid];
+  let meta = null;
+  try{
+    const r = await db.from('progresso_medidas').select('peso_kg,percentual_gordura')
+      .eq('organization_id', orgAtiva.id).eq('user_id', uid)
+      .order('data', { ascending:false }).limit(1);
+    const m = r && r.data && r.data[0];
+    const peso = m && Number(m.peso_kg), gord = m && Number(m.percentual_gordura);
+    if(peso > 0 && gord >= 0 && gord < 60){
+      const magra = peso * (1 - gord/100);
+      meta = (370 + 21.6 * magra) * FATOR_ATIVIDADE;
+    }
+  }catch(e){}
+  _metaQueimaCache[uid] = meta;
+  return meta;
+}
+
+/* Atividade do dia (app Saúde -> atalho -> saude_dias). Card próprio no
+   Diário, embaixo do Treino. */
+async function mostrarSaudeDoDia(uid, diaIso){
+  const card = document.getElementById('hoje-atividade');
+  const corpo = document.getElementById('hoje-atividade-corpo');
+  if(!card || !corpo) return;
+  card.hidden = true; corpo.innerHTML = '';
+  treinosDoRelogio = [];
+  if(!db || !orgAtiva || !uid || !diaIso) return;
+  try{
+    const r = await db.from('saude_dias')
+      .select('kcal_ativa,kcal_repouso,minutos_exercicio,passos,treinos,atualizado_em')
+      .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', diaIso).limit(1);
+    const d = r && r.data && r.data[0];
+    if(!d) return;
+
+    let html = '';
+    // ---- queima do dia ----
+    const gasto = (Number(d.kcal_ativa) || 0) + (Number(d.kcal_repouso) || 0);
+    const meta = await metaDeQueima(uid);
+    if(gasto > 0 && meta){
+      // projeção até o fim do dia: o atalho manda no meio do caminho (às
+      // 22:30, por exemplo), então o total até ali vale por 94% do dia.
+      const quando = d.atualizado_em ? new Date(d.atualizado_em) : null;
+      const ehHoje = diaIso === iso(new Date());
+      let fracao = 1;
+      if(ehHoje && quando && !isNaN(quando)){
+        fracao = (quando.getHours()*60 + quando.getMinutes()) / (24*60);
+        fracao = Math.min(1, Math.max(0.25, fracao));
+      }
+      const projetada = Math.round(gasto / fracao);
+      const pct = Math.max(0, Math.min(999, Math.round(projetada/meta*100)));
+      const VOLTA = 2 * Math.PI * 25;
+      const fatia = Math.max(0, Math.min(1, projetada/meta));
+      html += '<div class="at-cab"><span class="at-tit">Queima do dia</span>'
+        + '<span class="at-tot">'+pct+'%</span></div>'
+        + '<div class="at-queima">'
+        +   '<span class="at-anel"><svg viewBox="0 0 58 58" aria-hidden="true">'
+        +     '<circle class="tr" cx="29" cy="29" r="25"></circle>'
+        +     '<circle class="pr" cx="29" cy="29" r="25" stroke-dasharray="'+(VOLTA*fatia).toFixed(1)+' '+VOLTA.toFixed(1)+'"></circle>'
+        +   '</svg><b>'+pct+'%</b></span>'
+        +   '<span class="at-lado">'
+        +     '<div class="at-l"><span>Meta de queima</span><b>'+fmtKcal(meta)+'</b></div>'
+        +     '<div class="at-l"><span>Queima projetada</span><b>'+fmtKcal(projetada)+'</b></div>'
+        +     '<div class="at-l forte"><span>'+(projetada >= meta ? 'Passou da meta em' : 'Queima restante')+'</span><b>'+fmtKcal(Math.abs(meta-projetada))+'</b></div>'
+        +   '</span>'
+        + '</div>';
+    }
+
+    // ---- treinos e passos ----
+    const treinos = Array.isArray(d.treinos) ? d.treinos : [];
+    treinosDoRelogio = treinos;
+    const linhas = treinos.map(function(t){
+      // caloria antes do tempo, na mesma ordem do total que fica no título
+      const dir = [];
+      if(t.kcal != null) dir.push(fmtKcal(t.kcal)+' kcal');
+      if(t.minutos != null) dir.push(Math.round(t.minutos)+' min');
+      return '<div class="at-l"><span>'+(t.tipo || 'Atividade')+'</span><span>'+dir.join(' · ')+'</span></div>';
+    });
+    if(d.passos != null){
+      linhas.push('<div class="at-l"><span>Passos</span><span>'+Number(d.passos).toLocaleString('pt-BR')+'</span></div>');
+    }
+    if(linhas.length){
+      const tot = [];
+      if(d.kcal_ativa != null) tot.push(fmtKcal(d.kcal_ativa)+' kcal');
+      if(d.minutos_exercicio != null) tot.push(d.minutos_exercicio+' min');
+      html += '<div class="at-cab"><span class="at-tit">Treinos</span>'
+        + '<span class="at-tot">'+tot.join(' · ')+'</span></div>' + linhas.join('');
+    }
+
+    if(!html) return;
+    corpo.innerHTML = html;
+    card.hidden = false;
+  }catch(e){ /* sem dado ainda: o card fica escondido */ }
+}
+
 async function atualizarCardTreinoHoje(diaSel){
   const chaveBtn = document.getElementById('hoje-treino-chave');
   const nota = document.getElementById('hoje-treino-nota');
@@ -5984,6 +6128,7 @@ async function atualizarCardTreinoHoje(diaSel){
       btnIniciar.textContent = ehHoje ? 'Iniciar treino' : 'Iniciar treino de hoje';
     }
 
+    await mostrarSaudeDoDia(uid, diaIso);
     const rDia = await db.from('treino_registros').select('id,treino_chave')
       .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', diaIso);
     const feitosNoDia = (rDia && rDia.data) || [];
@@ -6039,12 +6184,18 @@ async function atualizarCardTreinoHoje(diaSel){
 }
 /* Lista os treinos já registrados no dia que a tela mostra, cada um com um
    "Apagar" de dois toques (registro apagado não volta). */
+/* treinos que vieram do relógio (app Saúde) no dia que está na tela - ficam
+   aqui pra entrar também na lista do card de Treino, junto com os que foram
+   registrados no app. */
+let treinosDoRelogio = [];
 function listarTreinosFeitos(feitos, plano, diaIso){
   const box = document.getElementById('hoje-treino-feitos');
   if(!box) return;
   box.innerHTML = '';
-  if(!feitos || !feitos.length){ box.hidden = true; return; }
+  const doRelogio = treinosDoRelogio || [];
+  if((!feitos || !feitos.length) && !doRelogio.length){ box.hidden = true; return; }
   box.hidden = false;
+  feitos = feitos || [];
   feitos.forEach(function(rg){
     const t = plano && plano.treinos && plano.treinos[rg.treino_chave];
     const linha = document.createElement('div');
@@ -6078,6 +6229,27 @@ function listarTreinosFeitos(feitos, plano, diaIso){
       }
     };
     linha.appendChild(txt); linha.appendChild(btn);
+    box.appendChild(linha);
+  });
+  // caminhada, corrida, musculação: o que o Apple Watch gravou aparece aqui
+  // também, com a etiqueta de onde veio. Sem botão de apagar - quem manda
+  // nesse registro é o app Saúde, não o nosso.
+  doRelogio.forEach(function(t){
+    const linha = document.createElement('div');
+    linha.className = 'hoje-treino-feito do-relogio';
+    const txt = document.createElement('span');
+    txt.className = 'hoje-treino-feito-txt';
+    txt.textContent = t.tipo || 'Atividade';
+    const val = document.createElement('span');
+    val.className = 'hoje-treino-feito-val';
+    const dir = [];
+    if(t.kcal != null) dir.push(fmtKcal(t.kcal)+' kcal');
+    if(t.minutos != null) dir.push(Math.round(t.minutos)+' min');
+    val.textContent = dir.join(' · ');
+    const tag = document.createElement('span');
+    tag.className = 'hoje-treino-tag';
+    tag.textContent = 'relógio';
+    linha.appendChild(txt); linha.appendChild(val); linha.appendChild(tag);
     box.appendChild(linha);
   });
 }
