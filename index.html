@@ -793,6 +793,20 @@
     border-radius:var(--rc);padding:8px 10px}
   .hoje-treino-feito-txt{flex:1 1 auto;min-width:0;font-size:13px;font-weight:600;color:var(--ink2);
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* tarja de erro de gravação - fica por cima de tudo, inclusive da tela de
+     sessão de treino, porque é justamente lá que perder dado dói. */
+  .aviso-erro{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));
+    z-index:300;background:#C62828;color:#fff;border-radius:var(--rc);padding:11px 13px;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);cursor:pointer;display:flex;flex-direction:column;gap:2px}
+  .aviso-erro b{font-size:13.5px;font-weight:700;line-height:1.35}
+  .aviso-erro span{font-size:12px;opacity:.9;line-height:1.35;word-break:break-word}
+  .aviso-erro i{font-size:10.5px;opacity:.75;font-style:normal;margin-top:2px}
+  .aviso-erro.ok{background:var(--ok)}
+  .confirma-txt{font-size:14px;line-height:1.5;color:var(--ink);margin:0 0 10px}
+  .confirma-lista{margin:0 0 12px;padding-left:18px;font-size:13px;color:var(--ink2);line-height:1.6}
+  .confirma-bts{display:flex;gap:8px}
+  .confirma-bts .btn-pill{margin:0;width:auto;flex:1 1 0}
+  .btn-pill.perigo{background:var(--nao);color:#fff}
   .hoje-treino-feito-val{flex:0 0 auto;font-size:12.5px;color:var(--ink3);font-variant-numeric:tabular-nums}
   .hoje-treino-tag{flex:0 0 auto;font-size:10px;font-weight:700;text-transform:uppercase;
     letter-spacing:.04em;color:var(--ink3);background:var(--fill);border-radius:8px;padding:3px 7px}
@@ -2086,14 +2100,14 @@ async function salvarFotoPerfil(dataUrl){
   if(!db || !orgAtiva || !uid) return false;
   try{
     if(dataUrl){
-      await db.from('escolhas_individuais').upsert({
+      await gravar(db.from('escolhas_individuais').upsert({
         organization_id: orgAtiva.id, user_id: uid, chave: FOTO_CHAVE,
         valor: { url: dataUrl }, atualizado_em: new Date().toISOString()
-      }, { onConflict: 'organization_id,user_id,chave' });
+      }, { onConflict: 'organization_id,user_id,chave' }), 'a foto');
       fotosPerfil[uid] = dataUrl;
     }else{
-      await db.from('escolhas_individuais').delete()
-        .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('chave', FOTO_CHAVE);
+      await gravar(db.from('escolhas_individuais').delete()
+        .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('chave', FOTO_CHAVE), 'a foto');
       delete fotosPerfil[uid];
     }
     montarContaUsuario();
@@ -2821,14 +2835,14 @@ async function enviarPdfsDoPlano(arquivos){
       conteudo = normalizarTravessoes(conteudo);
       const label = (conteudo && conteudo.atualizacao) || 'Atualização';
       const dataPlano = (conteudo && conteudo.data_avaliacao) || vigente;
-      await db.from(tabela).insert({
+      await gravar(db.from(tabela).insert({
         organization_id: orgAtiva.id,
         user_id: uid,
         conteudo: conteudo,
         vigente_a_partir: vigente || dataPlano,
         versao_label: label,
         criado_por: sessaoAtual.user.id
-      });
+      }), 'o plano');
       salvos++;
       linha.classList.add('ok');
       res.textContent = rotuloDaTabela(tabela) + ' · salvo';
@@ -2958,7 +2972,7 @@ async function apagarVersaoPlano(btn){
   var tabela = btn.getAttribute('data-tabela');
   btn.disabled = true; btn.textContent = 'Apagando...';
   try{
-    await db.from(tabela).delete().eq('id', id);
+    await gravar(db.from(tabela).delete().eq('id', id), 'a exclusão do plano');
     carregarVersoesHistorico();
     if(tabela === 'planos_treino' && typeof renderTreino === 'function' && !document.getElementById('vista-treino').hidden) renderTreino();
     if(tabela === 'planos_dieta' && typeof carregarPlanoAtivo === 'function' && !document.getElementById('vista-plano').hidden) carregarPlanoAtivo().then(render);
@@ -2990,7 +3004,7 @@ async function salvarVigenciaEditada(input){
   input.disabled = true;
   dizer('Salvando...');
   try{
-    await db.from(tabela).update({ vigente_a_partir: novaData }).eq('id', id);
+    await gravar(db.from(tabela).update({ vigente_a_partir: novaData }).eq('id', id), 'a data');
     input.setAttribute('data-antes', novaData);
     dizer('Salvo', 'bom');
     setTimeout(function(){ dizer(''); }, 2200);
@@ -3370,14 +3384,14 @@ async function salvar(){
   try{ await window.storage.set(STORE_KEY, JSON.stringify(pacote())); }catch(e){}
   try{
     if(db && orgAtiva){
-      await db.from('escolhas_casal').upsert({
+      await gravar(db.from('escolhas_casal').upsert({
         organization_id: orgAtiva.id,
         chave: 'plano_estado',
         valor: pacote(),
         atualizado_por: (sessaoAtual && sessaoAtual.user && sessaoAtual.user.id) || null
-      }, { onConflict: 'organization_id,chave' });
+      }, { onConflict: 'organization_id,chave' }), 'as escolhas do plano');
     }
-  }catch(e){}
+  }catch(e){ avisarErro('Não deu pra salvar as escolhas do plano', String(e && e.message || e)); }
 }
 async function carregar(){
   try{
@@ -3546,7 +3560,9 @@ async function carregarPlanoAtivo(){
     return;
   }
   const uidI = uidDoSlot('i'), uidC = uidDoSlot('c');
-  const docI = await buscarPlanoDe(uidI), docC = await buscarPlanoDe(uidC);
+  // os dois planos ao mesmo tempo: são consultas independentes, não faz
+  // sentido esperar a primeira terminar pra começar a segunda.
+  const [docI, docC] = await Promise.all([buscarPlanoDe(uidI), buscarPlanoDe(uidC)]);
   PLANO = zipPlano(docI, docC);
   const temAlgo = !!(docI || docC);
   if(vazio) vazio.hidden = temAlgo;
@@ -4667,10 +4683,14 @@ async function salvarDiario(){
         });
       });
       if(linhas.length){
-        await db.from('diario_dias').upsert(linhas, { onConflict: 'organization_id,user_id,dia' });
+        await gravar(db.from('diario_dias').upsert(linhas, { onConflict: 'organization_id,user_id,dia' }), 'o diário');
       }
     }
-  }catch(e){}
+  }catch(e){
+    // a cópia local já foi gravada acima, então não se perde nada - mas a
+    // pessoa precisa saber que o outro aparelho não vai ver isso ainda.
+    avisarErro('Não deu pra salvar no servidor', String(e && e.message || e) + ' · ficou salvo só neste aparelho');
+  }
 }
 async function carregarDiario(){
   // 1) começa pela cópia local. Ela é o que garante que uma atualização do
@@ -6107,7 +6127,15 @@ async function atualizarCardTreinoHoje(diaSel){
     return;
   }
   try{
-    const linha = await buscarPlanoGenerico('planos_treino', uid);
+    // o plano e os registros do dia são independentes: buscar em paralelo tira
+    // uma ida ao banco do caminho até o card aparecer.
+    const hojeIsoPre = iso(new Date());
+    const diaPre = diaSel || diario.sel || hojeIsoPre;
+    const [linha, rDiaPre] = await Promise.all([
+      buscarPlanoGenerico('planos_treino', uid),
+      db.from('treino_registros').select('id,treino_chave')
+        .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', diaPre)
+    ]);
     // buscarPlanoGenerico devolve a LINHA do banco ({conteudo, vigente_a_partir,
     // versao_label}) - o plano em si é o conteudo dela.
     const plano = linha && linha.conteudo;
@@ -6129,8 +6157,10 @@ async function atualizarCardTreinoHoje(diaSel){
     }
 
     await mostrarSaudeDoDia(uid, diaIso);
-    const rDia = await db.from('treino_registros').select('id,treino_chave')
-      .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', diaIso);
+    // já veio junto com o plano lá em cima quando o dia é o mesmo
+    const rDia = (diaIso === diaPre) ? rDiaPre
+      : await db.from('treino_registros').select('id,treino_chave')
+          .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', diaIso);
     const feitosNoDia = (rDia && rDia.data) || [];
     // treino registrado sem querer (um teste, o treino errado) precisa ter
     // como sair - antes não havia nenhum caminho pra apagar pelo app.
@@ -6219,7 +6249,7 @@ function listarTreinosFeitos(feitos, plano, diaIso){
       }
       btn.disabled = true; btn.textContent = 'Apagando...';
       try{
-        await db.from('treino_registros').delete().eq('id', rg.id);
+        await gravar(db.from('treino_registros').delete().eq('id', rg.id), 'a exclusão do treino');
         // o treino apagado não pode continuar mandando na sugestão do dia
         treinoHojeEscolhido = null; treinoHojeEscolhidoDia = null;
         renderDiario();
@@ -6440,7 +6470,7 @@ async function salvarReferencias(){
   const num = function(id){ const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
   btn.disabled = true;
   try{
-    await db.from('progresso_referencias').upsert({
+    await gravar(db.from('progresso_referencias').upsert({
       organization_id: orgAtiva.id,
       user_id: sessaoAtual.user.id,
       altura_m: num('ref-altura'),
@@ -6450,7 +6480,7 @@ async function salvarReferencias(){
       gorda_kg_min: num('ref-gordakg-min'), gorda_kg_max: num('ref-gordakg-max'),
       magra_kg_min: num('ref-magrakg-min'), magra_kg_max: num('ref-magrakg-max'),
       atualizado_por: sessaoAtual.user.id
-    }, { onConflict: 'organization_id,user_id' });
+    }, { onConflict: 'organization_id,user_id' }), 'as faixas de referência');
     fecharDlg();
     renderProgresso();
   }catch(e){
@@ -6506,7 +6536,7 @@ document.getElementById('pg-salvar').onclick = async function(){
   const obs = document.getElementById('pg-obs').value.trim();
   btn.disabled = true;
   try{
-    await db.from('progresso_medidas').upsert({
+    await gravar(db.from('progresso_medidas').upsert({
       organization_id: orgAtiva.id,
       user_id: sessaoAtual.user.id,
       data: data,
@@ -6514,7 +6544,7 @@ document.getElementById('pg-salvar').onclick = async function(){
       percentual_gordura: isNaN(gordura) ? null : gordura,
       percentual_massa_magra: isNaN(magra) ? null : magra,
       observacoes: obs || null
-    }, { onConflict: 'organization_id,user_id,data' });
+    }, { onConflict: 'organization_id,user_id,data' }), 'a medição');
     document.getElementById('pg-obs').value = '';
     renderProgresso();
   }catch(e){
@@ -6820,10 +6850,10 @@ async function abrirHabitosDlg(tipo){
         e.marcados = e.marcados.filter(function(x){ return x!==id; });
       }
       try{
-        await db.from(e.tabela).upsert({
+        await gravar(db.from(e.tabela).upsert({
           organization_id: orgAtiva.id, user_id: uid, dia: hojeIso, marcados: e.marcados,
           atualizado_por: sessaoAtual.user.id
-        }, { onConflict: 'organization_id,user_id,dia' });
+        }, { onConflict: 'organization_id,user_id,dia' }), 'a marcação');
       }catch(err){ cb.checked = !cb.checked; }
       atualizarCardHabitos();
     };
@@ -7099,12 +7129,67 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
     (c.liberacao_nota ? '<h5>Liberação</h5><p class="tr-nota">'+c.liberacao_nota+'</p>' : '');
 }
 
-async function salvarRegistroTreino(chave, c, box, btn){
-  const erro = box.querySelector('.tr-erro-registro');
-  erro.classList.remove('mostra');
-  if(!db || !orgAtiva || !sessaoAtual){ erro.textContent='Entre na conta primeiro.'; erro.classList.add('mostra'); return; }
-  const t = c.treinos[chave];
-  const exercicios = Array.prototype.map.call(box.querySelectorAll('.tr-serie-bloco'), function(bloco){
+/* O que ainda não foi marcado na tela, exercício por exercício. O parâmetro é
+   o que está na sessão AGORA - série que a pessoa apagou não conta como
+   faltando. O aquecimento fica de fora: ele não vai pro registro. */
+function faltandoNaSessao(box){
+  const saida = [];
+  Array.prototype.forEach.call(box.querySelectorAll('.tr-serie-bloco'), function(bloco){
+    const nome = bloco.getAttribute('data-nome') || 'exercício';
+    let faltam = 0;
+    Array.prototype.forEach.call(bloco.querySelectorAll('.tr-serie-linha .tr-serie-check'), function(chk){
+      if(chk.getAttribute('aria-pressed') !== 'true') faltam++;
+    });
+    if(faltam) saida.push({ nome: nome, faltam: faltam });
+  });
+  return saida;
+}
+function plural(n, um, muitos){ return n + ' ' + (n === 1 ? um : muitos); }
+
+/* Finalizar de verdade: confere o que falta, grava, avisa e FECHA a sessão.
+   Antes o botão só salvava e ficava parado na tela - foi isso que pareceu
+   "não aconteceu nada" no treino do dia 17. */
+async function finalizarTreino(c, box, btn){
+  const faltam = faltandoNaSessao(box);
+  if(faltam.length){
+    const total = faltam.reduce(function(a, x){ return a + x.faltam; }, 0);
+    const ok = await perguntar({
+      titulo: 'Treino incompleto',
+      texto: 'Faltam ' + plural(total, 'série', 'séries') + ' em '
+           + plural(faltam.length, 'exercício', 'exercícios') + '. Finalizar mesmo assim?',
+      lista: faltam.map(function(x){ return x.nome + ' — ' + plural(x.faltam, 'série', 'séries'); }),
+      ok: 'Finalizar', cancelar: 'Voltar pro treino'
+    });
+    if(!ok) return;
+  }
+  await salvarRegistroTreino(sessaoTreinoChave, c, box, btn);
+  const feitas = Array.prototype.filter.call(box.querySelectorAll('.tr-serie-linha .tr-serie-check'),
+    function(chk){ return chk.getAttribute('aria-pressed') === 'true'; }).length;
+  fecharSessaoTreino();
+  avisarOk('Treino ' + sessaoTreinoChave + ' concluído', plural(feitas, 'série registrada', 'séries registradas'));
+}
+
+/* Cada série marcada, cada carga digitada e cada linha apagada grava na
+   hora - o botão do fim deixa de ser o único jeito de não perder o treino.
+   O atraso de 700ms junta as digitações seguidas numa gravação só. */
+let salvarSessaoTimer = null;
+function salvarSessaoAgora(){
+  clearTimeout(salvarSessaoTimer); salvarSessaoTimer = null;
+  const box = document.getElementById('sessao-treino-registro');
+  if(!box || !sessaoTreinoConteudo || !sessaoTreinoChave) return;
+  // sem botão: a mensagem de erro, se houver, aparece na tarja
+  salvarRegistroTreino(sessaoTreinoChave, sessaoTreinoConteudo, box, null).catch(function(){});
+}
+function agendarSalvarSessao(){
+  clearTimeout(salvarSessaoTimer);
+  salvarSessaoTimer = setTimeout(salvarSessaoAgora, 700);
+}
+
+/* Monta o que vai pro banco a partir do que está na tela. Fica separado do
+   salvar pra poder gravar série por série durante o treino, sem depender do
+   botão do fim. */
+function montarExerciciosDaSessao(t, box){
+  return Array.prototype.map.call(box.querySelectorAll('.tr-serie-bloco'), function(bloco){
     const idx = parseInt(bloco.getAttribute('data-ex'), 10);
     const nome = (t.ex[idx]||[])[0] || '';
     const series = Array.prototype.map.call(bloco.querySelectorAll('.tr-serie-linha'), function(linha){
@@ -7119,10 +7204,21 @@ async function salvarRegistroTreino(chave, c, box, btn){
     });
     return { nome: nome, series: series };
   });
-  const orig = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Salvando...';
+}
+
+async function salvarRegistroTreino(chave, c, box, btn){
+  const erro = box && box.querySelector('.tr-erro-registro');
+  if(erro) erro.classList.remove('mostra');
+  const orig = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = 'Salvando...'; }
   try{
-    await db.from('treino_registros').upsert({
+    // tudo dentro do try, inclusive a montagem: antes, um erro aqui escapava
+    // do tratamento e o clique morria em silêncio.
+    if(!db || !orgAtiva || !sessaoAtual) throw new Error('Entre na conta primeiro.');
+    const t = c && c.treinos && c.treinos[chave];
+    if(!t) throw new Error('Treino ' + (chave || '?') + ' não encontrado no plano.');
+    const exercicios = montarExerciciosDaSessao(t, box);
+    await gravar(db.from('treino_registros').upsert({
       organization_id: orgAtiva.id,
       user_id: diario.perfil,
       treino_chave: chave,
@@ -7130,13 +7226,21 @@ async function salvarRegistroTreino(chave, c, box, btn){
       dia: iso(new Date()),
       exercicios: exercicios,
       atualizado_por: sessaoAtual.user.id
-    }, { onConflict: 'organization_id,user_id,treino_chave,dia' });
-    btn.textContent = 'Salvo!';
-    setTimeout(function(){ btn.disabled = false; btn.textContent = orig; }, 1200);
+    }, { onConflict: 'organization_id,user_id,treino_chave,dia' }), 'o treino');
+    if(btn){
+      btn.textContent = 'Salvo!';
+      setTimeout(function(){ btn.disabled = false; btn.textContent = orig; }, 1200);
+    }
   }catch(e){
-    erro.textContent = 'Não deu pra salvar agora.';
-    erro.classList.add('mostra');
-    btn.disabled = false; btn.textContent = orig;
+    const msg = String(e && e.message || e);
+    if(erro){
+      // a mensagem de verdade, não mais o "não deu pra salvar agora" genérico
+      erro.textContent = msg;
+      erro.classList.add('mostra');
+    }
+    avisarErro('Não deu pra salvar o treino', msg);
+    if(btn){ btn.disabled = false; btn.textContent = orig; }
+    throw e;
   }
 }
 
@@ -7647,11 +7751,21 @@ function montarSessaoTreino(){
       // só repetia o óbvio e empurrava os exercícios pra baixo
       + ''
       + blocos
-      + '<button type="button" class="btn-pill primario" id="sessao-treino-salvar">Salvar treino de hoje</button>'
+      + '<button type="button" class="btn-pill primario" id="sessao-treino-salvar">Finalizar treino</button>'
       + '<div class="erro-auth tr-erro-registro"></div>'
       + '</div>';
   }
   corpo.innerHTML = chips + corpoTreino;
+  // digitou carga ou repetição: grava sozinho, sem esperar o botão do fim
+  if(!corpo.__ligadoAutosave){
+    corpo.__ligadoAutosave = true;
+    corpo.addEventListener('input', function(ev){
+      const alvo = ev.target;
+      if(alvo && alvo.classList && (alvo.classList.contains('tr-serie-kg') || alvo.classList.contains('tr-serie-reps'))){
+        agendarSalvarSessao();
+      }
+    });
+  }
   Array.prototype.forEach.call(corpo.querySelectorAll('.tr-chip-sel'), function(b){
     b.onclick = function(){ sessaoTreinoChave = b.getAttribute('data-chave'); montarSessaoTreino(); };
   });
@@ -7709,13 +7823,20 @@ function montarSessaoTreino(){
       linhasBox.appendChild(wrap);
       ligarCheckSerie(wrap.querySelector('.tr-serie-check'));
       ligarSwipeSerie(wrap);
+      agendarSalvarSessao();
     };
   });
   const btnSalvar = document.getElementById('sessao-treino-salvar');
   if(btnSalvar){
     btnSalvar.onclick = function(){
-      salvarRegistroTreino(sessaoTreinoChave, c, document.getElementById('sessao-treino-registro'), btnSalvar)
-        .then(function(){ atualizarCardTreinoHoje(); });
+      // `.catch` obrigatório: sem ele, qualquer erro dentro do salvar virava
+      // "unhandled rejection" - o clique morria sem mensagem nenhuma, que foi
+      // exatamente o que aconteceu no treino do dia 17.
+      finalizarTreino(c, document.getElementById('sessao-treino-registro'), btnSalvar)
+        .catch(function(e){
+          avisarErro('Não deu pra finalizar o treino', String(e && e.message || e));
+          btnSalvar.disabled = false; btnSalvar.textContent = 'Finalizar treino';
+        });
     };
   }
 }
@@ -7729,6 +7850,7 @@ function ligarCheckSerie(btn){
     btn.setAttribute('aria-pressed', feita);
     const linha = btn.closest('.tr-serie-linha, .tr-aquecimento-linha, .tr-preserie-linha');
     if(linha) linha.classList.toggle('feita', feita);
+    agendarSalvarSessao();
     // terminou a série: já começa a contar o descanso pra próxima, com o
     // tempo que o plano manda naquele exercício (e, na falta dele, o
     // intervalo da semana).
@@ -7828,9 +7950,38 @@ function ligarSwipeSerie(wrapEl, aoExcluir){
   linha.addEventListener('pointerup', soltar);
   linha.addEventListener('pointercancel', soltar);
   if(excluirBtn){
-    excluirBtn.onclick = function(){
+    excluirBtn.onclick = async function(){
       if(aoExcluir){ aoExcluir(); return; }
       const linhasBox = wrapEl.closest('.tr-serie-linhas');
+      // Apagar sem querer e ficar sem saber quantas o plano pedia: antes de
+      // tirar uma linha que deixa o exercício ABAIXO do prescrito, diz quantas
+      // o Pedro pediu e quantas vão sobrar. Série que a pessoa mesma adicionou
+      // a mais não pergunta nada.
+      const bloco = wrapEl.closest('.tr-serie-bloco');
+      if(bloco && linhasBox){
+        const idx = parseInt(bloco.getAttribute('data-ex'), 10);
+        const t = sessaoTreinoConteudo && sessaoTreinoConteudo.treinos
+          && sessaoTreinoConteudo.treinos[sessaoTreinoChave];
+        const e = t && t.ex && t.ex[idx];
+        const temPrescricao = e && temValorPlano(e[3]);
+        const previsto = temPrescricao ? numSeriesPadrao(e[3]) : 0;
+        const agora = linhasBox.querySelectorAll('.tr-serie-linha').length;
+        if(previsto && (agora - 1) < previsto){
+          const ok = await perguntar({
+            titulo: 'Apagar série?',
+            texto: 'O plano pede ' + plural(previsto, 'série válida', 'séries válidas')
+                 + ' em ' + (bloco.getAttribute('data-nome') || 'esse exercício')
+                 + '. Vai ficar ' + (agora - 1) + '. Apagar mesmo assim?',
+            ok: 'Apagar', cancelar: 'Cancelar', perigo: true
+          });
+          if(!ok){
+            // desfaz o arrasto e deixa a linha no lugar
+            const linha = wrapEl.querySelector('.tr-serie-linha');
+            if(linha){ linha.style.transition = 'transform .18s ease'; linha.style.transform = ''; }
+            return;
+          }
+        }
+      }
       wrapEl.style.overflow = 'hidden';
       wrapEl.style.maxHeight = wrapEl.offsetHeight+'px';
       wrapEl.style.transition = 'opacity .16s ease, max-height .18s ease .02s';
@@ -7838,7 +7989,10 @@ function ligarSwipeSerie(wrapEl, aoExcluir){
         wrapEl.style.opacity = '0';
         wrapEl.style.maxHeight = '0px';
       });
-      setTimeout(function(){ wrapEl.remove(); renumerarSeries(linhasBox); }, 220);
+      setTimeout(function(){
+        wrapEl.remove(); renumerarSeries(linhasBox);
+        if(linhasBox) agendarSalvarSessao();
+      }, 220);
     };
   }
 }
@@ -8068,6 +8222,7 @@ let sessaoTreinoDescansoTimer = null;
 function fecharDescanso(){
   if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
   sessaoTreinoDescansoTimer = null;
+  window.__pintarDescanso = null;
   pararSomDescanso();
   soltarTela();
   const el = document.getElementById('tr-descanso-toast');
@@ -8136,6 +8291,7 @@ function iniciarDescanso(txt, nomeExercicio){
     arco.style.strokeDasharray = (VOLTA*fatia).toFixed(1) + ' ' + VOLTA.toFixed(1);
     el.classList.toggle('acabando', restante <= 5 && restante > 0);
   }
+  const rotuloEl = el.querySelector('.tr-desc-rot');
   function tick(){
     restante = Math.round((fimEm - Date.now()) / 1000);
     // o bipe caiu no meio do caminho? refaz com o tempo que falta.
@@ -8143,8 +8299,13 @@ function iniciarDescanso(txt, nomeExercicio){
       rearmarSomDescanso(restante);
     }
     if(restante < 0){
+      // acabou enquanto o app estava em segundo plano? o certo é dizer que
+      // terminou, não mostrar "Vai!" como se fosse agora (nem o número
+      // congelado de quando o Safari parou o contador).
+      const acabouFazTempo = (Date.now() - fimEm) > 3000;
       el.classList.add('fim');
-      tempoEl.textContent = 'Vai!';
+      if(rotuloEl) rotuloEl.textContent = acabouFazTempo ? 'Descanso terminado' : 'Descanso';
+      tempoEl.textContent = acabouFazTempo ? 'Fim' : 'Vai!';
       arco.style.strokeDasharray = '0 ' + VOLTA.toFixed(1);
       if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
       sessaoTreinoDescansoTimer = null;
@@ -8159,6 +8320,10 @@ function iniciarDescanso(txt, nomeExercicio){
     pintar();
   }
   pintar();
+  // UM relógio só: o número na tela é sempre derivado de `fimEm` (horário
+  // absoluto de término). O `__pintarDescanso` deixa o vigia lá de baixo
+  // repintar de fora, pra quando o Safari mata o intervalo em segundo plano.
+  window.__pintarDescanso = tick;
   sessaoTreinoDescansoTimer = setInterval(tick, 1000);
   // voltando do segundo plano, acerta o número imediatamente em vez de
   // esperar a próxima batida
@@ -8386,24 +8551,113 @@ document.getElementById('relatorio-pdf').onclick = salvarRelatorioPdf;
 document.getElementById('relatorio-whatsapp').onclick = enviarRelatorioWhatsapp;
 window.addEventListener('afterprint', function(){ document.body.classList.remove('imprimindo'); });
 
+/* =========================================================
+   GRAVAÇÃO: NADA FALHA EM SILÊNCIO
+   O cliente do Neon (postgrest-js) NÃO lança erro quando o banco recusa a
+   gravação - ele devolve {data, error} e o código seguia em frente. Era por
+   isso que dava pra ver "Salvo!" com o dado não tendo ido. Toda gravação
+   passa por `gravar()` agora: erro do banco vira exceção, e quem chamar
+   mostra na tela. Onde não existe um lugar próprio pra mensagem, aparece a
+   tarja do `avisarErro`.
+   ========================================================= */
+function avisar(texto, detalhe, tipo){
+  let el = document.getElementById('aviso-erro');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'aviso-erro';
+    el.onclick = function(){ el.remove(); };
+    document.body.appendChild(el);
+  }
+  el.className = 'aviso-erro' + (tipo === 'ok' ? ' ok' : '');
+  el.innerHTML = '<b>' + texto + '</b>' + (detalhe ? '<span>' + detalhe + '</span>' : '')
+    + '<i>toque pra fechar</i>';
+  clearTimeout(el.__sumir);
+  el.__sumir = setTimeout(function(){ if(el.parentNode) el.remove(); }, tipo === 'ok' ? 5000 : 9000);
+  try{ if(navigator.vibrate) navigator.vibrate(tipo === 'ok' ? 40 : 60); }catch(e){}
+}
+function avisarErro(texto, detalhe){ avisar(texto, detalhe, 'erro'); }
+function avisarOk(texto, detalhe){ avisar(texto, detalhe, 'ok'); }
+
+/* Pergunta curta de sim/não no popup padrão do app. Devolve promessa que
+   resolve `true` só quando confirma - fechar no X ou no "Cancelar" resolve
+   `false`. Usado no apagar série abaixo do prescrito e no finalizar treino
+   incompleto. */
+function perguntar(op){
+  return new Promise(function(resolve){
+    document.getElementById('dlg-tit').textContent = op.titulo || 'Confirmar';
+    const body = document.getElementById('dlg-body');
+    body.innerHTML = '<p class="confirma-txt">' + (op.texto || '') + '</p>'
+      + ((op.lista && op.lista.length)
+          ? '<ul class="confirma-lista">' + op.lista.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ul>'
+          : '')
+      + '<div class="confirma-bts">'
+      +   '<button type="button" class="btn-pill" id="confirma-nao">' + (op.cancelar || 'Cancelar') + '</button>'
+      +   '<button type="button" class="btn-pill ' + (op.perigo ? 'perigo' : 'primario') + '" id="confirma-sim">' + (op.ok || 'Confirmar') + '</button>'
+      + '</div>';
+    let respondido = false;
+    function responder(v){
+      if(respondido) return;
+      respondido = true;
+      dlg.removeEventListener('close', aoFechar);
+      fecharDlg();
+      resolve(v);
+    }
+    function aoFechar(){ responder(false); }
+    document.getElementById('confirma-nao').onclick = function(){ responder(false); };
+    document.getElementById('confirma-sim').onclick = function(){ responder(true); };
+    dlg.addEventListener('close', aoFechar);
+    abrirDlg();
+  });
+}
+async function gravar(promessa, oque){
+  const r = await promessa;
+  if(r && r.error){
+    const e = r.error;
+    throw new Error((oque ? oque + ': ' : '') + (e.message || e.details || e.hint || 'o banco recusou'));
+  }
+  return r;
+}
+/* usa quando a gravação acontece longe de um formulário (marcar refeição,
+   marcar série): não trava nada, mas a falha aparece na tela. */
+function gravarAvisando(promessa, oque){
+  return gravar(promessa, oque).catch(function(e){
+    avisarErro('Não deu pra salvar ' + (oque || 'a alteração'), String(e && e.message || e));
+    return null;
+  });
+}
+
+/* Vigia do contador de descanso. O número na tela nunca é decrementado em
+   memória: ele é recalculado do horário de término toda vez que isto roda.
+   Serve de rede pro caso do Safari matar o setInterval do painel quando o
+   app vai pra segundo plano - foi o que deixou o contador congelado em 1:08
+   enquanto o apito (que é áudio agendado, não timer) tocou na hora certa. */
+setInterval(function(){ if(window.__pintarDescanso) window.__pintarDescanso(); }, 500);
+['visibilitychange','pageshow','focus','pointerdown'].forEach(function(ev){
+  const alvo = (ev === 'visibilitychange') ? document : window;
+  alvo.addEventListener(ev, function(){ if(window.__pintarDescanso) window.__pintarDescanso(); }, {passive:true});
+});
+
 async function iniciarApp(){
   try{
     await carregar();
-    await carregarDiario();
     // o perfil tem que ser montado ANTES do cardápio: ele só depende da
     // organização, e se o plano falhar por qualquer motivo o app não pode
     // ficar sem perfil (era isso que fazia Treino e Dieta dizerem "Entre na
     // conta" mesmo com a pessoa logada, enquanto Evolução funcionava).
     montarSwitchesPerfil();
-    try{
-      await carregarPlanoAtivo();
-    }catch(ePlano){
-      PLANO = {semana:[], fds:[]};
-      const aviso = document.getElementById('plano-vazio');
-      const avisoTxt = document.getElementById('plano-vazio-texto');
-      if(aviso) aviso.hidden = false;
-      if(avisoTxt) avisoTxt.textContent = 'Não deu pra montar o cardápio com o plano atual. O resto do app continua funcionando.';
-    }
+    // diário e cardápio abrem juntos. Eram duas esperas em fila, uma atrás da
+    // outra, e o app só desenhava depois das duas - com o banco em São Paulo
+    // isso era quase um segundo parado à toa.
+    await Promise.all([
+      carregarDiario(),
+      carregarPlanoAtivo().catch(function(ePlano){
+        PLANO = {semana:[], fds:[]};
+        const aviso = document.getElementById('plano-vazio');
+        const avisoTxt = document.getElementById('plano-vazio-texto');
+        if(aviso) aviso.hidden = false;
+        if(avisoTxt) avisoTxt.textContent = 'Não deu pra montar o cardápio com o plano atual. O resto do app continua funcionando.';
+      })
+    ]);
     renderListas();
     render();
     setAba('diario');
