@@ -1,48 +1,33 @@
-/* =========================================================
-   api/saude.js  -  porta de entrada dos dados do app Saúde
-   =========================================================
-   Recebe um POST do Atalho do iPhone e grava na tabela saude_dias.
-   Não usa login: quem identifica a pessoa é a chave que vai no
-   cabeçalho, conferida na tabela saude_chaves.
+// Porta de entrada dos dados do app Saude. Recebe um POST do Atalho do
+// iPhone e grava na tabela saude_dias. Nao usa login: quem identifica a
+// pessoa e a chave que vai no cabecalho x-chave, conferida em saude_chaves.
+//
+// Escrito no MESMO formato dos outros arquivos deste projeto (auth-proxy.js
+// e auth/[...path].js): runtime edge, ESM, recebendo Request e devolvendo
+// Response. A primeira versao estava em CommonJS com (req, res) e destoava
+// do resto - e o projeto inteiro e compilado como ESM, entao o formato
+// tinha que ser esse.
+//
+// SEM DEPENDENCIA NENHUMA, de proposito: este projeto nao tem package.json,
+// entao um require('@neondatabase/serverless') nunca acharia o pacote. A
+// conversa com o banco e um POST comum no endpoint SQL-over-HTTP do Neon,
+// que e exatamente o que aquele pacote faz por baixo.
+//
+// Variavel de ambiente necessaria na Vercel:
+//   DATABASE_URL = string de conexao do Neon (a "pooled")
 
-   SEM DEPENDÊNCIA NENHUMA, de propósito. A versão anterior usava
-   `@neondatabase/serverless`, e este projeto não tem package.json -
-   ou seja, na Vercel aquele require nunca ia achar o pacote e a
-   função quebraria antes de rodar uma linha. Aqui a conversa com o
-   banco é um POST comum no endpoint SQL-over-HTTP do Neon, que é
-   exatamente o que aquele pacote faz por baixo. O outro arquivo do
-   projeto (auth-proxy.js) também não tem dependência: o projeto
-   segue sendo só HTML + funções, sem build e sem node_modules.
+export const config = { runtime: 'edge' };
 
-   Variável de ambiente necessária na Vercel:
-     DATABASE_URL = string de conexão do Neon (a "pooled", que
-                    começa com postgresql://)
-
-   Exemplo de corpo (tudo opcional menos o dia):
-   {
-     "dia": "2026-09-19",
-     "kcal_ativa": 612,
-     "kcal_repouso": 1740,
-     "minutos_exercicio": 64,
-     "passos": 8412,
-     "treinos": [
-       {"tipo":"Musculação","inicio":"2026-09-19T18:30:00-03:00","minutos":58,"kcal":380}
-     ]
-   }
-   ========================================================= */
-
-/* ---- conversa com o Neon por HTTP, sem pacote ----
-   O endereço do endpoint SQL sai da própria DATABASE_URL: o host do
-   banco com /sql no fim. */
+// o endereco do endpoint SQL sai da propria DATABASE_URL: o host com /sql
 function enderecoSql(url){
   const m = /@([^/:]+)/.exec(String(url || ''));
-  if(!m) throw new Error('DATABASE_URL sem host reconhecível');
+  if(!m) throw new Error('DATABASE_URL sem host reconhecivel');
   return 'https://' + m[1] + '/sql';
 }
 
 async function sql(texto, params){
   const url = process.env.DATABASE_URL;
-  if(!url) throw new Error('falta a variável DATABASE_URL na Vercel');
+  if(!url) throw new Error('falta a variavel DATABASE_URL na Vercel');
   const r = await fetch(enderecoSql(url), {
     method: 'POST',
     headers: {
@@ -55,10 +40,16 @@ async function sql(texto, params){
   });
   const corpo = await r.json().catch(function(){ return null; });
   if(!r.ok){
-    const detalhe = (corpo && (corpo.message || corpo.error)) || ('HTTP ' + r.status);
-    throw new Error(detalhe);
+    throw new Error((corpo && (corpo.message || corpo.error)) || ('HTTP ' + r.status));
   }
   return (corpo && corpo.rows) || [];
+}
+
+function json(dados, status){
+  return new Response(JSON.stringify(dados), {
+    status: status || 200,
+    headers: { 'content-type': 'application/json; charset=utf-8' }
+  });
 }
 
 function numero(v){
@@ -70,7 +61,7 @@ function inteiro(v){
   const n = numero(v);
   return n === null ? null : Math.round(n);
 }
-/* "2026-09-19", "19/09/2026" ou um ISO completo viram sempre AAAA-MM-DD */
+// "2026-09-19", "19/09/2026" ou um ISO completo viram sempre AAAA-MM-DD
 function dataIso(v){
   const s = String(v || '').trim();
   let m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
@@ -80,36 +71,34 @@ function dataIso(v){
   return null;
 }
 
-module.exports = async function handler(req, res){
-  // o Atalho manda POST; um GET no mesmo endereço serve de teste de vida
-  if(req.method === 'GET'){
-    return res.status(200).json({ ok: true, pronto: !!process.env.DATABASE_URL });
+export default async function handler(request){
+  // o Atalho manda POST; um GET no mesmo endereco serve de teste de vida
+  if(request.method === 'GET'){
+    return json({ ok: true, pronto: !!process.env.DATABASE_URL });
   }
-  if(req.method !== 'POST'){
-    return res.status(405).json({ erro: 'use POST' });
+  if(request.method !== 'POST'){
+    return json({ erro: 'use POST' }, 405);
   }
   try{
-    const chave = req.headers['x-chave'];
-    if(!chave) return res.status(401).json({ erro: 'falta o cabeçalho x-chave' });
+    const chave = request.headers.get('x-chave');
+    if(!chave) return json({ erro: 'falta o cabecalho x-chave' }, 401);
 
     const dono = await sql(
       'select organization_id, user_id, nome from saude_chaves where chave = $1',
       [String(chave)]
     );
-    if(!dono.length) return res.status(401).json({ erro: 'chave desconhecida' });
+    if(!dono.length) return json({ erro: 'chave desconhecida' }, 401);
     const organization_id = dono[0].organization_id;
     const user_id = dono[0].user_id;
     const nome = dono[0].nome;
 
-    let corpo = req.body;
-    if(typeof corpo === 'string'){
-      try{ corpo = JSON.parse(corpo); }catch(e){ corpo = null; }
-    }
+    let corpo = null;
+    try{ corpo = await request.json(); }catch(e){ corpo = null; }
     if(!corpo || typeof corpo !== 'object'){
-      return res.status(400).json({ erro: 'corpo precisa ser um JSON' });
+      return json({ erro: 'corpo precisa ser um JSON' }, 400);
     }
 
-    // sem dia informado, é hoje no fuso de São Paulo (o Atalho às vezes
+    // sem dia informado, e hoje no fuso de Sao Paulo (o Atalho as vezes
     // manda a data em UTC, o que jogaria o treino da noite pro dia seguinte)
     const dia = dataIso(corpo.dia) ||
       new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10);
@@ -135,10 +124,10 @@ module.exports = async function handler(req, res){
     );
     await sql('update saude_chaves set ultimo_envio = now() where chave = $1', [String(chave)]);
 
-    return res.status(200).json({ ok: true, pessoa: nome, dia: dia, treinos: treinos.length });
+    return json({ ok: true, pessoa: nome, dia: dia, treinos: treinos.length });
   }catch(e){
-    // erro sempre visível: é o Atalho do iPhone do outro lado, e ele só
+    // erro sempre visivel: e o Atalho do iPhone do outro lado, e ele so
     // mostra o que a resposta disser
-    return res.status(500).json({ erro: 'falhou ao gravar', detalhe: String((e && e.message) || e) });
+    return json({ erro: 'falhou ao gravar', detalhe: String((e && e.message) || e) }, 500);
   }
-};
+}
