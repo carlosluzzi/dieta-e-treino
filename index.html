@@ -38,14 +38,48 @@
   // pedido do zero, combinada com um redirecionamento interno no
   // vercel.json.)
   var client = createAuthClient('https://dieta-e-treino-sage.vercel.app/api/auth');
+
+  // O cliente do banco pede o token a cada consulta. Sem cache, cada consulta
+  // virava DUAS viagens de rede: primeiro um getSession (que sai do iPhone,
+  // passa pelo nosso proxy no Vercel e so entao chega no servico de login) e
+  // so depois a consulta de verdade. Numa abertura do app sao umas dez
+  // consultas - ou seja, vinte viagens, metade delas so pra repetir a mesma
+  // resposta. Agora o token e buscado uma vez e reaproveitado ate um minuto
+  // antes de vencer (o proprio JWT diz quando vence, no campo "exp"), e duas
+  // consultas que saem juntas dividem a mesma busca em vez de fazerem uma
+  // cada. Sair da conta limpa isso na hora.
+  var tk = { valor:null, ate:0, indo:null };
+  function venceEm(token){
+    try{
+      var meio = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+      var dados = JSON.parse(atob(meio + '==='.slice((meio.length + 3) % 4)));
+      if(dados && dados.exp) return dados.exp * 1000;
+    }catch(e){}
+    return 0;
+  }
+  function pegarToken(){
+    var agora = Date.now();
+    if(tk.valor && agora < tk.ate) return Promise.resolve(tk.valor);
+    if(tk.indo) return tk.indo;
+    tk.indo = client.getSession().then(function(s){
+      var t = (s && s.data && s.data.session && s.data.session.token) || null;
+      var vence = t ? venceEm(t) : 0;
+      // sem "exp" legivel, guarda por um minuto: ja tira as repetidas da
+      // abertura sem segurar um token velho por muito tempo.
+      tk.valor = t;
+      tk.ate = t ? (vence ? vence - 60000 : Date.now() + 60000) : 0;
+      tk.indo = null;
+      return t;
+    }, function(e){ tk.indo = null; throw e; });
+    return tk.indo;
+  }
+  window.__limparToken = function(){ tk.valor = null; tk.ate = 0; tk.indo = null; };
+
   var db = new NeonPostgrestClient({
     dataApiUrl: 'https://ep-soft-bread-ac808or4.apirest.sa-east-1.aws.neon.tech/dieta_treino/rest/v1',
     options: {
       global: {
-        fetch: fetchWithToken(async function(){
-          var s = await client.getSession();
-          return (s && s.data && s.data.session && s.data.session.token) || null;
-        })
+        fetch: fetchWithToken(pegarToken)
       }
     }
   });
@@ -1185,8 +1219,11 @@
   .tr-ex-rot{font-size:12.5px;color:var(--ink3);white-space:nowrap}
   .tr-ex-val{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap}
   @media(max-width:359px){ .tr-ex-grade{grid-template-columns:1fr} }
-  /* mesma grade dentro da sessão de treino, só com o respiro daquele bloco */
-  .tr-ex-grade-sessao{margin:-2px 0 10px}
+  /* mesma grade dentro da sessão de treino, só com o respiro daquele bloco.
+     O espaço embaixo é maior que em cima de propósito: os números do plano
+     (pontilhado do "Descanso") estavam colados no cabeçalho da tabela e na
+     primeira série, e as duas coisas se misturavam na leitura. */
+  .tr-ex-grade-sessao{margin:-2px 0 18px}
   /* alongamento / mobilidade: mesma grade de duas colunas dos números do
      plano, um bloco por lista */
   .tr-along-bloco{margin-bottom:16px}
@@ -1752,8 +1789,45 @@ if(!window.storage){
   // não respondia, não tinha de onde restaurar o que já estava marcado.
   window.storage = {
     get: function(k){ return Promise.resolve({ value: localStorage.getItem(k) }); },
-    set: function(k,v){ localStorage.setItem(k,v); return Promise.resolve(); }
+    set: function(k,v){ localStorage.setItem(k,v); return Promise.resolve(); },
+    remove: function(k){ localStorage.removeItem(k); return Promise.resolve(); }
   };
+}
+if(window.storage && !window.storage.remove){
+  window.storage.remove = function(k){ return window.storage.set(k, ''); };
+}
+
+/* ---------------------------------------------------------
+   0.0.1 CACHE DE LEITURA (o app abre com o que ele já sabia)
+   ---------------------------------------------------------
+   O que o banco devolve muda pouco: a periodização é a mesma a semana
+   inteira, o plano de hábitos idem. Antes toda abertura esperava tudo isso
+   chegar de São Paulo antes de desenhar - por isso o card de Treino ficava
+   um tempão vazio, e às vezes dizia "ainda não tem periodização cadastrada"
+   quando a verdade era "a resposta não chegou". Agora cada resposta fica
+   guardada no aparelho: o app desenha na hora com a última que ele viu e
+   troca sozinho quando a nova chega. Se a nova não chega, ele fica com a
+   antiga em vez de mentir. */
+const CACHE_KEY = 'dieta-cache-v1';
+let cacheLeitura = null;
+function cacheCarregar(){
+  if(cacheLeitura) return cacheLeitura;
+  cacheLeitura = {};
+  try{
+    const bruto = localStorage.getItem(CACHE_KEY);
+    if(bruto) cacheLeitura = JSON.parse(bruto) || {};
+  }catch(e){ cacheLeitura = {}; }
+  return cacheLeitura;
+}
+function cacheLer(chave){
+  const c = cacheCarregar();
+  const v = c[chave];
+  return (v && typeof v === 'object' && 'v' in v) ? v.v : undefined;
+}
+function cacheGravar(chave, valor){
+  const c = cacheCarregar();
+  c[chave] = { v: valor, em: Date.now() };
+  try{ localStorage.setItem(CACHE_KEY, JSON.stringify(c)); }catch(e){}
 }
 
 /* =========================================================
@@ -2004,8 +2078,18 @@ async function carregarOrganizacaoAtiva(){
   orgAtiva = full && full.data;
   if(orgAtiva) await comTimeout(neon.organization.setActive({ organizationId: orgAtiva.id }), 6000);
 
-  var papel = await comTimeout(neon.organization.getActiveMemberRole(), 6000);
-  papelAtual = (papel && papel.data && papel.data.role) || (papel && papel.data) || 'member';
+  // o papel (admin ou não) só decide o que aparece no menu de administração -
+  // nada da tela inicial depende dele. Esperar essa resposta antes de abrir o
+  // app era mais uma ida de rede em fila à toa; agora ela chega depois e o
+  // menu se acerta sozinho.
+  // do último acesso: evita o menu piscar de "Integrante" pra "Administrador"
+  try{ papelAtual = papelAtual || localStorage.getItem('papelAtual') || 'member'; }
+  catch(e){ papelAtual = papelAtual || 'member'; }
+  comTimeout(neon.organization.getActiveMemberRole(), 6000).then(function(papel){
+    papelAtual = (papel && papel.data && papel.data.role) || (papel && papel.data) || 'member';
+    try{ localStorage.setItem('papelAtual', papelAtual); }catch(e){}
+    if(typeof montarContaUsuario === 'function') montarContaUsuario();
+  }).catch(function(){});
 }
 
 async function entrarNoApp(){
@@ -2261,6 +2345,8 @@ document.getElementById('btn-fechar-conta').onclick = function(){
 };
 document.getElementById('btn-sair').onclick = async function(){
   await neon.signOut();
+  if(window.__limparToken) window.__limparToken();
+  try{ await window.storage.remove(CACHE_KEY); }catch(e){}
   location.reload();
 };
 
@@ -6126,18 +6212,59 @@ async function atualizarCardTreinoHoje(diaSel){
     treinoHojeEscolhido = null; treinoHojeConteudo = null;
     return;
   }
+  const hojeIso = iso(new Date());
+  const diaIso = diaSel || diario.sel || hojeIso;
+  const ehHoje = diaIso === hojeIso;
+  // a sessão de treino sempre grava no dia de hoje. O botão nunca some
+  // (sumir confunde); olhando outro dia, o texto deixa isso claro.
+  if(btnIniciar){
+    btnIniciar.hidden = false;
+    btnIniciar.textContent = ehHoje ? 'Iniciar treino' : 'Iniciar treino de hoje';
+  }
+
+  // ---- 1) desenha JÁ, com o que o aparelho já sabe ----
+  // Antes o card ficava vazio até o banco responder (umas três idas de rede em
+  // fila), e nesse meio tempo escrevia "ainda não tem periodização cadastrada".
+  // Agora ele abre preenchido com a última resposta conhecida e só se corrige
+  // quando a nova chega.
+  let pintouDoCache = false;
+  const linhaCache = planoGuardado('planos_treino', uid);
+  if(ehHoje && linhaCache && linhaCache.conteudo){
+    treinoHojeConteudo = linhaCache.conteudo;
+    const ultCache = cacheLer('ultimoTreino|' + uid);
+    const inicioCache = String(linhaCache.vigente_a_partir || '').slice(0,10);
+    const chaveDia = hojeIso + '|' + inicioCache;
+    if(treinoHojeEscolhidoDia !== chaveDia){ treinoHojeEscolhido = null; treinoHojeEscolhidoDia = chaveDia; }
+    if(!treinoHojeEscolhido){
+      const valido = ultCache && (!inicioCache || String(ultCache.dia||'') >= inicioCache);
+      treinoHojeEscolhido = proximoTreinoSugerido(linhaCache.conteudo, valido ? ultCache.chave : null);
+    }
+    const tc = treinoHojeEscolhido && linhaCache.conteudo.treinos && linhaCache.conteudo.treinos[treinoHojeEscolhido];
+    if(tc){
+      chaveBtn.textContent = 'Treino ' + treinoHojeEscolhido;
+      chaveBtn.hidden = false;
+      nota.textContent = tc.nome;
+      pintouDoCache = true;
+    }
+  }
+
   try{
-    // o plano e os registros do dia são independentes: buscar em paralelo tira
-    // uma ida ao banco do caminho até o card aparecer.
-    const hojeIsoPre = iso(new Date());
-    const diaPre = diaSel || diario.sel || hojeIsoPre;
-    const [linha, rDiaPre] = await Promise.all([
+    // ---- 2) confirma com o banco ----
+    // as quatro consultas são independentes entre si, então saem juntas: uma
+    // ida de rede no lugar de três em fila.
+    const rUltPromessa = db.from('treino_registros').select('treino_chave,dia')
+      .eq('organization_id', orgAtiva.id).eq('user_id', uid)
+      .order('dia', { ascending:false }).limit(10);
+    const [linha, rDia] = await Promise.all([
       buscarPlanoGenerico('planos_treino', uid),
       db.from('treino_registros').select('id,treino_chave')
-        .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', diaPre)
+        .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', diaIso),
+      mostrarSaudeDoDia(uid, diaIso)
     ]);
     // buscarPlanoGenerico devolve a LINHA do banco ({conteudo, vigente_a_partir,
-    // versao_label}) - o plano em si é o conteudo dela.
+    // versao_label}) - o plano em si é o conteudo dela. `undefined` quer dizer
+    // "não deu pra saber": nesse caso o que está na tela fica como está.
+    if(linha === undefined) return;
     const plano = linha && linha.conteudo;
     if(!plano){
       chaveBtn.hidden = true;
@@ -6146,21 +6273,7 @@ async function atualizarCardTreinoHoje(diaSel){
       return;
     }
     treinoHojeConteudo = plano;
-    const hojeIso = iso(new Date());
-    const diaIso = diaSel || diario.sel || hojeIso;
-    const ehHoje = diaIso === hojeIso;
-    // a sessão de treino sempre grava no dia de hoje. O botão nunca some
-    // (sumir confunde); olhando outro dia, o texto deixa isso claro.
-    if(btnIniciar){
-      btnIniciar.hidden = false;
-      btnIniciar.textContent = ehHoje ? 'Iniciar treino' : 'Iniciar treino de hoje';
-    }
 
-    await mostrarSaudeDoDia(uid, diaIso);
-    // já veio junto com o plano lá em cima quando o dia é o mesmo
-    const rDia = (diaIso === diaPre) ? rDiaPre
-      : await db.from('treino_registros').select('id,treino_chave')
-          .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', diaIso);
     const feitosNoDia = (rDia && rDia.data) || [];
     // treino registrado sem querer (um teste, o treino errado) precisa ter
     // como sair - antes não havia nenhum caminho pra apagar pelo app.
@@ -6186,22 +6299,25 @@ async function atualizarCardTreinoHoje(diaSel){
     // A sugestão só olha treinos feitos DENTRO do plano que está valendo. Sem
     // isso, um treino A registrado antes (num teste, ou no plano anterior)
     // continuava mandando na rotação e o primeiro dia do plano novo já vinha
-    // como B. A chave do cache leva a data de início junto, pra mudar a
-    // vigência recalcular na hora em vez de só no dia seguinte.
+    // como B. A chave leva a data de início junto, pra mudar a vigência
+    // recalcular na hora em vez de só no dia seguinte. O filtro por data é
+    // feito aqui e não na consulta pra ela poder sair junto com as outras,
+    // sem esperar o plano chegar primeiro.
     const inicioPlano = String((linha && linha.vigente_a_partir) || '').slice(0,10);
-    const chaveCache = hojeIso + '|' + inicioPlano;
-    if(treinoHojeEscolhidoDia !== chaveCache){ treinoHojeEscolhido = null; treinoHojeEscolhidoDia = chaveCache; }
-    if(!treinoHojeEscolhido){
-      let q = db.from('treino_registros').select('treino_chave,dia')
-        .eq('organization_id', orgAtiva.id).eq('user_id', uid);
-      if(inicioPlano) q = q.gte('dia', inicioPlano);
-      const rUlt = await q.order('dia', { ascending:false }).limit(1);
-      const ultimo = rUlt && rUlt.data && rUlt.data[0] ? rUlt.data[0].treino_chave : null;
-      treinoHojeEscolhido = proximoTreinoSugerido(plano, ultimo);
-    }
-    const t = treinoHojeEscolhido && plano.treinos && plano.treinos[treinoHojeEscolhido];
+    const rUlt = await rUltPromessa;
+    const registros = (rUlt && rUlt.data) || [];
+    const dentroDoPlano = registros.filter(function(rg){
+      return !inicioPlano || String(rg.dia || '').slice(0,10) >= inicioPlano;
+    });
+    const ultimo = dentroDoPlano.length ? dentroDoPlano[0].treino_chave : null;
+    if(registros.length) cacheGravar('ultimoTreino|' + uid, { chave: registros[0].treino_chave, dia: String(registros[0].dia||'').slice(0,10) });
+    const chaveDia2 = hojeIso + '|' + inicioPlano;
+    const escolhido = proximoTreinoSugerido(plano, ultimo);
+    treinoHojeEscolhidoDia = chaveDia2;
+    treinoHojeEscolhido = escolhido;
+    const t = escolhido && plano.treinos && plano.treinos[escolhido];
     if(t){
-      chaveBtn.textContent = 'Treino ' + treinoHojeEscolhido;
+      chaveBtn.textContent = 'Treino ' + escolhido;
       chaveBtn.hidden = false;
       nota.textContent = feitosNoDia.length
         ? (t.nome + ' · ' + (feitosNoDia.length===1 ? '1 treino já feito hoje' : feitosNoDia.length+' treinos já feitos hoje'))
@@ -6210,7 +6326,11 @@ async function atualizarCardTreinoHoje(diaSel){
       chaveBtn.hidden = true;
       nota.textContent = 'Nenhum treino cadastrado no plano.';
     }
-  }catch(e){ chaveBtn.hidden = true; nota.textContent = ''; }
+  }catch(e){
+    // deu ruim na rede: o que foi desenhado do cache continua valendo. Só
+    // limpa a tela se não havia nada desenhado.
+    if(!pintouDoCache){ chaveBtn.hidden = true; nota.textContent = ''; }
+  }
 }
 /* Lista os treinos já registrados no dia que a tela mostra, cada um com um
    "Apagar" de dois toques (registro apagado não volta). */
@@ -6730,17 +6850,52 @@ function arrumarPlanoTreino(c){
   return c;
 }
 
+/* Os planos (dieta, treino, hábitos, suplementação) são consultados por várias
+   telas e várias vezes na mesma abertura. Três coisas mudam aqui:
+   1) o que já veio fica guardado no aparelho, então a tela desenha na hora;
+   2) duas consultas iguais disparadas juntas dividem a mesma ida ao banco;
+   3) se a ida ao banco falhar, devolve o que estava guardado em vez de null -
+      null aqui virava "ainda não tem periodização cadastrada" na tela, que é
+      uma informação errada quando o problema foi a rede. */
+const planoIndo = {};
+function chavePlano(tabela, uid){ return 'plano|' + tabela + '|' + uid; }
+function planoGuardado(tabela, uid){
+  if(!uid) return null;
+  const linha = cacheLer(chavePlano(tabela, uid));
+  if(!linha) return null;
+  // arrumarPlanoTreino se protege sozinha contra rodar duas vezes (marca
+  // __arrumado no próprio conteúdo, que vai junto pro armazenamento).
+  if(tabela === 'planos_treino' && linha.conteudo) arrumarPlanoTreino(linha.conteudo);
+  return linha;
+}
 async function buscarPlanoGenerico(tabela, uid){
   if(!db || !orgAtiva || !uid) return null;
-  try{
-    const r = await db.from(tabela)
-      .select('conteudo,vigente_a_partir,versao_label')
-      .eq('organization_id', orgAtiva.id).eq('user_id', uid)
-      .order('vigente_a_partir', { ascending:false }).limit(20);
-    const linha = escolherVigente(r && r.data);
-    if(linha && tabela === 'planos_treino') arrumarPlanoTreino(linha.conteudo);
-    return linha;
-  }catch(e){ return null; }
+  const k = chavePlano(tabela, uid);
+  if(planoIndo[k]) return planoIndo[k];
+  planoIndo[k] = (async function(){
+    try{
+      const r = await db.from(tabela)
+        .select('conteudo,vigente_a_partir,versao_label')
+        .eq('organization_id', orgAtiva.id).eq('user_id', uid)
+        .order('vigente_a_partir', { ascending:false }).limit(20);
+      if(r && r.error) throw new Error(r.error.message || 'o banco recusou');
+      const linha = escolherVigente(r && r.data);
+      if(linha){
+        cacheGravar(k, { conteudo: linha.conteudo, vigente_a_partir: linha.vigente_a_partir,
+          versao_label: linha.versao_label });
+        if(tabela === 'planos_treino') arrumarPlanoTreino(linha.conteudo);
+      }
+      return linha;
+    }catch(e){
+      // rede ruim ou banco fora do ar: o último plano conhecido é uma resposta
+      // muito melhor do que "não existe". Sem nada guardado, devolve undefined
+      // (= "não deu pra saber"), que é diferente de null (= "consultei e não
+      // tem") - quem chama usa isso pra não escrever na tela que o plano não
+      // existe quando na verdade a resposta não chegou.
+      return planoGuardado(tabela, uid) || undefined;
+    }finally{ planoIndo[k] = null; }
+  })();
+  return planoIndo[k];
 }
 
 async function buscarRegistroDia(tabela, uid, dia){
@@ -7265,16 +7420,25 @@ async function abrirSessaoTreino(chaveInicial){
     return;
   }
   try{
-    const r = await db.from('planos_treino')
-      .select('conteudo,vigente_a_partir,versao_label')
-      .eq('organization_id', orgAtiva.id).eq('user_id', uid)
-      .order('vigente_a_partir', { ascending:false }).limit(20);
-    const linha = escolherVigente(r && r.data);
-    if(!linha){
+    // mesma consulta do card de Treino: passando por buscarPlanoGenerico, as
+    // duas dividem a mesma ida ao banco (e o plano que já está guardado no
+    // aparelho abre a sessão na hora, sem espera).
+    const linha = await buscarPlanoGenerico('planos_treino', uid) || planoGuardado('planos_treino', uid);
+    if(!linha || !linha.conteudo){
       corpo.innerHTML = '<p class="pg-vazio">Ainda não tem periodização cadastrada. Peça pro admin cadastrar em "Gerenciar versões de plano".</p>';
       return;
     }
     sessaoTreinoConteudo = arrumarPlanoTreino(linha.conteudo);
+    // sem treino sugerido (o card ainda não tinha respondido quando o botão
+    // foi tocado), a sessão caía na lista A/B/C/D pra escolher na mão - e era
+    // justamente o que o app já sabia responder. Refaz a conta aqui com o
+    // último treino guardado no aparelho.
+    if(!sessaoTreinoChaveInicial){
+      const ult = cacheLer('ultimoTreino|' + uid);
+      const ini = String(linha.vigente_a_partir || '').slice(0,10);
+      const valido = ult && (!ini || String(ult.dia||'') >= ini);
+      sessaoTreinoChaveInicial = proximoTreinoSugerido(sessaoTreinoConteudo, valido ? ult.chave : null);
+    }
     if(sessaoTreinoChaveInicial && sessaoTreinoConteudo.treinos && sessaoTreinoConteudo.treinos[sessaoTreinoChaveInicial]){
       sessaoTreinoChave = sessaoTreinoChaveInicial;
     }
