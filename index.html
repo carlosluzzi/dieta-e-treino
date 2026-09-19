@@ -171,7 +171,11 @@
      .tabbar-ico/.tabbar-item span/.tabbar-item mais abaixo) - se um mudar,
      mudar o outro junto, senão o .wrap volta a sobrar/faltar espaço embaixo */
   :root{--tabbar-h:calc(18px + 21px + 4px + 12px + 20px + env(safe-area-inset-bottom,0px))}
-  .wrap{flex:1;min-height:0;width:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  /* overflow-x:hidden é rede de segurança, não conserto: o app rola só na
+     vertical, e qualquer texto comprido demais que escape de um conserto
+     específico não pode transformar a tela inteira num carrossel lateral. */
+  .wrap{flex:1;min-height:0;width:100%;overflow-y:auto;overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
     overscroll-behavior-y:contain;max-width:720px;margin:0 auto;
     padding:0 16px calc(var(--tabbar-h) + 8px)}
 
@@ -196,6 +200,42 @@
        Medido com print: 1,25px de diferença entre os dois centros. */
     position:relative;top:1.25px}
   @media (max-width:360px){ .marca small{font-size:16px} }
+
+  /* ---------- tela de abertura ---------- */
+  /* Mesma dupla do topo (maçã + nomes), só que centralizada e maior: é a
+     cara do app enquanto ele se monta. Fundo igual ao do app pra que o
+     desaparecimento pareça a tela se revelando, não uma troca de telas. */
+  #abertura{position:fixed;inset:0;z-index:400;background:var(--bg);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;
+    padding:24px;transition:opacity .38s ease}
+  #abertura.saindo{opacity:0;pointer-events:none}
+  .abertura-marca{display:flex;align-items:center;gap:14px;max-width:100%}
+  .abertura-logo{flex:0 0 auto;display:block;width:58px;height:58px}
+  .abertura-logo svg{width:100%;height:100%;display:block}
+  /* um pouco maior que o do topo (18px), como pedido - e com a mesma
+     correção de 1,25px, porque "Carlos e Isabella" continua sem letra
+     descendente e continua parecendo subir em relação à maçã. */
+  .abertura-nomes{font-size:26px;font-weight:700;color:var(--ink);letter-spacing:-.02em;
+    line-height:1.15;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    position:relative;top:1.6px}
+  .abertura-nomes:empty{display:none}
+  @media (max-width:360px){
+    .abertura-logo{width:50px;height:50px}
+    .abertura-nomes{font-size:22px}
+  }
+  /* fiozinho que anda: diz "está vindo" sem prometer uma porcentagem que a
+     gente não sabe calcular */
+  .abertura-barra{width:104px;height:3px;border-radius:3px;background:var(--fill);overflow:hidden}
+  .abertura-barra i{display:block;width:40%;height:100%;border-radius:3px;background:var(--azul);
+    animation:aberturaAnda 1.15s ease-in-out infinite}
+  @keyframes aberturaAnda{
+    0%{transform:translateX(-110%)}
+    100%{transform:translateX(260%)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .abertura-barra i{animation:none;width:100%;opacity:.5}
+    #abertura{transition:none}
+  }
 
   /* ---------- segmented control ---------- */
   .switch{display:inline-flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px}
@@ -823,10 +863,20 @@
   .at-l span:last-child{flex:0 0 auto;color:var(--ink3);font-variant-numeric:tabular-nums}
   .at-nota{font-size:11.5px;color:var(--ink3);margin:8px 0 0;line-height:1.4}
   .hoje-treino-feitos{display:flex;flex-direction:column;gap:6px;margin:8px 0 2px}
+  /* invólucro do arrasto: o vermelho do Excluir mora atrás e o recorte
+     arredondado impede as pontinhas de aparecerem nos cantos. */
+  .hoje-treino-feito-wrap{position:relative;border-radius:var(--rc);overflow:hidden}
+  .hoje-treino-feito-wrap .tr-serie-excluir{top:0;bottom:0;border-radius:var(--rc)}
   .hoje-treino-feito{display:flex;align-items:center;gap:8px;background:var(--fill2);
-    border-radius:var(--rc);padding:8px 10px}
+    border-radius:var(--rc);padding:8px 10px;width:100%;border:none;font-family:inherit;
+    text-align:left;cursor:pointer;position:relative;touch-action:pan-y}
   .hoje-treino-feito-txt{flex:1 1 auto;min-width:0;font-size:13px;font-weight:600;color:var(--ink2);
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hoje-treino-feito-seta{flex:0 0 auto;font-size:17px;line-height:1;color:var(--ink3);
+    font-weight:400;padding-bottom:2px}
+  /* a do relógio continua sendo um <div>: não tem o que abrir nem o que
+     apagar, quem manda nela é o app Saúde. */
+  .hoje-treino-feito.do-relogio{cursor:default}
   /* tarja de erro de gravação - fica por cima de tudo, inclusive da tela de
      sessão de treino, porque é justamente lá que perder dado dói. */
   .aviso-erro{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));
@@ -842,6 +892,19 @@
   .confirma-bts .btn-pill{margin:0;width:auto;flex:1 1 0}
   .btn-pill.perigo{background:var(--nao);color:#fff}
   .hoje-treino-feito-val{flex:0 0 auto;font-size:12.5px;color:var(--ink3);font-variant-numeric:tabular-nums}
+  /* detalhe do treino registrado (abre tocando na linha do treino feito) */
+  .reg-treino{display:flex;flex-direction:column;gap:14px}
+  .reg-ex{display:flex;flex-direction:column;gap:3px}
+  .reg-nome{font-size:14px;font-weight:700;color:var(--azul);line-height:1.3;margin-bottom:2px}
+  .reg-serie{display:grid;grid-template-columns:36px 1fr 20px;gap:8px;align-items:center;
+    font-size:13.5px;color:var(--ink2);padding:2px 0;border-bottom:.5px dotted var(--hair)}
+  .reg-serie:last-child{border-bottom:0}
+  .reg-num{justify-self:start;min-width:32px;height:24px;padding:0 6px;border-radius:8px;
+    background:var(--fill);color:var(--ink);font-size:12.5px;font-weight:700;
+    display:flex;align-items:center;justify-content:center}
+  .reg-num.preparo{color:var(--ink3);font-size:10.5px}
+  .reg-val{font-variant-numeric:tabular-nums;color:var(--ink)}
+  .reg-ok{color:var(--ok);font-size:13px;text-align:right}
   .hoje-treino-tag{flex:0 0 auto;font-size:10px;font-weight:700;text-transform:uppercase;
     letter-spacing:.04em;color:var(--ink3);background:var(--fill);border-radius:8px;padding:3px 7px}
   /* em tela estreita a etiqueta sai pra não espremer o nome da atividade -
@@ -1039,8 +1102,16 @@
     color:var(--azul);margin:0 0 8px}
   /* o título do treino que está sendo feito usa o mesmo desenho do
      "Atualização 1" lá do topo da aba Treino - é o mesmo tipo de título. */
+  /* "TREINO B - MEMBROS SUPERIORES EMPURRAR" numa linha só, em caixa alta e
+     com letra espaçada, não cabia na largura do iPhone e virava um bloco de
+     três linhas ocupando o topo inteiro. Agora são duas coisas: a letra do
+     treino em destaque e, embaixo, o que ele é - menor, sem caixa alta e
+     sem o traço do meio. */
   .tr-sessao-titulo{font-size:15.5px;font-weight:800;text-transform:uppercase;letter-spacing:.11em;
-    color:var(--azul);text-align:center;margin:18px 0 10px;line-height:1.4}
+    color:var(--azul);text-align:center;margin:18px 0 2px;line-height:1.25}
+  .tr-sessao-sub{font-size:13.5px;font-weight:600;color:var(--ink2);text-align:center;
+    margin:0 0 12px;line-height:1.35;letter-spacing:0;text-transform:none;
+    padding:0 8px;overflow-wrap:anywhere}
   .tr-sub{font-size:13px;color:var(--ink2);margin:0;line-height:1.5}
   .tr-sub.editavel{cursor:pointer;text-decoration:underline;text-decoration-color:var(--hair);
     text-underline-offset:3px}
@@ -1150,7 +1221,7 @@
   .tr-meta-tag b{font-weight:700;color:var(--ink3);margin-right:4px;text-transform:uppercase;font-size:9.5px;letter-spacing:.02em}
 
   .tr-serie-linhas{display:flex;flex-direction:column;gap:5px}
-  .tr-serie-header-row{display:grid;grid-template-columns:38px 1fr 52px 52px 32px;gap:6px;padding:0 2px 2px;
+  .tr-serie-header-row{display:grid;grid-template-columns:36px 1fr 58px 58px 32px;gap:5px;padding:0 2px 2px;
     font-size:11.5px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.02em}
   .tr-serie-header-row span{text-align:center}
 
@@ -1171,8 +1242,11 @@
   /* o raio aqui não é enfeite: o invólucro do gesto é arredondado e recorta o
      que está dentro dele, então uma linha de canto vivo deixava aparecer duas
      pontinhas vermelhas do botão Excluir que fica atrás. */
-  .tr-serie-linha,.tr-aquecimento-linha{position:relative;display:grid;grid-template-columns:38px 1fr 52px 52px 32px;
-    gap:6px;align-items:center;padding:2px;background:var(--card);border-radius:10px;touch-action:pan-y}
+  /* as duas colunas de número ganharam 6px cada (e a de "Anterior", que
+     sobrava espaço, cedeu): "10-12" e "30-40" são metas de faixa que vêm do
+     plano e estavam sendo cortadas em "10-1". Espaço, não fonte menor. */
+  .tr-serie-linha,.tr-aquecimento-linha{position:relative;display:grid;grid-template-columns:36px 1fr 58px 58px 32px;
+    gap:5px;align-items:center;padding:2px;background:var(--card);border-radius:10px;touch-action:pan-y}
   .tr-serie-linha.feita{background:var(--fill2);border-radius:10px}
   .tr-serie-num{justify-self:center;min-width:34px;height:30px;padding:0 4px;border-radius:10px;background:var(--fill);
     color:var(--ink);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
@@ -1186,6 +1260,10 @@
      botão Excluir do arrasto), e o anel, que sobra 3px pra fora, batia nessa
      borda. Por dentro nunca é cortado e não empurra nada de lugar. */
   .tr-serie-kg:focus,.tr-serie-reps:focus{outline:none;box-shadow:inset 0 0 0 2px var(--azul)}
+  /* a referência do plano (ou o peso da última vez) fica esperando dentro do
+     campo, num cinza bem mais claro que o texto digitado - senão não dá pra
+     saber, batendo o olho, o que foi feito hoje e o que é só sugestão. */
+  .tr-serie-kg::placeholder,.tr-serie-reps::placeholder{color:#BDBDB8}
   /* quadradinho, não bolinha - e com o mesmo arredondamento que o resto do
      app usa nos botões de marcar (os de seguiu/adaptou/não fiz do diário),
      pra não ter um raio só dele. Marcado fica verde, igual "seguiu". */
@@ -1228,6 +1306,17 @@
      plano, um bloco por lista */
   .tr-along-bloco{margin-bottom:16px}
   .tr-along-bloco:last-child{margin-bottom:0}
+  /* Aqui o "rótulo" é o nome do exercício, não uma palavra curta tipo
+     "Descanso" - e nome de exercício é comprido ("Rotação torácica em quatro
+     apoios" pede 284px numa coluna de 172px). Em duas colunas sem quebrar,
+     isso empurrava a tela 96px pra direita e quebrava a rolagem só vertical
+     do app inteiro. Então esta lista vira uma coluna só, com o nome podendo
+     ocupar mais de uma linha e o valor ancorado à direita. */
+  .tr-along-bloco .tr-ex-grade{grid-template-columns:1fr}
+  .tr-along-bloco .tr-ex-campo{align-items:baseline}
+  .tr-along-bloco .tr-ex-rot{white-space:normal;overflow-wrap:anywhere;min-width:0;
+    flex:1 1 auto;line-height:1.35}
+  .tr-along-bloco .tr-ex-val{flex:0 0 auto}
   .tr-along-tit{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
     color:var(--ink3);margin:0 0 6px}
   .tr-serie-ativacao-label{font-size:14px;color:var(--ink2)}
@@ -1238,8 +1327,8 @@
      feio e solto no meio do cartão. Continua fora de .tr-serie-linha de
      propósito: não conta na numeração das séries que valem, não vira
      "Anterior" da próxima vez e não é salva no registro. */
-  .tr-preserie-linha{position:relative;display:grid;grid-template-columns:38px 1fr 52px 52px 32px;
-    gap:6px;align-items:center;padding:2px;background:var(--card)}
+  .tr-preserie-linha{position:relative;display:grid;grid-template-columns:36px 1fr 58px 58px 32px;
+    gap:5px;align-items:center;padding:2px;background:var(--card)}
   /* o "AQ" usa o mesmo balãozinho cinza do número da série - só a letra é
      menor, porque são duas letras no lugar de um algarismo. */
   .tr-serie-num.aq{font-size:11px;color:var(--ink3);letter-spacing:.02em}
@@ -1366,6 +1455,20 @@
 </style>
 </head>
 <body>
+
+<!-- Tela de abertura: fica por cima de tudo enquanto o app se monta, e só
+     sai quando a tela inicial está pronta de verdade (plano, diário, dieta,
+     hábitos e treino já desenhados). Antes dava pra ver o app sendo
+     construído ao vivo - card aparecendo, número entrando depois, treino
+     chegando por último. O nome do casal vem guardado do último acesso, pra
+     já nascer escrito em vez de piscar. -->
+<div id="abertura">
+  <div class="abertura-marca">
+    <span class="abertura-logo logo-svg-slot" role="img" aria-label="Dieta e treino"></span>
+    <span class="abertura-nomes" id="abertura-nomes"></span>
+  </div>
+  <div class="abertura-barra"><i></i></div>
+</div>
 
 <div id="tela-instalar" class="tela-cheia" hidden>
   <div class="cartao">
@@ -1779,6 +1882,35 @@
 var LOGO_SVG = '<svg viewBox="0 0 1095 1095" aria-hidden="true"><path fill="#ab181e" fill-rule="evenodd" d="M798.01 115.5C800.14 121.24 798.94 129.46 798.4 135.56C796.98 151.92 793.71 168.2 788.26 183.69C769.55 236.8 733.69 273.8 680.26 292.68C653.29 302.22 624.28 305.5 597.75 316.29C588.47 320.07 580.08 324.55 571.43 329.5C568.84 324.49 570.77 316.21 571.04 310.5C571.67 297.02 574.07 283.09 577.53 270.04C578.67 265.73 580.48 261.62 581.72 257.34C602.97 184.16 671.67 132.1 745.41 120.64C757.43 118.77 769.37 116.76 781.5 115.75C786.9 115.3 792.85 113.89 798.01 115.5ZM551.5 349.15C544.26 351.31 534.75 350.16 527.5 348.22C524.08 336.59 522.19 324.47 518.58 312.83C512.17 292.14 501.35 270.67 487.62 253.85C478.83 243.08 469.18 232.74 457.55 224.96C453.66 222.36 445.14 218.87 444.72 213.5C444.41 209.52 447.83 205.58 450.03 202.54C455.53 194.93 469.89 182.33 478.81 179.38C481.94 178.34 485.13 178.04 488.26 179.29C498.32 183.3 509.41 201.54 514.96 210.59C533.03 240.03 544.44 283.36 548.25 317.5C549.41 327.96 551.83 338.61 551.5 349.15ZM700.62 312.44C725.89 310.87 753.19 314.99 776.52 324.95C794.04 332.43 810.23 341.49 825.26 353.24C907.5 417.56 920.99 535.34 905.47 631.88C902.76 648.78 899.86 665.64 895.64 682.26C889.96 704.64 882.67 726.41 874.49 747.99C850.1 812.3 811.14 874.35 761.94 922.44C738.39 945.46 707.08 966.7 673.5 969.91C642.02 972.91 617.18 959.15 588.21 950.4C571.08 945.23 552.34 942.88 534.5 944.27C518.23 945.54 502.66 949.2 486.97 953.49C459.68 960.95 433.55 972.9 404.55 971.57C389.43 970.88 374.7 965.98 361.29 959.22C310.7 933.75 275.19 879.19 248.36 831.18C235.35 807.92 224.54 783.46 214.77 758.69C207.39 739.99 201.38 720.87 195.81 701.57C190.17 681.98 185.53 661.81 182.63 641.63C179.91 622.63 177.32 603.69 176.35 584.5C172.61 509.97 189.46 428.59 242.92 373.41C254.07 361.9 266.33 352 279.69 343.17C329.47 310.26 394.45 304.43 450.33 324.21C458.65 327.16 467.28 330.38 475.14 334.4C496.59 345.37 517.66 358.41 542.5 358.9C573.6 359.51 593.81 344.55 620.66 332.19C646.08 320.49 672.74 314.17 700.62 312.44ZM549.5 422.18C540.86 422.53 531.95 424.31 524.59 429.05C521.97 430.74 519.81 433.04 517.22 434.71C515.54 435.79 513.66 436.3 512.11 437.6C509.9 439.46 508.86 442.37 506.7 444.19C505.06 445.57 502.75 446.24 500.95 447.46C495.83 450.92 492.52 456.63 491.02 462.52C487.93 474.69 493.21 485.39 491.62 496.5C484.35 497.45 483.59 502.97 484.12 509.5C484.6 515.31 487.75 530.1 493.16 533.35C494.73 534.29 496.73 534.27 498.5 534.53C500.1 541.56 505.06 549.39 505.95 555.5C506.94 562.24 506.86 579.73 503 585.48C500.67 588.95 496.02 591.12 492.36 592.85C484.09 596.74 475.36 600.06 466.5 602.31C461.14 598.23 456.83 593.02 450.78 589.71C436.34 581.82 417.77 579.96 401.79 583.42C394.27 585.04 388.45 589.38 381.5 591.85C364.81 577.87 350.8 574.26 329.8 582.38C323.93 584.66 314.7 591.5 309.8 592.5C315.39 583.82 322.32 576.19 325.56 566.12C328.14 558.08 327.38 549.74 329.28 541.64C331.36 532.8 335.66 524.37 339.96 516.45C342.95 510.96 347.21 503.55 353.5 501.84C358.36 503.59 361.82 507.81 366.61 509.88C372.38 512.37 377.77 509.56 383.5 510.7C385.75 511.15 387.33 513.2 389.62 513.8C394.72 515.13 410.12 515.4 411.16 508.49C411.48 506.4 410.63 504.47 410.06 502.5C412.83 499.8 417.06 498.71 417.98 494.47C418.69 491.18 417.83 487.8 416.73 484.69C413.8 476.49 406.55 457.52 396.5 457.2C389.19 456.96 381.17 459.88 374.1 461.54C361.69 464.45 348.33 466.77 336.75 472.28C326.78 477.02 314.52 494.38 306.27 502.79C280.56 528.98 249.42 551.89 237.73 588.3C234.79 597.45 231.83 607.77 232.88 617.5C234.06 628.44 247.56 636.13 255.65 641.89C280.05 659.28 309.39 677.95 340.5 676.95C347.58 676.72 354.81 675.33 361.51 673.03C370.06 670.08 377.59 665.35 385.75 671.75C397.29 680.79 399.59 695 403.39 708.22C405.12 714.26 407.82 720.22 410.68 725.8C415.88 735.93 423.21 745.23 431.54 752.97C435.45 756.6 440.72 759.25 444.07 763.41C448.56 769.01 449.39 777.89 452.01 784.5C455.27 792.74 462.62 803.06 464.67 810.74C467.02 819.55 466.5 829.46 466.19 838.5C465.74 851.81 462.97 863.96 457.6 876.14C453.09 886.34 444.05 903.31 443.5 914.1C449.64 912.95 455.63 910.88 461.69 909.29C471.93 906.6 482.3 904.25 492.71 902.34C517.01 897.87 541.85 896.61 566.5 898.11C582.77 899.09 599.07 901.85 614.92 905.53C624.49 907.76 633.89 911.59 643.5 913.3C639.35 890.21 623.94 870.99 621.39 847.36C620.09 835.33 619.73 820.52 623.41 808.86C624.68 804.85 627.47 801.57 629.38 797.88C631.32 794.11 633.13 790.22 634.78 786.31C637.75 779.25 639.49 768.5 644.24 762.73C647.8 758.4 653.12 755.51 657.18 751.67C664.49 744.77 670.85 737.05 675.77 728.28C680.44 719.96 683.97 711.38 686.6 702.21C690.18 689.68 693.19 676.05 705.54 669.01C711.55 665.59 716.79 668.65 722.65 670.78C731 673.83 739.57 675.9 748.5 676.05C779.53 676.57 807.58 658.74 832.12 641.6C839.71 636.29 854.55 627.37 855.71 617.45C856.9 607.27 853.5 596.74 850.37 587.21C839.04 552.71 810.56 529.57 785.78 504.73C775.3 494.23 763.61 475.96 750.32 470.21C739.16 465.38 726.47 463.58 714.73 460.66C708.64 459.15 699.67 456.08 693.5 456.56C684.15 457.29 677.05 475.85 674.07 483.53C672.86 486.65 671.65 490.01 672.25 493.4C672.98 497.53 676.61 499.37 679.75 501.5C679.52 503.74 678.61 506.12 679.15 508.42C680.66 514.93 696.65 514.51 701.42 512.85C703.28 512.2 704.58 510.36 706.54 510.03C712.44 509.04 716.59 512.21 723.68 509.22C728.78 507.07 731.97 502.12 737.5 501.16C743.27 503.93 746.25 509.89 749.35 515.19C754.11 523.32 758.57 532.75 760.48 542.03C761.78 548.38 760.95 554.95 762.33 561.33C764.76 572.66 771.92 582.56 778.96 591.5C774.25 591.26 765.5 584.36 760.28 582.28C746.47 576.77 732.72 575.74 719.21 582.68C714.87 584.91 711.36 588.45 707.5 591.38C702.74 588.98 698.24 586.09 693.1 584.46C675.74 578.96 653.87 580.49 637.83 589.39C631.92 592.67 627.82 597.84 622.5 601.78C614.24 599.69 606.1 596.66 598.33 593.2C594.18 591.35 588.89 589.16 586.2 585.29C583.94 582.03 584.11 577.28 583.72 573.5C583.1 567.64 582.29 560.97 583.58 555.16C584.48 551.12 587.02 547.77 588.43 543.93C589.57 540.85 590.23 537.6 591.3 534.5C592.88 534.28 594.6 534.23 596.05 533.51C601.61 530.77 604.36 517.13 605.35 511.62C606.02 507.83 606.66 503.32 604.67 499.78C603.1 496.98 600.09 496.91 597.5 495.83C598.54 486.77 600.7 477.69 599.91 468.5C599.72 466.3 597.22 459.85 597.55 458.46C597.6 458.24 598.92 456.72 599.09 456.5C596.59 448.88 591.71 443.97 585.25 439.5C586.64 438.83 588.04 438.17 589.44 437.5C582.93 432.53 575.09 430.13 567.16 428.5C567.27 427.71 567.39 426.92 567.5 426.13C561.03 424.94 555.06 424.77 548.5 425.17C548.83 424.18 549.17 423.18 549.5 422.18Z"/></svg>';
 document.querySelectorAll('.logo-svg-slot').forEach(function(el){ el.innerHTML = LOGO_SVG; });
 
+/* ---------------------------------------------------------
+   TELA DE ABERTURA
+   ---------------------------------------------------------
+   Ela some quando a tela inicial está inteira: não é um tempo fixo, é o
+   fim do trabalho. O relógio de segurança existe só pra ela nunca virar
+   uma prisão - se alguma coisa travar, o app aparece do jeito que der, com
+   o que já tiver carregado, em vez de ficar segurando a pessoa do lado de
+   fora. */
+var NOMES_CHAVE = 'nomesIntegrantes';
+(function(){
+  var el = document.getElementById('abertura-nomes');
+  if(!el) return;
+  try{ el.textContent = localStorage.getItem(NOMES_CHAVE) || ''; }catch(e){}
+})();
+var aberturaFechada = false;
+function fecharAbertura(){
+  if(aberturaFechada) return;
+  aberturaFechada = true;
+  var el = document.getElementById('abertura');
+  if(!el) return;
+  el.classList.add('saindo');
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 420);
+}
+setTimeout(function(){ fecharAbertura(); }, 9000);
+function fecharAberturaNoProximoQuadro(){
+  if(typeof requestAnimationFrame !== 'function'){ fecharAbertura(); return; }
+  requestAnimationFrame(function(){ requestAnimationFrame(fecharAbertura); });
+}
+
 /* =========================================================
    0. ARMAZENAMENTO LOCAL (funciona fora do app Claude também)
    ========================================================= */
@@ -1867,6 +1999,7 @@ function montarInstrucaoInstalar(){
 function mostrarTelaInstalar(){
   montarInstrucaoInstalar();
   document.getElementById('tela-instalar').hidden = false;
+  fecharAbertura();
   // no celular/tablet nao tem escape: so sai daqui instalando de verdade
   // (mesmo mecanismo do pilotquest). So no computador existe a opcao de
   // seguir mesmo assim, e mesmo la pergunta de novo a cada carregamento
@@ -1940,6 +2073,7 @@ async function iniciarFluxoAuth(){
   }
   var conviteId = pegarConviteDaUrl();
   document.getElementById('tela-auth').hidden = false;
+  fecharAbertura();
   if(conviteId){
     alternarAuth('convite');
   } else {
@@ -2072,11 +2206,22 @@ async function carregarOrganizacaoAtiva(){
       if(n > melhor){ melhor = n; escolhida = orgs[k]; }
     }
   }
-  var full = await comTimeout(neon.organization.getFullOrganization(
-    escolhida ? { query: { organizationId: escolhida.id } } : undefined
-  ), 6000);
+  // buscar os dados do grupo e marcar ele como ativo são coisas
+  // independentes: as duas só precisam do id, que já veio da lista. Em fila,
+  // era mais uma viagem de rede antes do app abrir - e numa entrada nova (a
+  // pessoa logando num aparelho pela primeira vez) não tem cache nenhum pra
+  // disfarçar isso, então cada viagem economizada aparece na tela.
+  var idEscolhida = escolhida && escolhida.id;
+  var pares = await Promise.all([
+    comTimeout(neon.organization.getFullOrganization(
+      idEscolhida ? { query: { organizationId: idEscolhida } } : undefined
+    ), 6000),
+    idEscolhida
+      ? comTimeout(neon.organization.setActive({ organizationId: idEscolhida }), 6000).catch(function(){ return null; })
+      : Promise.resolve(null)
+  ]);
+  var full = pares[0];
   orgAtiva = full && full.data;
-  if(orgAtiva) await comTimeout(neon.organization.setActive({ organizationId: orgAtiva.id }), 6000);
 
   // o papel (admin ou não) só decide o que aparece no menu de administração -
   // nada da tela inicial depende dele. Esperar essa resposta antes de abrir o
@@ -2151,6 +2296,11 @@ function atualizarMarca(){
   var texto = textoIntegrantes();
   var el = document.getElementById('marca-sub');
   if(el) el.textContent = texto;
+  // a abertura usa o mesmo nome - e guarda ele pro proximo acesso ja nascer
+  // escrito, em vez de aparecer no meio do caminho
+  var ab = document.getElementById('abertura-nomes');
+  if(ab && texto) ab.textContent = texto;
+  if(texto){ try{ localStorage.setItem(NOMES_CHAVE, texto); }catch(e){} }
   document.title = texto ? ('Dieta e treino - ' + texto) : 'Dieta e treino';
 }
 
@@ -5977,10 +6127,15 @@ function renderResumoHoje(){
   document.getElementById('hoje-ir-diario').textContent =
     (diaIso === iso(new Date())) ? 'Marcar refeições de hoje' : 'Marcar refeições desse dia';
 
-  atualizarCardDieta(diaIso, feitas, total);
-  atualizarCardHabitos(diaIso);
-  atualizarCardTreinoHoje(diaIso);
+  // guardadas pra tela de abertura saber quando a tela inicial ficou pronta
+  // de verdade - os tres cards vao ao banco e voltam em tempos diferentes.
+  pinturaInicial = Promise.all([
+    Promise.resolve(atualizarCardDieta(diaIso, feitas, total)).catch(function(){}),
+    Promise.resolve(atualizarCardHabitos(diaIso)).catch(function(){}),
+    Promise.resolve(atualizarCardTreinoHoje(diaIso)).catch(function(){})
+  ]);
 }
+let pinturaInicial = null;
 
 /* Só o card da Dieta (medidor de calorias e macros). Fica separado porque é
    chamado de dois lugares: no desenho da tela inteira e a cada marcação feita
@@ -6243,7 +6398,7 @@ async function atualizarCardTreinoHoje(diaSel){
     if(tc){
       chaveBtn.textContent = 'Treino ' + treinoHojeEscolhido;
       chaveBtn.hidden = false;
-      nota.textContent = tc.nome;
+      nota.textContent = '';
       pintouDoCache = true;
     }
   }
@@ -6286,13 +6441,12 @@ async function atualizarCardTreinoHoje(diaSel){
       const tFeito = plano.treinos && plano.treinos[chave];
       chaveBtn.textContent = 'Treino ' + chave;
       chaveBtn.hidden = false;
-      nota.textContent = (tFeito ? tFeito.nome + ' · ' : '') +
-        (feitosNoDia.length===1 ? 'feito nesse dia' : feitosNoDia.length+' treinos feitos nesse dia');
+      nota.textContent = '';
       return;
     }
     if(!ehHoje && !feitosNoDia.length){
       chaveBtn.hidden = true;
-      nota.textContent = 'Nenhum treino registrado nesse dia.';
+      nota.textContent = '';
       return;
     }
 
@@ -6319,12 +6473,14 @@ async function atualizarCardTreinoHoje(diaSel){
     if(t){
       chaveBtn.textContent = 'Treino ' + escolhido;
       chaveBtn.hidden = false;
-      nota.textContent = feitosNoDia.length
-        ? (t.nome + ' · ' + (feitosNoDia.length===1 ? '1 treino já feito hoje' : feitosNoDia.length+' treinos já feitos hoje'))
-        : t.nome;
+      // o card não escreve mais o nome do treino nem "1 treino já feito
+      // hoje". A pastilha "Treino C ›" já diz qual é o próximo (e tocar nela
+      // mostra qual é), e o que já foi feito aparece logo abaixo, na lista -
+      // dizer as duas coisas em texto era repetir o que a tela mostra.
+      nota.textContent = '';
     }else{
       chaveBtn.hidden = true;
-      nota.textContent = 'Nenhum treino cadastrado no plano.';
+      nota.textContent = '';
     }
   }catch(e){
     // deu ruim na rede: o que foi desenhado do cache continua valendo. Só
@@ -6332,6 +6488,45 @@ async function atualizarCardTreinoHoje(diaSel){
     if(!pintouDoCache){ chaveBtn.hidden = true; nota.textContent = ''; }
   }
 }
+/* Toque no treino feito: mostra o que foi registrado - exercício por
+   exercício, série por série, com AQ e TC marcados. Antes a linha dizia
+   "Treino B" e não abria nada, então não dava pra conferir o que tinha sido
+   gravado (nem pra descobrir que o treino era só um teste). */
+function abrirTreinoRegistrado(rg, t){
+  const dlg = document.getElementById('dlg');
+  const corpo = document.getElementById('dlg-body');
+  if(!dlg || !corpo) return;
+  document.getElementById('dlg-tit').textContent =
+    'Treino ' + rg.treino_chave + (t && t.nome ? ' · ' + t.nome : '');
+  const exs = (rg.exercicios || []).filter(function(ex){
+    return ex && (ex.series || []).some(function(x){ return x && (x.feita || x.kg!=null || x.reps!=null); });
+  });
+  if(!exs.length){
+    corpo.innerHTML = '<p class="pg-vazio">Esse registro está vazio - nenhuma série foi marcada. '
+      + 'Dá pra apagar ele puxando a linha pra esquerda.</p>';
+  }else{
+    const ROT = { aq:'AQ', tc:'TC' };
+    corpo.innerHTML = '<div class="reg-treino">' + exs.map(function(ex){
+      const linhas = [];
+      let nValida = 0;
+      (ex.series || []).forEach(function(x){
+        if(!x) return;
+        const marca = ROT[x.t] || String(++nValida);
+        if(!x.feita && x.kg==null && x.reps==null) return;
+        const val = (x.kg!=null ? fmtNum(x.kg,1) + ' kg' : '-')
+          + ' × ' + (x.reps!=null ? x.reps : '-');
+        linhas.push('<div class="reg-serie"><span class="reg-num'
+          + (ROT[x.t] ? ' preparo' : '') + '">' + marca + '</span>'
+          + '<span class="reg-val">' + val + '</span>'
+          + '<span class="reg-ok">' + (x.feita ? '✓' : '') + '</span></div>');
+      });
+      return '<div class="reg-ex"><div class="reg-nome">' + (ex.nome || 'Exercício')
+        + '</div>' + linhas.join('') + '</div>';
+    }).join('') + '</div>';
+  }
+  dlg.showModal();
+}
+
 /* Lista os treinos já registrados no dia que a tela mostra, cada um com um
    "Apagar" de dois toques (registro apagado não volta). */
 /* treinos que vieram do relógio (app Saúde) no dia que está na tela - ficam
@@ -6348,38 +6543,39 @@ function listarTreinosFeitos(feitos, plano, diaIso){
   feitos = feitos || [];
   feitos.forEach(function(rg){
     const t = plano && plano.treinos && plano.treinos[rg.treino_chave];
-    const linha = document.createElement('div');
+    // a linha inteira vira um botão: tocar nela abre o que foi registrado
+    // naquele treino. Antes ela não fazia nada - dizia "Treino B feito" e
+    // não tinha como ver o que era esse treino B.
+    const wrap = document.createElement('div');
+    wrap.className = 'hoje-treino-feito-wrap';
+    const excluir = document.createElement('button');
+    excluir.type = 'button'; excluir.className = 'tr-serie-excluir';
+    excluir.textContent = 'Excluir';
+    const linha = document.createElement('button');
+    linha.type = 'button';
     linha.className = 'hoje-treino-feito';
     const txt = document.createElement('span');
     txt.className = 'hoje-treino-feito-txt';
     txt.textContent = 'Treino ' + rg.treino_chave + (t && t.nome ? ' · ' + t.nome : '');
-    const btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'hoje-treino-apagar';
-    btn.textContent = 'Apagar';
-    btn.onclick = async function(){
-      if(btn.getAttribute('data-confirmar') !== '1'){
-        btn.setAttribute('data-confirmar','1');
-        btn.textContent = 'Confirmar';
-        setTimeout(function(){
-          if(btn.getAttribute('data-confirmar')==='1'){
-            btn.removeAttribute('data-confirmar'); btn.textContent = 'Apagar';
-          }
-        }, 4000);
-        return;
-      }
-      btn.disabled = true; btn.textContent = 'Apagando...';
+    const seta = document.createElement('span');
+    seta.className = 'hoje-treino-feito-seta';
+    seta.textContent = '›';
+    linha.appendChild(txt); linha.appendChild(seta);
+    linha.onclick = function(){ abrirTreinoRegistrado(rg, t); };
+    wrap.appendChild(excluir); wrap.appendChild(linha);
+    box.appendChild(wrap);
+    // apagar é puxando pra esquerda, igual às séries e às linhas do diário -
+    // um jeito só de apagar coisa no app inteiro, em vez de um botãozinho
+    // "Apagar/Confirmar" que só existia aqui.
+    ligarSwipeSerie(wrap, async function(){
       try{
         await gravar(db.from('treino_registros').delete().eq('id', rg.id), 'a exclusão do treino');
         // o treino apagado não pode continuar mandando na sugestão do dia
         treinoHojeEscolhido = null; treinoHojeEscolhidoDia = null;
         renderDiario();
         if(typeof renderTreino === 'function') renderTreino();
-      }catch(e){
-        btn.disabled = false; btn.textContent = 'Apagar';
-      }
-    };
-    linha.appendChild(txt); linha.appendChild(btn);
-    box.appendChild(linha);
+      }catch(e){ /* a tarja vermelha já contou o que houve */ }
+    });
   });
   // caminhada, corrida, musculação: o que o Apple Watch gravou aparece aqui
   // também, com a etiqueta de onde veio. Sem botão de apagar - quem manda
@@ -7328,10 +7524,23 @@ async function finalizarTreino(c, box, btn){
    hora - o botão do fim deixa de ser o único jeito de não perder o treino.
    O atraso de 700ms junta as digitações seguidas numa gravação só. */
 let salvarSessaoTimer = null;
+/* Abrir a sessão pra dar uma olhada NÃO é fazer o treino. O salvamento
+   automático nasceu pra não perder série marcada no meio do treino, mas do
+   jeito que estava, qualquer toque dentro da tela já criava o registro do dia
+   - e o treino aparecia como feito sem ter sido. Agora ele só grava depois
+   que existe pelo menos uma série marcada. Se o registro já existe (o treino
+   começou de verdade e você desmarcou tudo), ele continua sendo atualizado:
+   aí o certo é apagar pela lista, não deixar um registro velho congelado. */
+let sessaoTreinoJaGravou = false;
+function temAlgumaSerieMarcada(box){
+  return !!(box && box.querySelector('.tr-serie-linha .tr-serie-check[aria-pressed="true"]'));
+}
 function salvarSessaoAgora(){
   clearTimeout(salvarSessaoTimer); salvarSessaoTimer = null;
   const box = document.getElementById('sessao-treino-registro');
   if(!box || !sessaoTreinoConteudo || !sessaoTreinoChave) return;
+  if(!sessaoTreinoJaGravou && !temAlgumaSerieMarcada(box)) return;
+  sessaoTreinoJaGravou = true;
   // sem botão: a mensagem de erro, se houver, aparece na tarja
   salvarRegistroTreino(sessaoTreinoChave, sessaoTreinoConteudo, box, null).catch(function(){});
 }
@@ -7347,15 +7556,24 @@ function montarExerciciosDaSessao(t, box){
   return Array.prototype.map.call(box.querySelectorAll('.tr-serie-bloco'), function(bloco){
     const idx = parseInt(bloco.getAttribute('data-ex'), 10);
     const nome = (t.ex[idx]||[])[0] || '';
-    const series = Array.prototype.map.call(bloco.querySelectorAll('.tr-serie-linha'), function(linha){
+    // aquecimento e teste de carga entram no registro junto com as válidas,
+    // na ordem em que aparecem na tela, marcados com `t` ('aq'/'tc'). É o
+    // que faz o peso do aquecimento voltar como "Anterior" na semana
+    // seguinte. Quem lê separa pelo `t` (ver seriesDoTipo) - registro antigo
+    // não tem o campo e continua valendo como série que conta.
+    const series = Array.prototype.map.call(
+      bloco.querySelectorAll('.tr-serie-linha, .tr-preserie-linha'), function(linha){
       const kgIn = linha.querySelector('.tr-serie-kg');
       const repsIn = linha.querySelector('.tr-serie-reps');
       const chk = linha.querySelector('.tr-serie-check');
-      return {
+      const tipoLinha = linha.getAttribute('data-tipo-linha') || '';
+      const s = {
         kg: kgIn && kgIn.value!=='' ? parseFloat(kgIn.value) : null,
         reps: repsIn && repsIn.value!=='' ? parseInt(repsIn.value,10) : null,
         feita: !!(chk && chk.getAttribute('aria-pressed')==='true')
       };
+      if(tipoLinha) s.t = tipoLinha;
+      return s;
     });
     return { nome: nome, series: series };
   });
@@ -7412,6 +7630,7 @@ async function abrirSessaoTreino(chaveInicial){
   document.getElementById('tela-sessao-treino').hidden = false;
   sessaoTreinoChave = null;
   sessaoTreinoChaveInicial = chaveInicial || null;
+  sessaoTreinoJaGravou = false;
   const corpo = document.getElementById('sessao-treino-corpo');
   corpo.innerHTML = '<p class="pg-vazio">Carregando...</p>';
   const uid = diario.perfil;
@@ -7453,6 +7672,12 @@ async function abrirSessaoTreino(chaveInicial){
         .eq('organization_id', orgAtiva.id).eq('user_id', uid)
         .order('dia', { ascending:false }).limit(30);
       sessaoTreinoRegistros = (rr && rr.data) || [];
+      // treino de hoje que já existe no banco: daí em diante o salvamento
+      // automático pode continuar atualizando ele normalmente
+      const hojeAgora = iso(new Date());
+      sessaoTreinoJaGravou = sessaoTreinoRegistros.some(function(rg){
+        return rg.dia === hojeAgora && rg.treino_chave === sessaoTreinoChave;
+      });
     }catch(e){ sessaoTreinoRegistros = []; }
     montarSessaoTreino();
   }catch(e){
@@ -7505,19 +7730,50 @@ function valorCurtoSemana(txt){
     .replace(/\s+/g, ' ')
     .trim();
 }
-function preSerieAquecimentoHtml(aquecimentoTxt){
-  const partes = /^(\d+)\s*x\s*(\d+)/i.exec(String(aquecimentoTxt||''));
-  const nSets = partes ? Math.max(1, parseInt(partes[1],10)) : 1;
-  const repsAlvo = partes ? partes[2] : '';
+/* Quantas vezes e quantas repetições uma prescrição manda ("2x15" -> 2 e
+   "15"; "3x8–10" -> 3 e "8-10"; "3x30–40 s" -> 3 e "30-40"). O texto das
+   repetições vira o cinza que fica esperando dentro do campo: o número do
+   plano já está ali, é só digitar por cima do que você fez de verdade. */
+function partesPrescricao(txt){
+  const s = String(txt == null ? '' : txt).trim();
+  const m = /^(\d+)\s*[x×]\s*(.+)$/i.exec(s);
+  if(!m) return { vezes: 1, reps: '' };
+  const reps = m[2].replace(/[–—]/g, '-')
+    .replace(/\s*(s|seg|segundos?|reps?|repetiç(ões|ao|ão))\b.*$/i, '')
+    .replace(/\s+/g, '').trim();
+  return { vezes: Math.max(1, parseInt(m[1], 10) || 1), reps: reps };
+}
+
+/* Linhas de preparo (aquecimento e teste de carga) - as primeiras da MESMA
+   tabela das séries, com "AQ"/"TC" no lugar do número.
+   Elas têm kg e reps iguais às outras de propósito: no aquecimento a pessoa
+   bota um pezinho e quer lembrar disso na semana seguinte ("fiz com 25"), e
+   o teste de carga é justamente onde o peso do dia é achado. O que elas NÃO
+   fazem é entrar na conta das séries que valem: ficam fora de
+   .tr-serie-linha, então não são numeradas, não contam no "faltam X séries"
+   e vão pro registro marcadas com o seu tipo. */
+function linhasPreparoHtml(nome, aquecimentoTxt, testeTxt, isometrico){
   let linhas = '';
-  for(let s=0; s<nSets; s++){
-    linhas += '<div class="tr-preserie-linha" data-serie="'+s+'">'
-      + '<span class="tr-serie-num aq">AQ</span>'
-      + '<span class="tr-serie-anterior">-</span>'
-      + '<span class="tr-preserie-vazio">-</span>'
-      + '<span class="tr-preserie-vazio">'+(repsAlvo||'-')+'</span>'
+  function uma(rotulo, tipo, alvo, idx){
+    const ant = serieAnterior(nome, idx, tipo);
+    const antTxt = ant ? (ant.kg!=null?fmtNum(ant.kg,1):'-')+' kg × '+(ant.reps!=null?ant.reps:'-') : '-';
+    const kgPlaceholder = ant && ant.kg!=null ? fmtNum(ant.kg,1) : 'kg';
+    linhas += '<div class="tr-preserie-linha" data-serie="'+idx+'" data-tipo-linha="'+tipo+'">'
+      + '<span class="tr-serie-num aq">'+rotulo+'</span>'
+      + '<span class="tr-serie-anterior">'+antTxt+'</span>'
+      + '<input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="'+kgPlaceholder+'">'
+      + '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="'
+        + (alvo || (isometrico ? 'seg' : 'reps')) + '">'
       + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
       + '</div>';
+  }
+  if(temValorPlano(aquecimentoTxt)){
+    const p = partesPrescricao(aquecimentoTxt);
+    for(let s=0; s<p.vezes; s++) uma('AQ', 'aq', p.reps, s);
+  }
+  if(temValorPlano(testeTxt)){
+    const p = partesPrescricao(testeTxt);
+    for(let s=0; s<p.vezes; s++) uma('TC', 'tc', p.reps, s);
   }
   return linhas;
 }
@@ -7758,13 +8014,35 @@ function abrirExplicacaoExercicio(nome){
 // kg/reps da série `idxSerie` desse exercício na última vez (dia mais
 // recente, ignorando hoje) que esse treino foi registrado - ou null se
 // nunca foi feito antes.
-function serieAnterior(nomeExercicio, idxSerie){
+/* Separa as séries de um exercício registrado por tipo de linha: as que
+   valem (sem marca), o aquecimento ('aq') e o teste de carga ('tc').
+   Registro antigo não tem a marca - e nele tudo era série que vale, então a
+   leitura continua certa. */
+function seriesDoTipo(ex, tipo){
+  const todas = (ex && ex.series) || [];
+  return todas.filter(function(s){ return (s && s.t ? s.t : '') === (tipo || ''); });
+}
+
+/* O "Anterior" é a memória do exercício, não do treino. Antes ele só olhava
+   registros da MESMA letra (Treino A), então bastava a nutricionista mandar
+   uma periodização nova com a remada no B - ou o mesmo A com quatro séries
+   em vez de três - pra todo o histórico de carga sumir da tela e você ter
+   que adivinhar o peso de novo. Agora a busca é pelo NOME do exercício em
+   qualquer treino: se "Remada máquina apoiada, pegada neutra" continua
+   existindo no plano novo, o peso continua aparecendo.
+   Série que o plano acrescentou (a 4ª, num plano que tinha 3) não fica órfã:
+   na falta do índice exato, mostra a última que existe daquele tipo. */
+function serieAnterior(nomeExercicio, idxSerie, tipo){
   const hoje = iso(new Date());
+  const alvo = norm(nomeExercicio);
   for(let i=0;i<sessaoTreinoRegistros.length;i++){
     const rg = sessaoTreinoRegistros[i];
-    if(rg.dia === hoje || rg.treino_chave !== sessaoTreinoChave) continue;
-    const ex = (rg.exercicios||[]).find(function(x){ return x.nome===nomeExercicio; });
-    const s = ex && ex.series && ex.series[idxSerie];
+    if(rg.dia === hoje) continue;
+    const ex = (rg.exercicios||[]).find(function(x){ return norm(x.nome) === alvo; });
+    if(!ex) continue;
+    const lista = seriesDoTipo(ex, tipo);
+    if(!lista.length) continue;
+    const s = lista[idxSerie] || lista[lista.length - 1];
     if(s && (s.kg!=null || s.reps!=null)) return s;
   }
   return null;
@@ -7829,9 +8107,11 @@ function montarSessaoTreino(){
       // embaixo como pré-série marcável (ver preSerieAquecimentoHtml).
       // mesmo formato da aba Treino: rótulo e valor alinhados em duas
       // colunas, em vez de pílulas soltas.
+      // "Séries válidas" e "Teste de carga" saíram daqui: a tabela embaixo já
+      // diz as duas coisas sozinha - 1, 2, 3 são as válidas, e o teste virou
+      // a linha TC. Repetir em cima era ocupar espaço pra dizer o que está
+      // logo ali. Na aba Treino (onde não existe tabela) eles continuam.
       const campos = [];
-      if(temValorPlano(e[2])) campos.push(['Teste de carga', comSinalDeVezes(e[2])]);
-      if(temValorPlano(e[3])) campos.push(['Séries válidas', comSinalDeVezes(e[3])]);
       if(temValorPlano(e[4])) campos.push(['Descanso', comSinalDeVezes(e[4])]);
       const meta = campos.length
         ? '<div class="tr-ex-grade tr-ex-grade-sessao">' + campos.map(function(par){
@@ -7839,10 +8119,11 @@ function montarSessaoTreino(){
               + '<span class="tr-ex-val">'+par[1]+'</span></div>';
           }).join('') + '</div>'
         : '';
-      // pré-série de aquecimento: só faz sentido pros exercícios "normais" -
-      // ativação já É o aquecimento (vira o checklist principal dele) e os
-      // isométricos do plano nunca têm aquecimento prescrito à parte.
-      const preSerie = (tipo!=='ativacao' && temValorPlano(e[1])) ? preSerieAquecimentoHtml(e[1]) : '';
+      // linhas de preparo (aquecimento e teste de carga): só fazem sentido
+      // pros exercícios "normais" - ativação já É o aquecimento (vira o
+      // checklist principal dele).
+      const preSerie = (tipo!=='ativacao')
+        ? linhasPreparoHtml(e[0], e[1], e[2], tipo==='isometrico') : '';
       let linhasSerie = '';
       let cabecalho = '';
       if(tipo==='ativacao'){
@@ -7871,20 +8152,27 @@ function montarSessaoTreino(){
       } else {
         const nSeries = numSeriesPadrao(e[3]);
         const repsLabel = tipo==='isometrico' ? 'Segundos' : 'Reps';
-        const repsPlaceholder = tipo==='isometrico' ? 'seg' : 'reps';
+        // o campo nasce VAZIO, com a meta do plano em cinza esperando ser
+        // digitada por cima ("8-10" nas válidas, o do plano no AQ e no TC).
+        // Antes ele já vinha preenchido com o da semana passada, e aí não
+        // dava pra saber, olhando, o que foi feito hoje e o que era sobra do
+        // treino anterior. O peso da última vez não some: fica de cinza no
+        // campo de kg, e marcar a série adota esse número quando você não
+        // digitou nada - repetir a carga é um toque, mudar é digitar.
+        const alvoValidas = partesPrescricao(e[3]).reps;
+        const repsPlaceholder = alvoValidas || (tipo==='isometrico' ? 'seg' : 'reps');
         cabecalho = '<div class="tr-serie-header-row"><span>Série</span><span>Anterior</span><span>kg</span><span>'+repsLabel+'</span><span></span></div>';
         for(let s=0; s<nSeries; s++){
-          const ant = serieAnterior(e[0], s);
+          const ant = serieAnterior(e[0], s, '');
           const antTxt = ant ? (ant.kg!=null?fmtNum(ant.kg,1):'-')+' kg × '+(ant.reps!=null?ant.reps:'-') : '-';
-          const kgVal = ant && ant.kg!=null ? ant.kg : '';
-          const repsVal = ant && ant.reps!=null ? ant.reps : '';
+          const kgPlaceholder = ant && ant.kg!=null ? fmtNum(ant.kg,1) : 'kg';
           linhasSerie += '<div class="tr-serie-linha-wrap">'
             + '<button type="button" class="tr-serie-excluir">Excluir</button>'
             + '<div class="tr-serie-linha" data-serie="'+s+'">'
             + '<span class="tr-serie-num">'+(s+1)+'</span>'
             + '<span class="tr-serie-anterior">'+antTxt+'</span>'
-            + '<input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="kg" value="'+kgVal+'">'
-            + '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="'+repsPlaceholder+'" value="'+repsVal+'">'
+            + '<input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="'+kgPlaceholder+'">'
+            + '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="'+repsPlaceholder+'">'
             + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
             + '</div></div>';
         }
@@ -7907,7 +8195,8 @@ function montarSessaoTreino(){
         + '<button type="button" class="tr-serie-add" data-ex="'+idx+'" data-tipo="'+tipo+'">+ Adicionar série</button>'
         + '</div>';
     }).join('');
-    corpoTreino = '<h4 class="tr-sessao-titulo">Treino '+sessaoTreinoChave+' - '+t.nome+'</h4>'
+    corpoTreino = '<h4 class="tr-sessao-titulo">Treino '+sessaoTreinoChave+'</h4>'
+      + (t.nome ? '<p class="tr-sessao-sub">'+t.nome+'</p>' : '')
       + semanaInfo
       + core
       + '<div class="tr-registro" id="sessao-treino-registro">'
@@ -8014,6 +8303,16 @@ function ligarCheckSerie(btn){
     btn.setAttribute('aria-pressed', feita);
     const linha = btn.closest('.tr-serie-linha, .tr-aquecimento-linha, .tr-preserie-linha');
     if(linha) linha.classList.toggle('feita', feita);
+    // marcar sem ter digitado nada quer dizer "repeti o de sempre": adota o
+    // peso que está de cinza no campo (o da última vez). Só o kg - as
+    // repetições variam demais pra serem chutadas, e a meta do plano é uma
+    // faixa ("8-10"), não um número.
+    if(feita && linha){
+      const kgIn = linha.querySelector('.tr-serie-kg');
+      if(kgIn && kgIn.value === '' && kgIn.placeholder && /^[\d.,]+$/.test(kgIn.placeholder)){
+        kgIn.value = kgIn.placeholder.replace(',', '.');
+      }
+    }
     agendarSalvarSessao();
     // terminou a série: já começa a contar o descanso pra próxima, com o
     // tempo que o plano manda naquele exercício (e, na falta dele, o
@@ -8047,7 +8346,7 @@ function renumerarSeries(linhasBox){
 function ligarSwipeSerie(wrapEl, aoExcluir){
   // `.vs-linha-editavel` é a linha do histórico de planos: ela ficava de fora
   // desta lista, então o arrasto simplesmente não acontecia lá.
-  const linha = wrapEl.querySelector('.tr-serie-linha, .tr-aquecimento-linha, .item-dia, .vs-linha-editavel');
+  const linha = wrapEl.querySelector('.tr-serie-linha, .tr-aquecimento-linha, .item-dia, .vs-linha-editavel, .hoje-treino-feito');
   const excluirBtn = wrapEl.querySelector('.tr-serie-excluir');
   if(!linha) return;
   const LARGURA_ABERTA = 76;
@@ -8284,40 +8583,72 @@ function parseDescansoSegundos(txt){
    usuário, então o iOS deixa tocar). O áudio continua rodando em segundo
    plano, e o bipe sai na hora certa mesmo com o app congelado atrás do
    Instagram. */
-function montarWavDescanso(segundos){
-  const TAXA = 8000;                       // suficiente pra um bipe
-  const RABO = 1.4;                        // sobra depois do fim, pro toque final
-  const total = Math.max(1, Math.round((segundos + RABO) * TAXA));
-  const dados = new Int16Array(total);
-  // desenha um tom em `quando` (segundos a partir do início do descanso)
-  function tom(quando, duracao, freq, volume){
-    const ini = Math.round(quando * TAXA);
-    const fim = ini + Math.round(duracao * TAXA);
-    for(let i = Math.max(0, ini); i < Math.min(total, fim); i++){
-      const t = (i - ini) / TAXA;
-      // rampa nas pontas pra não estalar
-      const env = Math.min(1, (fim - i)/(0.02*TAXA), (i - ini)/(0.005*TAXA));
-      const v = Math.sin(2*Math.PI*freq*t) * volume * Math.max(0, env);
-      dados[i] = Math.max(-32000, Math.min(32000, dados[i] + Math.round(v)));
+/* Som do descanso - "tu · tu · tu · tum".
+   Três mudanças em relação ao que era:
+   1) UM tom no fim, e não dois (o "tum-tam" incomodava);
+   2) 22 kHz no lugar de 8 kHz - naquela taxa não sobrava nada além do apito
+      puro, e era metade do motivo de soar seco;
+   3) envelope que SEGURA no volume cheio e só depois cai devagar, com um
+      retorno bem leve por cima do tom final. O corte antigo matava o som de
+      uma vez (o "seco" que incomodava no fone); uma queda pura o deixaria
+      fino. Os dois juntos dão corpo sem perder o recado. */
+const DESC_TAXA = 22050;
+function envelopeDescanso(t, sust, dur, ataque){
+  const sobe = Math.min(1, t / (ataque || 0.006));
+  if(t <= sust) return sobe;
+  return sobe * Math.exp(-(t - sust) * (4.2 / Math.max(0.05, dur - sust)));
+}
+function amostrasDescanso(segundos){
+  const RABO = 2.4;
+  const total = Math.max(1, Math.round((segundos + RABO) * DESC_TAXA));
+  function tomEm(buf, quando, sust, dur, freq, vol, ataque){
+    const ini = Math.round(quando * DESC_TAXA);
+    const fim = Math.min(buf.length, ini + Math.round(dur * DESC_TAXA));
+    for(let i = Math.max(0, ini); i < fim; i++){
+      const t = (i - ini) / DESC_TAXA;
+      buf[i] += Math.sin(2*Math.PI*freq*t) * envelopeDescanso(t, sust, dur, ataque) * vol;
     }
   }
-  // contagem regressiva: três toques curtos, a 3, 2 e 1 segundo do fim
+  // os três avisos, a 3, 2 e 1 segundo do fim: seguram 90 ms cheios (o "tu")
+  // e somem, em vez de serem cortados
+  const avisos = new Float32Array(total);
   for(let b = 3; b >= 1; b--){
-    if(segundos - b > 0) tom(segundos - b, 0.13, 880, 26000);
+    if(segundos - b > 0) tomEm(avisos, segundos - b, 0.09, 0.26, 880, 0.84, 0.004);
   }
-  // e o toque de "vai", na hora exata de começar a próxima série: mais longo
-  // e mais agudo, pra não confundir com os avisos
-  tom(segundos, 0.30, 1175, 30000);
-  tom(segundos + 0.38, 0.45, 1568, 30000);
-  const buf = new ArrayBuffer(44 + dados.length*2);
+  // o "tum" da hora de voltar, em buffer próprio: só ele leva o retorno, pra
+  // os avisos continuarem separados e secos entre si
+  const fim = new Float32Array(total);
+  tomEm(fim, segundos, 0.13, 1.05, 1175, 0.90, 0.008);
+  const atraso = Math.round(0.055 * DESC_TAXA);
+  const d = new Float32Array(total);
+  let pico = 0;
+  for(let i = 0; i < total; i++){
+    d[i] = avisos[i] + fim[i] + (i >= atraso ? fim[i - atraso] * 0.14 : 0);
+    const a = Math.abs(d[i]);
+    if(a > pico) pico = a;
+  }
+  // som cortado no topo chia, que é o contrário do que a gente quer aqui:
+  // se passou de 1, abaixa o conjunto inteiro mantendo o formato
+  if(pico > 0.94){
+    const fator = 0.94 / pico;
+    for(let i = 0; i < total; i++) d[i] *= fator;
+  }
+  return d;
+}
+function montarWavDescanso(segundos, volume){
+  const d = amostrasDescanso(segundos);
+  const g = (volume == null ? 1 : volume);
+  const buf = new ArrayBuffer(44 + d.length*2);
   const dv = new DataView(buf);
   function txt(pos, str){ for(let i=0;i<str.length;i++) dv.setUint8(pos+i, str.charCodeAt(i)); }
-  txt(0,'RIFF'); dv.setUint32(4, 36 + dados.length*2, true); txt(8,'WAVEfmt ');
+  txt(0,'RIFF'); dv.setUint32(4, 36 + d.length*2, true); txt(8,'WAVEfmt ');
   dv.setUint32(16,16,true); dv.setUint16(20,1,true); dv.setUint16(22,1,true);
-  dv.setUint32(24,TAXA,true); dv.setUint32(28,TAXA*2,true);
+  dv.setUint32(24,DESC_TAXA,true); dv.setUint32(28,DESC_TAXA*2,true);
   dv.setUint16(32,2,true); dv.setUint16(34,16,true);
-  txt(36,'data'); dv.setUint32(40, dados.length*2, true);
-  for(let i=0;i<dados.length;i++) dv.setInt16(44 + i*2, dados[i], true);
+  txt(36,'data'); dv.setUint32(40, d.length*2, true);
+  for(let i=0;i<d.length;i++){
+    dv.setInt16(44 + i*2, Math.max(-32000, Math.min(32000, Math.round(d[i] * g * 32000))), true);
+  }
   return new Blob([buf], {type:'audio/wav'});
 }
 /* Ícones em SVG, no mesmo traço do resto do app (24x24, stroke 1.8) - nada
@@ -8331,13 +8662,71 @@ const ICO_SINO_MUDO = '<svg viewBox="0 0 24 24" aria-hidden="true" class="ico-si
   + '<path d="M10 20.4a2.2 2.2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'
   + '<path d="M4.4 3.6l15.2 16.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 let descansoAudio = null, descansoAudioUrl = null, descansoWakeLock = null;
-let descansoSomLigado = true;
+
+/* ---- altura do som, por pessoa ----
+   Eu posso querer alto e a Isabella baixo, e cada uma das duas contas tem a
+   sua. Fica em escolhas_individuais (organização + pessoa + chave), a mesma
+   tabela da foto de perfil, com uma cópia no aparelho pra valer já no
+   primeiro descanso, sem esperar o banco. Zero é mudo: é a mesma barrinha,
+   não tem um botão separado pra isso. */
+const VOL_CHAVE = 'descanso_volume';
+let descansoVolume = 0.75;
+function chaveVolumeLocal(){ return 'descansoVolume|' + (diario.perfil || 'eu'); }
+let descansoSomLigado = true;   // = volume > 0, mantido pros trechos antigos
+function aplicarVolume(v){
+  descansoVolume = Math.max(0, Math.min(1, v));
+  descansoSomLigado = descansoVolume > 0;
+}
 try{
-  window.storage.get('descansoSom').then(function(r){
-    const v = r && (r.value !== undefined ? r.value : r);
-    if(v === '0') descansoSomLigado = false;
-  });
+  const bruto = localStorage.getItem(chaveVolumeLocal());
+  if(bruto !== null) aplicarVolume(parseFloat(bruto));
+  else {
+    // conta antiga só tinha ligado/desligado
+    const velho = localStorage.getItem('descansoSom');
+    if(velho === '0') aplicarVolume(0);
+  }
 }catch(e){}
+async function carregarVolumeDescanso(){
+  if(!db || !orgAtiva || !diario.perfil) return;
+  try{
+    const r = await db.from('escolhas_individuais').select('valor')
+      .eq('organization_id', orgAtiva.id).eq('user_id', diario.perfil)
+      .eq('chave', VOL_CHAVE).maybeSingle();
+    const v = r && r.data && r.data.valor;
+    const n = (v && typeof v === 'object') ? v.v : v;
+    if(n != null && !isNaN(parseFloat(n))){
+      aplicarVolume(parseFloat(n));
+      try{ localStorage.setItem(chaveVolumeLocal(), String(descansoVolume)); }catch(e){}
+    }
+  }catch(e){ /* fica com o do aparelho */ }
+}
+/* Soltou a barrinha: salva na hora. Sem "confirmar", sem "aplicar" - o gesto
+   já é a decisão. O aparelho grava na hora (é o que vale no próximo
+   descanso) e o banco recebe logo atrás, pra seguir a pessoa em outro
+   celular. */
+function salvarVolumeDescanso(){
+  try{ localStorage.setItem(chaveVolumeLocal(), String(descansoVolume)); }catch(e){}
+  if(!db || !orgAtiva || !diario.perfil || !sessaoAtual) return;
+  gravar(db.from('escolhas_individuais').upsert({
+    organization_id: orgAtiva.id,
+    user_id: diario.perfil,
+    chave: VOL_CHAVE,
+    valor: { v: descansoVolume }
+  }, { onConflict: 'organization_id,user_id,chave' }), 'a altura do som').catch(function(){});
+}
+/* toque de teste: só o "tum" do fim, na altura que o dedo acabou de soltar */
+let audioTeste = null, audioTesteUrl = null;
+function tocarTesteVolume(){
+  if(!(descansoVolume > 0)) return;
+  try{
+    if(audioTeste){ try{ audioTeste.pause(); }catch(e){} }
+    if(audioTesteUrl) URL.revokeObjectURL(audioTesteUrl);
+    audioTesteUrl = URL.createObjectURL(montarWavDescanso(0.05, descansoVolume));
+    audioTeste = new Audio(audioTesteUrl);
+    audioTeste.setAttribute('playsinline','');
+    audioTeste.play().catch(function(){});
+  }catch(e){}
+}
 function pararSomDescanso(){
   if(descansoAudio){ try{ descansoAudio.pause(); }catch(e){} descansoAudio = null; }
   if(descansoAudioUrl){ try{ URL.revokeObjectURL(descansoAudioUrl); }catch(e){} descansoAudioUrl = null; }
@@ -8348,7 +8737,7 @@ function tocarSomDescanso(segundos){
   if(!descansoSomLigado || !(segundos > 0)) return;
   try{
     descansoUltimoArme = Date.now();
-    descansoAudioUrl = URL.createObjectURL(montarWavDescanso(segundos));
+    descansoAudioUrl = URL.createObjectURL(montarWavDescanso(segundos, descansoVolume));
     descansoAudio = new Audio(descansoAudioUrl);
     descansoAudio.preload = 'auto';
     // o iPhone às vezes trata um áudio novo como "mídia" e para a música de
@@ -8436,6 +8825,9 @@ function iniciarDescanso(txt, nomeExercicio){
     +   '<div class="tr-desc-col">'
     +     '<div class="tr-desc-topo"><span class="tr-desc-rot">Descanso</span>' + BOTOES + '</div>'
     +     (nomeExercicio ? '<div class="tr-desc-ex"></div>' : '')
+    +     '<div class="tr-desc-vol-caixa" hidden>'
+    +       '<input type="range" class="tr-desc-vol" min="0" max="100" step="5" aria-label="Altura do som">'
+    +     '</div>'
     +     '<div class="tr-desc-acoes">'
     +       '<button type="button" class="tr-desc-btn" data-acao="mais">+30 s</button>'
     +       '<button type="button" class="tr-desc-btn forte" data-acao="pular">Pular</button>'
@@ -8506,21 +8898,42 @@ function iniciarDescanso(txt, nomeExercicio){
   segurarTela();
 
   const btSom = el.querySelector('.tr-desc-som');
+  const volCaixa = el.querySelector('.tr-desc-vol-caixa');
+  const volBarra = el.querySelector('.tr-desc-vol');
   function pintarSom(){
     btSom.innerHTML = descansoSomLigado ? ICO_SINO : ICO_SINO_MUDO;
     btSom.setAttribute('aria-pressed', descansoSomLigado ? 'true' : 'false');
-    btSom.title = descansoSomLigado
-      ? 'Som ligado - o bipe toca mesmo com o app fechado'
-      : 'Som desligado';
+    btSom.title = 'Altura do som';
   }
   pintarSom();
-  btSom.onclick = function(){
-    descansoSomLigado = !descansoSomLigado;
-    try{ window.storage.set('descansoSom', descansoSomLigado ? '1' : '0'); }catch(e){}
-    if(descansoSomLigado) tocarSomDescanso(Math.max(0, restante));
-    else pararSomDescanso();
-    pintarSom();
+  if(volBarra) volBarra.value = Math.round(descansoVolume * 100);
+  // o sino não liga e desliga mais: ele mostra a barrinha. Tudo na esquerda
+  // é mudo - um controle só, em vez de um botão de mudo e um de altura.
+  btSom.onclick = function(ev){
+    ev.stopPropagation();
+    if(!volCaixa) return;
+    volCaixa.hidden = !volCaixa.hidden;
+    if(!volCaixa.hidden && volBarra) volBarra.value = Math.round(descansoVolume * 100);
   };
+  if(volBarra){
+    // arrastando: só muda o ícone, sem tocar nada (som a cada pixel enlouquece)
+    volBarra.addEventListener('input', function(){
+      aplicarVolume(parseInt(volBarra.value, 10) / 100);
+      pintarSom();
+    });
+    // soltou: toca na altura escolhida e salva. Não tem "confirmar" - soltar
+    // o dedo JÁ é a decisão, e ela vale daí pra sempre, pra essa pessoa.
+    volBarra.addEventListener('change', function(){
+      aplicarVolume(parseInt(volBarra.value, 10) / 100);
+      pintarSom();
+      salvarVolumeDescanso();
+      if(descansoVolume > 0) tocarTesteVolume(); else pararSomDescanso();
+      // o áudio do descanso que já está agendado foi gerado na altura
+      // antiga: refaz ele com a nova, senão a mudança só valeria no próximo
+      if(restante > 0 && descansoVolume > 0) tocarSomDescanso(Math.max(0, restante));
+    });
+    volBarra.addEventListener('click', function(ev){ ev.stopPropagation(); });
+  }
   // Encolher, não fechar: fechado de vez não teria como voltar, e o descanso
    // continua correndo. Encolhido vira uma pilulazinha com o tempo, e tocar
    // nela abre de novo. Quem quer acabar com o descanso usa "Pular".
@@ -8530,7 +8943,7 @@ function iniciarDescanso(txt, nomeExercicio){
   };
   el.onclick = function(ev){
     if(!el.classList.contains('minimizado')) return;
-    if(ev.target.closest('.tr-desc-btn, .tr-desc-som')) return;
+    if(ev.target.closest('.tr-desc-btn, .tr-desc-som, .tr-desc-vol-caixa')) return;
     el.classList.remove('minimizado');
   };
   Array.prototype.forEach.call(el.querySelectorAll('.tr-desc-btn'), function(b){
@@ -8825,10 +9238,20 @@ async function iniciarApp(){
     renderListas();
     render();
     setAba('diario');
+    // a abertura so sai agora: plano, diario e os tres cards (dieta, habitos
+    // e treino) ja desenhados. E o que tira a sensacao de ver o app sendo
+    // montado ao vivo.
+    try{ await pinturaInicial; }catch(ePint){}
+    // um quadro pro navegador pintar o que acabou de chegar antes da
+    // cortina levantar - sem isso a abertura sai um piscar antes da tela
+    fecharAberturaNoProximoQuadro();
   }catch(e){
     document.getElementById('refeicoes').innerHTML =
       '<div class="meal"><div class="meal-head"><h2>Deu erro ao montar o cardápio</h2><div class="horas">'+
       ((e && e.message) ? e.message : String(e))+'</div></div></div>';
+    // deu erro: a abertura sai do mesmo jeito. Ninguem pode ficar preso
+    // atras dela por causa de uma falha de carregamento.
+    fecharAbertura();
   }
 }
 </script>
