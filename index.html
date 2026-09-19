@@ -715,6 +715,31 @@
   .sessao-treino-corpo{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
     overscroll-behavior-y:contain;max-width:720px;margin:0 auto;width:100%;
     padding:16px 16px calc(24px + env(safe-area-inset-bottom,0px))}
+  /* ---------- barra fixa da sessão ---------- */
+  .tr-barra{flex-shrink:0;background:var(--card);border-top:1px solid var(--hair);
+    box-shadow:0 -6px 20px rgba(0,0,0,.07);
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));z-index:5}
+  .tr-barra[hidden]{display:none}
+  .tr-barra-linha{display:flex;align-items:center;gap:12px;max-width:720px;margin:0 auto}
+  .tr-barra-tempo{flex:1 1 auto;min-width:0;display:flex;align-items:baseline;gap:8px}
+  .tr-barra-rot{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--ink3);white-space:nowrap}
+  .tr-barra-num{font-size:22px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .tr-barra-btns{display:flex;gap:8px;flex-shrink:0}
+  .tr-barra-ico{width:36px;height:36px;border-radius:12px;border:1px solid var(--hair);
+    background:var(--card);color:var(--ink);font-size:13px;font-family:inherit;display:flex;
+    align-items:center;justify-content:center;padding:0;cursor:pointer}
+  .tr-barra-fim{padding:0 14px;height:36px;border-radius:12px;border:none;background:var(--ink);
+    color:#fff;font-size:13.5px;font-weight:700;font-family:inherit;cursor:pointer}
+  .tr-barra.pausado .tr-barra-num{color:var(--ink3)}
+  /* com a sessão aberta, o painel do descanso deixa de flutuar no meio da
+     tela e encosta na barra, virando a mesma peça (ver mockup aprovado). */
+  .tr-descanso-toast.na-sessao{left:0;right:0;transform:none;width:auto;max-width:none;
+    bottom:var(--tr-barra-h,64px);border-radius:16px 16px 0 0;border-bottom:0;
+    box-shadow:0 -6px 20px rgba(0,0,0,.07)}
+  .tr-descanso-toast.na-sessao .tr-desc-corpo{max-width:720px;margin:0 auto}
+  .tr-descanso-toast.na-sessao.minimizado{left:auto;right:12px;width:auto;border-radius:999px;
+    bottom:calc(var(--tr-barra-h,64px) + 10px);box-shadow:0 8px 24px rgba(0,0,0,.18)}
   .tr-chip-sel{font-size:13px;font-weight:600;padding:8px 16px;border-radius:10px;
     background:var(--fill);color:var(--ink2);border:0;cursor:pointer}
   .tr-chip-sel[aria-pressed="true"]{background:var(--azul);color:#fff}
@@ -1109,8 +1134,8 @@
      sem o traço do meio. */
   .tr-sessao-titulo{font-size:15.5px;font-weight:800;text-transform:uppercase;letter-spacing:.11em;
     color:var(--azul);text-align:center;margin:18px 0 2px;line-height:1.25}
-  .tr-sessao-sub{font-size:13.5px;font-weight:600;color:var(--ink2);text-align:center;
-    margin:0 0 12px;line-height:1.35;letter-spacing:0;text-transform:none;
+  .tr-sessao-sub{font-size:15.5px;font-weight:600;color:var(--ink2);text-align:center;
+    margin:0 0 12px;line-height:1.35;letter-spacing:-.01em;text-transform:none;
     padding:0 8px;overflow-wrap:anywhere}
   .tr-sub{font-size:13px;color:var(--ink2);margin:0;line-height:1.5}
   .tr-sub.editavel{cursor:pointer;text-decoration:underline;text-decoration-color:var(--hair);
@@ -1126,9 +1151,12 @@
      ("Séries válidas" em tela estreita), os três valores continuam na mesma
      altura em vez de cada um flutuar num lugar. */
   .tr-sem-celula{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-    gap:3px;background:none;padding:10px 6px;min-width:0}
+    gap:3px;background:none;padding:10px 6px 4px;min-width:0}
   .tr-sem-celula + .tr-sem-celula{border-left:1px solid var(--hair)}
-  .tr-sem-rot{display:flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:var(--ink3);
+  /* as três células têm exatamente o mesmo rótulo: era o botãozinho "?" que
+     entrava no flex de "Intensidade" e espremia a palavra, deixando ela menor
+     que as vizinhas. Sem ele, some a diferença. */
+  .tr-sem-rot{display:block;font-size:11.5px;font-weight:700;color:var(--ink3);
     text-transform:uppercase;letter-spacing:.03em;text-align:center;line-height:1.2}
   .tr-sem-val{font-size:15px;font-weight:700;color:var(--ink);text-align:center;line-height:1.25;
     white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
@@ -1180,7 +1208,10 @@
   .tr-detalhes h5{font-size:11.5px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.02em;margin:14px 0 4px}
   .tr-detalhes h5:first-child{margin-top:10px}
   .tr-detalhes ul{margin:0 0 0 18px;padding:0;font-size:13px;color:var(--ink2);line-height:1.5}
-  .tr-registro{margin-top:14px;padding-top:14px}
+  /* 14 de margem + 14 de espaço interno davam 32px de vão entre o cartão da
+     semana e o primeiro exercício - um buraco no meio da tela de treino, sem
+     nada pra separar. Metade disso já separa as duas coisas. */
+  .tr-registro{margin-top:0;padding-top:2px}
   .tr-registro-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px}
   .tr-registro-tit{font-size:11.5px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.02em}
   .tr-registro-ultima{font-size:12px;color:var(--ink3)}
@@ -1196,10 +1227,13 @@
      app de treino "de verdade", inspirado no Strong) - ver
      abrirSessaoTreino/montarSessaoTreino/ligarSwipeSerie/abrirMenuExercicio. */
   .tr-serie-bloco{margin-top:18px;padding-top:14px}
-  /* o primeiro exercício fica à mesma distância do cartão da semana que um
-     exercício fica do "+ Adicionar série" do anterior: 18+14 entre blocos,
-     e aqui 14 (margem do cartão) + 4 + 14 dá a mesma folga de 32px. */
-  .tr-serie-bloco:first-of-type{margin-top:4px}
+  /* O PRIMEIRO exercício é caso à parte: entre dois exercícios o vão grande
+     faz sentido (são coisas iguais que precisam se separar), mas entre o
+     cartão da semana e o primeiro exercício ele virava um buraco no meio da
+     tela. O que segurava a distância eram três coisas somadas, não uma: a
+     margem daqui, o espaço interno do bloco e o espaço embaixo das células
+     do cartão. Mexer só numa não adiantava nada. */
+  .tr-serie-bloco:first-of-type{margin-top:0;padding-top:4px}
   .tr-serie-cab{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
   /* quando tem legenda de tipo embaixo, o nome não precisa do respiro todo */
   .tr-serie-cab:has(+ .tr-ex-tipo){margin-bottom:4px}
@@ -1271,6 +1305,17 @@
     color:var(--ink3);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;padding:0}
   .tr-serie-check[aria-pressed="true"]{background:var(--ok);color:#fff;box-shadow:var(--sh-min)}
+  /* célula de segundos das séries por tempo: no lugar do campo, o ▶ que abre
+     o cronômetro. Mesmo tamanho e mesmo fundo dos campos vizinhos, pra linha
+     não ficar torta. */
+  .tr-serie-crono{width:100%;height:30px;border-radius:10px;border:none;background:var(--fill);
+    color:var(--ink2);font-size:12.5px;font-weight:700;font-family:inherit;display:flex;
+    align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:0}
+  .tr-serie-crono[data-valor]{color:var(--ink);font-size:14px}
+  .tr-crono-meta{font-size:11.5px;color:var(--ink3);margin:2px 0 10px;line-height:1.35}
+  .tr-crono-meta b{color:var(--ink);font-weight:700}
+  .crono-passou .tr-desc-anel-pr{stroke:var(--ok)}
+  .crono-passou .tr-desc-tempo{color:var(--ok)}
   .tr-serie-add{margin-top:6px;width:100%;padding:9px;border-radius:10px;border:1px dashed var(--hair);
     background:none;color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
   /* ativação (ex.: Wall Slide) - sem kg/reps/anterior, só um checklist de
@@ -1824,6 +1869,22 @@
     <h1>Treino de hoje</h1>
   </div>
   <div id="sessao-treino-corpo" class="sessao-treino-corpo"></div>
+  <!-- barra presa no rodapé da sessão: o tempo do treino correndo, pausa e
+       finalizar. O painel de descanso encosta em cima dela, virando uma peça
+       só - é lá que ficam o descanso e, depois, o cronômetro dos exercícios
+       por tempo. -->
+  <div id="tr-barra" class="tr-barra" hidden>
+    <div class="tr-barra-linha">
+      <span class="tr-barra-tempo">
+        <span class="tr-barra-rot" id="tr-barra-rot">Treino</span>
+        <span class="tr-barra-num" id="tr-barra-num">0:00</span>
+      </span>
+      <span class="tr-barra-btns">
+        <button type="button" class="tr-barra-ico" id="tr-barra-pausa" aria-label="Pausar treino">❚❚</button>
+        <button type="button" class="tr-barra-fim" id="tr-barra-fim">Finalizar</button>
+      </span>
+    </div>
+  </div>
 </div>
 
 <dialog id="dlg-conta">
@@ -6216,7 +6277,10 @@ document.getElementById('hoje-ir-diario').onclick = function(){
 };
 document.getElementById('hoje-ir-habitos').onclick = function(){ abrirHabitosDlg('habitos'); };
 document.getElementById('hoje-ir-suplementacao').onclick = function(){ abrirHabitosDlg('suplementacao'); };
-document.getElementById('hoje-ir-iniciar-treino').onclick = function(){ abrirSessaoTreino(treinoHojeEscolhido); };
+document.getElementById('hoje-ir-iniciar-treino').onclick = function(){
+  const emAndamento = lerAndamento();
+  abrirSessaoTreino((emAndamento && emAndamento.chave) || treinoHojeEscolhido);
+};
 
 // chaves únicas de treino (A/B/C/A2/D...) na ordem da divisão, sem "OFF" -
 // usada tanto pro seletor dentro da sessão quanto pra sugestão do card e
@@ -6374,7 +6438,16 @@ async function atualizarCardTreinoHoje(diaSel){
   // (sumir confunde); olhando outro dia, o texto deixa isso claro.
   if(btnIniciar){
     btnIniciar.hidden = false;
-    btnIniciar.textContent = ehHoje ? 'Iniciar treino' : 'Iniciar treino de hoje';
+    // treino começado e não finalizado: o botão convida a voltar pra ele, com
+    // o tempo que já está correndo. Antes dizia "Iniciar treino" como se nada
+    // estivesse acontecendo, e voltar significava recomeçar.
+    const emAndamento = lerAndamento();
+    if(emAndamento && ehHoje){
+      andamento = emAndamento;
+      btnIniciar.textContent = 'Continuar treino ' + emAndamento.chave + ' · ' + fmtRelogio(segundosDoTreino());
+    }else{
+      btnIniciar.textContent = ehHoje ? 'Iniciar treino' : 'Iniciar treino de hoje';
+    }
   }
 
   // ---- 1) desenha JÁ, com o que o aparelho já sabe ----
@@ -7345,9 +7418,8 @@ function montarTreino(c, versaoLabel, vigenteA, registros){
     cartaoSem.innerHTML =
         '<div class="tr-sem-celula"><span class="tr-sem-rot">Séries válidas</span>'
       + '<span class="tr-sem-val">'+valorCurtoSemana(semAtual.reps)+'</span></div>'
-      + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intensidade'
-      + '<button type="button" class="tr-dica-btn" id="tr-dica-rir" aria-label="O que é RIR">?</button>'
-      + '</span><span class="tr-sem-val">'+valorCurtoSemana(semAtual.rir)+'</span></div>'
+      + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intensidade</span>'
+      + '<span class="tr-sem-val">'+valorCurtoSemana(semAtual.rir)+'</span></div>'
       + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intervalo</span>'
       + '<span class="tr-sem-val">'+valorCurtoSemana(semAtual.intervalo)+'</span></div>';
     const bt = document.getElementById('tr-dica-rir');
@@ -7513,11 +7585,16 @@ async function finalizarTreino(c, box, btn){
     });
     if(!ok) return;
   }
-  await salvarRegistroTreino(sessaoTreinoChave, c, box, btn);
+  const duracao = segundosDoTreino();
+  await salvarRegistroTreino(sessaoTreinoChave, c, box, btn, duracao);
   const feitas = Array.prototype.filter.call(box.querySelectorAll('.tr-serie-linha .tr-serie-check'),
     function(chk){ return chk.getAttribute('aria-pressed') === 'true'; }).length;
+  // só aqui o treino acaba de verdade
+  andamento = null; gravarAndamento();
   fecharSessaoTreino();
-  avisarOk('Treino ' + sessaoTreinoChave + ' concluído', plural(feitas, 'série registrada', 'séries registradas'));
+  const detalhe = plural(feitas, 'série registrada', 'séries registradas')
+    + (duracao > 30 ? ' · ' + fmtRelogio(duracao) : '');
+  avisarOk('Treino ' + sessaoTreinoChave + ' concluído', detalhe);
 }
 
 /* Cada série marcada, cada carga digitada e cada linha apagada grava na
@@ -7565,11 +7642,15 @@ function montarExerciciosDaSessao(t, box){
       bloco.querySelectorAll('.tr-serie-linha, .tr-preserie-linha'), function(linha){
       const kgIn = linha.querySelector('.tr-serie-kg');
       const repsIn = linha.querySelector('.tr-serie-reps');
+      const crono = linha.querySelector('.tr-serie-crono');
       const chk = linha.querySelector('.tr-serie-check');
       const tipoLinha = linha.getAttribute('data-tipo-linha') || '';
+      // nas séries por tempo o número vem do cronômetro, não de um campo
+      const segs = crono ? crono.getAttribute('data-valor') : null;
       const s = {
         kg: kgIn && kgIn.value!=='' ? parseFloat(kgIn.value) : null,
-        reps: repsIn && repsIn.value!=='' ? parseInt(repsIn.value,10) : null,
+        reps: (segs != null && segs !== '') ? parseInt(segs, 10)
+              : (repsIn && repsIn.value!=='' ? parseInt(repsIn.value,10) : null),
         feita: !!(chk && chk.getAttribute('aria-pressed')==='true')
       };
       if(tipoLinha) s.t = tipoLinha;
@@ -7579,7 +7660,7 @@ function montarExerciciosDaSessao(t, box){
   });
 }
 
-async function salvarRegistroTreino(chave, c, box, btn){
+async function salvarRegistroTreino(chave, c, box, btn, duracao){
   const erro = box && box.querySelector('.tr-erro-registro');
   if(erro) erro.classList.remove('mostra');
   const orig = btn ? btn.textContent : '';
@@ -7598,6 +7679,7 @@ async function salvarRegistroTreino(chave, c, box, btn){
       semana: treinoSemana,
       dia: iso(new Date()),
       exercicios: exercicios,
+      duracao_s: (duracao != null && duracao > 0) ? duracao : (segundosDoTreino() || null),
       atualizado_por: sessaoAtual.user.id
     }, { onConflict: 'organization_id,user_id,treino_chave,dia' }), 'o treino');
     if(btn){
@@ -7661,6 +7743,7 @@ async function abrirSessaoTreino(chaveInicial){
     if(sessaoTreinoChaveInicial && sessaoTreinoConteudo.treinos && sessaoTreinoConteudo.treinos[sessaoTreinoChaveInicial]){
       sessaoTreinoChave = sessaoTreinoChaveInicial;
     }
+    if(sessaoTreinoChave) comecarAndamento(sessaoTreinoChave);
     const semanas = sessaoTreinoConteudo.semanas || [];
     if(!semanas.some(function(s){ return s.n===treinoSemana; })) treinoSemana = semanas[0] ? semanas[0].n : 1;
     // histórico do usuário, pra saber o "Anterior" (kg x reps da última vez
@@ -7685,11 +7768,17 @@ async function abrirSessaoTreino(chaveInicial){
   }
 }
 function fecharSessaoTreino(){
+  // o × esconde a tela, não encerra o treino: quem encerra é "Finalizar".
+  // Antes fechar aqui apagava qualquer noção de treino em andamento e o card
+  // voltava a dizer "Iniciar treino" no meio do treino.
+  encerrarAndamentoSeVazio();
   document.getElementById('tela-sessao-treino').hidden = true;
   fecharMenuExercicio();
+  fecharCrono();
   const toast = document.getElementById('tr-descanso-toast');
   if(toast) toast.remove();
   if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
+  pintarBarraTreino();
   atualizarCardTreinoHoje();
 }
 document.getElementById('sessao-treino-fechar').onclick = fecharSessaoTreino;
@@ -7722,7 +7811,10 @@ function comSinalDeVezes(txt){
   return String(txt == null ? '' : txt).replace(/(\d)\s*[x×]\s*(\d)/gi, '$1 × $2');
 }
 function valorCurtoSemana(txt){
+  // o "~" de "~3 RIR" é jeito de escrever do PDF, não informação: na tela ele
+  // só polui um número que já é uma faixa por natureza.
   return String(txt == null ? '' : txt)
+    .replace(/^\s*[~≈]\s*/, '')
     .replace(/repetiç(ões|ao|ão)/gi, 'reps')
     .replace(/\brepeti(ç|c)oes\b/gi, 'reps')
     .replace(/\bsegundos?\b/gi, 's')
@@ -8051,6 +8143,9 @@ function serieAnterior(nomeExercicio, idxSerie, tipo){
 // vale só durante a sessão aberta agora (zera ao trocar de treino A/B/C/...
 // ou abrir a sessão de novo), igual ao "Adicionar Nota" do Strong.
 let sessaoTreinoNotas = {};
+/* exercícios por tempo em que a pessoa preferiu digitar os segundos em vez de
+   usar o cronômetro (escolha no menu "•••" daquele exercício) */
+let modoDigitar = {};
 function montarSessaoTreino(){
   const c = sessaoTreinoConteudo;
   const corpo = document.getElementById('sessao-treino-corpo');
@@ -8080,9 +8175,8 @@ function montarSessaoTreino(){
       ? '<div class="tr-semana-cartao tr-semana-cartao-sessao">'
         + '<div class="tr-sem-celula"><span class="tr-sem-rot">Séries válidas</span>'
         + '<span class="tr-sem-val">'+valorCurtoSemana(semAtual.reps)+'</span></div>'
-        + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intensidade'
-        + '<button type="button" class="tr-dica-btn" id="tr-dica-rir-sessao" aria-label="O que é RIR">?</button>'
-        + '</span><span class="tr-sem-val">'+valorCurtoSemana(semAtual.rir)+'</span></div>'
+        + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intensidade</span>'
+        + '<span class="tr-sem-val">'+valorCurtoSemana(semAtual.rir)+'</span></div>'
         + '<div class="tr-sem-celula"><span class="tr-sem-rot">Intervalo</span>'
         + '<span class="tr-sem-val">'+valorCurtoSemana(semAtual.intervalo)+'</span></div></div>'
       : '';
@@ -8166,20 +8260,30 @@ function montarSessaoTreino(){
           const ant = serieAnterior(e[0], s, '');
           const antTxt = ant ? (ant.kg!=null?fmtNum(ant.kg,1):'-')+' kg × '+(ant.reps!=null?ant.reps:'-') : '-';
           const kgPlaceholder = ant && ant.kg!=null ? fmtNum(ant.kg,1) : 'kg';
+          // exercício por tempo (prancha, prancha lateral, canoa): em vez de
+          // digitar os segundos, toca no ▶ e o cronômetro corre no mesmo
+          // painel do descanso - só que PRA CIMA, pra dar pra passar da meta.
+          const campoReps = (tipo === 'isometrico' && !modoDigitar[idx])
+            ? '<button type="button" class="tr-serie-crono">▶ 0:00</button>'
+            : '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="'+repsPlaceholder+'">';
           linhasSerie += '<div class="tr-serie-linha-wrap">'
             + '<button type="button" class="tr-serie-excluir">Excluir</button>'
             + '<div class="tr-serie-linha" data-serie="'+s+'">'
             + '<span class="tr-serie-num">'+(s+1)+'</span>'
             + '<span class="tr-serie-anterior">'+antTxt+'</span>'
             + '<input type="number" step="0.5" inputmode="decimal" class="tr-serie-kg" placeholder="'+kgPlaceholder+'">'
-            + '<input type="number" step="1" inputmode="numeric" class="tr-serie-reps" placeholder="'+repsPlaceholder+'">'
+            + campoReps
             + '<button type="button" class="tr-serie-check" aria-pressed="false">✓</button>'
             + '</div></div>';
         }
       }
       const alvoReps = (/^(\d+)\s*x\s*(\d+)/i.exec(String(e[1]||'')) || [])[2] || '';
+      // meta das séries que VALEM (e[3]), separada do alvo do aquecimento
+      // (e[1], que é o que data-repsalvo carrega) - é ela que o cronômetro
+      // dos exercícios por tempo usa como referência.
+      const alvoValido = partesPrescricao(e[3]).reps;
       return '<div class="tr-serie-bloco" data-ex="'+idx+'" data-tipo="'+tipo+'"'
-        + ' data-repsalvo="'+alvoReps+'"'
+        + ' data-repsalvo="'+alvoReps+'" data-alvovalido="'+alvoValido+'"'
         + ' data-descanso="'+String(e[4]||'').replace(/"/g,'&quot;')+'"'
         + ' data-nome="'+String(e[0]||'').replace(/"/g,'&quot;')+'">'
         + '<div class="tr-serie-cab"><span class="tr-serie-titulo-wrap"><button type="button" class="tr-serie-titulo" data-nome="'+e[0].replace(/"/g,'&quot;')+'">'+e[0]+'</button></span>'
@@ -8204,7 +8308,6 @@ function montarSessaoTreino(){
       // só repetia o óbvio e empurrava os exercícios pra baixo
       + ''
       + blocos
-      + '<button type="button" class="btn-pill primario" id="sessao-treino-salvar">Finalizar treino</button>'
       + '<div class="erro-auth tr-erro-registro"></div>'
       + '</div>';
   }
@@ -8220,7 +8323,11 @@ function montarSessaoTreino(){
     });
   }
   Array.prototype.forEach.call(corpo.querySelectorAll('.tr-chip-sel'), function(b){
-    b.onclick = function(){ sessaoTreinoChave = b.getAttribute('data-chave'); montarSessaoTreino(); };
+    b.onclick = function(){
+      sessaoTreinoChave = b.getAttribute('data-chave');
+      comecarAndamento(sessaoTreinoChave);
+      montarSessaoTreino();
+    };
   });
   (function(){
     const bt = document.getElementById('tr-dica-rir-sessao');
@@ -8232,6 +8339,9 @@ function montarSessaoTreino(){
   })();
   Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-check'), function(b){
     ligarCheckSerie(b);
+  });
+  Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-crono'), function(b){
+    ligarCronoSerie(b);
   });
   Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-linha-wrap'), function(w){
     ligarSwipeSerie(w);
@@ -8279,20 +8389,51 @@ function montarSessaoTreino(){
       agendarSalvarSessao();
     };
   });
-  const btnSalvar = document.getElementById('sessao-treino-salvar');
-  if(btnSalvar){
-    btnSalvar.onclick = function(){
-      // `.catch` obrigatório: sem ele, qualquer erro dentro do salvar virava
-      // "unhandled rejection" - o clique morria sem mensagem nenhuma, que foi
-      // exatamente o que aconteceu no treino do dia 17.
-      finalizarTreino(c, document.getElementById('sessao-treino-registro'), btnSalvar)
+  // "Finalizar" vive na barra presa no rodapé agora, não no fim da lista -
+  // no meio do treino ele ficava a dez rolagens de distância. O `.catch` é
+  // obrigatório: sem ele um erro aqui dentro vira "unhandled rejection" e o
+  // toque morre sem mensagem nenhuma, que foi o que aconteceu no dia 17.
+  const btnFim = document.getElementById('tr-barra-fim');
+  if(btnFim){
+    btnFim.onclick = function(){
+      finalizarTreino(c, document.getElementById('sessao-treino-registro'), btnFim)
         .catch(function(e){
           avisarErro('Não deu pra finalizar o treino', String(e && e.message || e));
-          btnSalvar.disabled = false; btnSalvar.textContent = 'Finalizar treino';
+          btnFim.disabled = false; btnFim.textContent = 'Finalizar';
         });
     };
   }
+  pintarBarraTreino();
 }
+/* Botão ▶ das séries por tempo. Tocar abre o cronômetro crescente; parar
+   escreve os segundos ali e marca a série como feita (com o descanso
+   começando na sequência, igual a qualquer outra série). O valor fica
+   guardado num atributo, porque essa célula não é mais um campo de texto. */
+function segundosDoAlvo(txt){
+  const m = /(\d+)\s*[-–—]\s*(\d+)/.exec(String(txt || ''));
+  if(m) return parseInt(m[2], 10);              // faixa "30-40" -> mira nos 40
+  const n = /(\d+)/.exec(String(txt || ''));
+  return n ? parseInt(n[1], 10) : 0;
+}
+function ligarCronoSerie(btn){
+  if(!btn) return;
+  btn.onclick = function(){
+    const linha = btn.closest('.tr-serie-linha, .tr-preserie-linha');
+    const bloco = btn.closest('.tr-serie-bloco');
+    const nome = (bloco && bloco.getAttribute('data-nome')) || 'Tempo';
+    const meta = segundosDoAlvo(bloco && bloco.getAttribute('data-alvovalido'));
+    const antTxt = linha ? (linha.querySelector('.tr-serie-anterior') || {}).textContent : '';
+    const recorde = segundosDoAlvo((String(antTxt).split('×')[1] || '').trim());
+    iniciarCrono(nome, meta, recorde, function(seg){
+      btn.textContent = seg + ' s';
+      btn.setAttribute('data-valor', seg);
+      const chk = linha && linha.querySelector('.tr-serie-check');
+      if(chk && chk.getAttribute('aria-pressed') !== 'true') chk.click();
+      else agendarSalvarSessao();
+    });
+  };
+}
+
 // liga o toggle "feita" de uma série (botão de check) - marca também a linha
 // inteira (fundo levemente diferente), igual ao Strong.
 let sessaoTreinoIntervaloSemana = '';
@@ -8477,6 +8618,10 @@ function abrirMenuExercicio(idx, btnEl){
     + '<button type="button" class="tr-opcoes-item" data-acao="nota">Adicionar nota</button>'
     + '<button type="button" class="tr-opcoes-item" data-acao="aquecimento">Adicionar série de aquecimento</button>'
     + (descansoTxt ? '<button type="button" class="tr-opcoes-item" data-acao="descanso">Iniciar descanso ('+descansoTxt+')</button>' : '')
+    + ((e[5] === 'isometrico')
+        ? '<button type="button" class="tr-opcoes-item" data-acao="digitar">'
+          + (modoDigitar[idx] ? 'Usar o cronômetro' : 'Digitar os segundos na mão') + '</button>'
+        : '')
     + '<button type="button" class="tr-opcoes-item perigo" data-acao="remover">Remover da sessão de hoje</button>'
     + '</div>';
   document.body.appendChild(wrap);
@@ -8506,6 +8651,7 @@ function abrirMenuExercicio(idx, btnEl){
     fecharMenuExercicio();
     if(acao==='nota') abrirNotaExercicio(idx);
     else if(acao==='aquecimento') adicionarSerieAquecimento(idx);
+    else if(acao==='digitar'){ modoDigitar[idx] = !modoDigitar[idx]; montarSessaoTreino(); }
     else if(acao==='descanso') iniciarDescanso(descansoTxt, e[0]||'');
     else if(acao==='remover') removerExercicioDaSessao(idx);
   });
@@ -8772,6 +8918,193 @@ function soltarTela(){
 }
 
 let sessaoTreinoDescansoTimer = null;
+/* =========================================================
+   TEMPO DO TREINO (barra presa no rodapé da sessão)
+   =========================================================
+   O treino passa a ter começo e fim próprios, separados do registro das
+   séries. Fechar a tela da sessão no × não acaba com ele: era isso que fazia
+   o card voltar a dizer "Iniciar treino" no meio do treino, como se nada
+   estivesse acontecendo. Agora o que está em andamento fica guardado no
+   aparelho e o botão vira "Continuar treino".
+   A contagem é feita de horário absoluto (começo, pausas), nunca somando
+   +1 por tique: o iPhone congela o setInterval em segundo plano, e somando
+   tique o relógio atrasaria exatamente o tempo que você ficou fora. */
+const ANDAMENTO_CHAVE = 'treinoAndamento';
+let andamento = null;   // {dia, chave, inicio, pausaEm, pausaTotal}
+function chaveAndamento(){ return ANDAMENTO_CHAVE + '|' + (diario.perfil || 'eu'); }
+function sessaoAberta(){
+  const t = document.getElementById('tela-sessao-treino');
+  return !!(t && !t.hidden);
+}
+function lerAndamento(){
+  try{
+    const bruto = localStorage.getItem(chaveAndamento());
+    const a = bruto ? JSON.parse(bruto) : null;
+    // treino de ontem que ficou aberto não serve pra nada hoje
+    if(a && a.dia === iso(new Date())) return a;
+  }catch(e){}
+  return null;
+}
+function gravarAndamento(){
+  try{
+    if(andamento) localStorage.setItem(chaveAndamento(), JSON.stringify(andamento));
+    else localStorage.removeItem(chaveAndamento());
+  }catch(e){}
+}
+function segundosDoTreino(){
+  if(!andamento) return 0;
+  const fim = andamento.pausaEm || Date.now();
+  return Math.max(0, Math.round((fim - andamento.inicio - (andamento.pausaTotal || 0)) / 1000));
+}
+function fmtRelogio(seg){
+  const h = Math.floor(seg / 3600), m = Math.floor((seg % 3600) / 60), s = seg % 60;
+  const dois = function(n){ return (n < 10 ? '0' : '') + n; };
+  return h ? (h + ':' + dois(m) + ':' + dois(s)) : (m + ':' + dois(s));
+}
+function pintarBarraTreino(){
+  const barra = document.getElementById('tr-barra');
+  if(!barra) return;
+  if(!andamento || !sessaoAberta()){ barra.hidden = true; return; }
+  barra.hidden = false;
+  barra.classList.toggle('pausado', !!andamento.pausaEm);
+  const rot = document.getElementById('tr-barra-rot');
+  const num = document.getElementById('tr-barra-num');
+  const pausa = document.getElementById('tr-barra-pausa');
+  if(rot) rot.textContent = andamento.pausaEm ? 'Pausado' : ('Treino ' + (andamento.chave || ''));
+  if(num) num.textContent = fmtRelogio(segundosDoTreino());
+  if(pausa){
+    pausa.textContent = andamento.pausaEm ? '▶' : '❚❚';
+    pausa.setAttribute('aria-label', andamento.pausaEm ? 'Continuar treino' : 'Pausar treino');
+  }
+  // o painel de descanso se apoia na altura real da barra
+  document.documentElement.style.setProperty('--tr-barra-h', barra.offsetHeight + 'px');
+}
+window.__pintarBarraTreino = pintarBarraTreino;
+function comecarAndamento(chave){
+  const guardado = lerAndamento();
+  if(guardado && guardado.chave === chave){ andamento = guardado; }
+  else if(!andamento || andamento.chave !== chave){
+    andamento = { dia: iso(new Date()), chave: chave, inicio: Date.now(), pausaEm: null, pausaTotal: 0 };
+  }
+  pintarBarraTreino();
+}
+/* Fechou a tela sem ter marcado nada e sem registro no banco: não era treino,
+   era uma espiada. Não deixa rastro. */
+function encerrarAndamentoSeVazio(){
+  if(!andamento) return;
+  const box = document.getElementById('sessao-treino-registro');
+  if(!sessaoTreinoJaGravou && !temAlgumaSerieMarcada(box)){
+    andamento = null;
+    gravarAndamento();
+  }else{
+    gravarAndamento();
+  }
+}
+function alternarPausaTreino(){
+  if(!andamento) return;
+  if(andamento.pausaEm){
+    andamento.pausaTotal = (andamento.pausaTotal || 0) + (Date.now() - andamento.pausaEm);
+    andamento.pausaEm = null;
+  }else{
+    andamento.pausaEm = Date.now();
+  }
+  gravarAndamento();
+  pintarBarraTreino();
+}
+setInterval(pintarBarraTreino, 1000);
+['visibilitychange','pageshow','focus'].forEach(function(ev){
+  const alvo = (ev === 'visibilitychange') ? document : window;
+  alvo.addEventListener(ev, pintarBarraTreino, {passive:true});
+});
+(function(){
+  const pausa = document.getElementById('tr-barra-pausa');
+  if(pausa) pausa.onclick = alternarPausaTreino;
+  const fim = document.getElementById('tr-barra-fim');
+  if(fim) fim.onclick = function(){
+    const box = document.getElementById('sessao-treino-registro');
+    finalizarTreino(sessaoTreinoConteudo, box, fim);
+  };
+})();
+
+/* =========================================================
+   CRONÔMETRO DOS EXERCÍCIOS POR TEMPO (prancha e companhia)
+   =========================================================
+   Mesmo painel do descanso, ao contrário: começa em 0:00 e SOBE. A meta do
+   plano fica de referência e o anel enche até ela - passou, continua subindo
+   e o anel fica verde. "Parar e gravar" escreve os segundos na série e marca
+   ela como feita. Reaproveita o desenho do descanso de propósito: são a
+   mesma coisa pro dedo, e criar um segundo painel só faria o app ter dois
+   jeitos de mostrar um tempo correndo. */
+let cronoTimer = null, cronoEl = null;
+function fecharCrono(){
+  if(cronoTimer){ clearInterval(cronoTimer); cronoTimer = null; }
+  if(cronoEl && cronoEl.parentNode) cronoEl.parentNode.removeChild(cronoEl);
+  cronoEl = null;
+}
+function iniciarCrono(nomeExercicio, metaSeg, recorde, aoGravar){
+  fecharDescanso();
+  fecharCrono();
+  const comecou = Date.now();
+  const el = document.createElement('div');
+  el.className = 'tr-descanso-toast' + (sessaoAberta() ? ' na-sessao' : '');
+  el.setAttribute('role','status');
+  el.innerHTML =
+      '<div class="tr-desc-corpo">'
+    +   '<div class="tr-desc-anel">'
+    +     '<svg viewBox="0 0 100 100" aria-hidden="true">'
+    +       '<circle class="tr-desc-anel-tr" cx="50" cy="50" r="46"></circle>'
+    +       '<circle class="tr-desc-anel-pr" cx="50" cy="50" r="46" stroke-dasharray="0 289"></circle>'
+    +     '</svg>'
+    +     '<span class="tr-desc-tempo">0:00</span>'
+    +   '</div>'
+    +   '<div class="tr-desc-col">'
+    +     '<div class="tr-desc-topo"><span class="tr-desc-rot"></span></div>'
+    +     '<div class="tr-crono-meta"></div>'
+    +     '<div class="tr-desc-acoes">'
+    +       '<button type="button" class="tr-desc-btn" data-acao="zerar">Zerar</button>'
+    +       '<button type="button" class="tr-desc-btn forte" data-acao="gravar">Parar e gravar</button>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>';
+  document.body.appendChild(el);
+  cronoEl = el;
+  el.querySelector('.tr-desc-rot').textContent = nomeExercicio || 'Tempo';
+  const metaTxt = [];
+  if(metaSeg) metaTxt.push('Meta <b>' + metaSeg + ' s</b>');
+  if(recorde) metaTxt.push('seu recorde <b>' + recorde + ' s</b>');
+  el.querySelector('.tr-crono-meta').innerHTML = metaTxt.join(' · ');
+
+  const tempoEl = el.querySelector('.tr-desc-tempo');
+  const arco = el.querySelector('.tr-desc-anel-pr');
+  const VOLTA = 2 * Math.PI * 46;
+  let zeradoEm = comecou;
+  function passados(){ return Math.max(0, Math.round((Date.now() - zeradoEm) / 1000)); }
+  function pintar(){
+    const seg = passados();
+    tempoEl.textContent = fmtRelogio(seg);
+    const alvo = metaSeg || 60;
+    const fatia = Math.min(1, seg / alvo);
+    arco.setAttribute('stroke-dasharray', (VOLTA * fatia).toFixed(1) + ' ' + VOLTA.toFixed(1));
+    el.classList.toggle('crono-passou', !!metaSeg && seg >= metaSeg);
+  }
+  pintar();
+  cronoTimer = setInterval(pintar, 250);
+  window.__pintarCrono = pintar;
+
+  el.querySelector('[data-acao="zerar"]').onclick = function(ev){
+    ev.stopPropagation();
+    zeradoEm = Date.now();
+    pintar();
+  };
+  el.querySelector('[data-acao="gravar"]').onclick = function(ev){
+    ev.stopPropagation();
+    const seg = passados();
+    fecharCrono();
+    if(aoGravar) aoGravar(seg);
+  };
+  pintarBarraTreino();
+}
+
 function fecharDescanso(){
   if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
   sessaoTreinoDescansoTimer = null;
@@ -8808,7 +9141,7 @@ function iniciarDescanso(txt, nomeExercicio){
   fecharDescanso();
   const el = document.createElement('div');
   el.id = 'tr-descanso-toast';
-  el.className = 'tr-descanso-toast';
+  el.className = 'tr-descanso-toast' + (sessaoAberta() ? ' na-sessao' : '');
   el.setAttribute('role','status');
   const BOTOES = '<span class="tr-desc-topo-btns">'
     + '<button type="button" class="tr-desc-som" aria-label="Som do descanso"></button>'
