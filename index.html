@@ -74,12 +74,114 @@
     return tk.indo;
   }
   window.__limparToken = function(){ tk.valor = null; tk.ate = 0; tk.indo = null; };
+  // o getSession da entrada no app ja traz o token: em vez de jogar fora e
+  // pedir de novo na primeira consulta (mais uma viagem pelo proxy do
+  // Vercel), ele entra direto no cache.
+  window.__semearToken = function(t){
+    if(!t) return;
+    var vence = venceEm(t);
+    tk.valor = t;
+    tk.ate = vence ? vence - 60000 : Date.now() + 60000;
+  };
+
+  // ---- AQUECIMENTO DO BANCO ----
+  // O banco (Neon, plano free) dorme depois de uns 5 minutos sem uso. A
+  // consulta que chega com ele dormindo NAO da erro: volta HTTP 200 com
+  // lista VAZIA. Medido no app de verdade, com o banco posto pra dormir de
+  // proposito, o padrao e por TABELA: depois de um tempo ocioso, a primeira
+  // consulta em cada tabela volta vazia (tudo indica que a primeira vez que
+  // cada tabela e tocada a regra de acesso - RLS - ainda nao enxerga o
+  // usuario do token e filtra tudo); a segunda consulta na mesma tabela,
+  // 20 ms depois, volta certa. O app abre disparando umas dez consultas de
+  // uma vez, uma por tabela, nesse exato instante: todas voltavam vazias, e
+  // a tela dizia "ainda nao tem periodizacao cadastrada" e ficava sem foto
+  // ate a pessoa tocar em algo - o que disparava uma nova rodada, ja com as
+  // tabelas "acordadas".
+  //
+  // Duas defesas, uma atras da outra:
+  // 1) PORTAO: toda consulta espera um aquecimento terminar. Ele toca
+  //    TODAS as tabelas do app em paralelo (uma leitura minima em cada,
+  //    limit 1) e repete a rodada enquanto alguma voltar vazia, ate 3
+  //    vezes. Medido: rodada 0 quase toda vazia, rodada 1 quase toda
+  //    cheia, rodada 2 tudo cheio - e as consultas de verdade que vem
+  //    depois passam todas de primeira. E feito por um cliente separado,
+  //    sem portao (senao esperaria por ele mesmo). Com o banco ja quente,
+  //    custa uma rodada de ~50 ms; depois disso cada consulta so paga o
+  //    await de uma promessa ja resolvida. Numa conta nova, sem nada
+  //    gravado, tudo volta vazio de verdade: duas rodadas iguais bastam.
+  // 2) REPETICAO DE VAZIO: uma LEITURA que volta "200, lista vazia" e
+  //    refeita uma unica vez, 250 ms depois. Vazio de verdade continua
+  //    vazio (custa ~20 ms a mais, so nesse caso); vazio de tabela "cega"
+  //    vira a resposta certa. Escritas nunca sao repetidas. Isso segura o
+  //    que a rodada nao cobre (tabela nova no futuro, tela aberta minutos
+  //    depois com o banco ja dormindo de novo).
+  // Se o app ficar mais de 4 minutos sem falar com o banco (celular no
+  // bolso, app em segundo plano), o banco pode ter dormido de novo: o
+  // portao se rearma sozinho na proxima consulta.
+  var DATA_API = 'https://ep-soft-bread-ac808or4.apirest.sa-east-1.aws.neon.tech/dieta_treino/rest/v1';
+  var TABELAS_DO_APP = ['escolhas_casal','escolhas_individuais','planos_dieta','planos_treino',
+    'planos_habitos','planos_suplementacao','diario_dias','treino_registros','habitos_registros',
+    'suplementacao_registros','progresso_medidas','progresso_referencias','saude_dias'];
+  var fetchCru = fetchWithToken(pegarToken);
+  var dbCru = new NeonPostgrestClient({ dataApiUrl: DATA_API, options: { global: { fetch: fetchCru } } });
+  var aquecendo = null;
+  var ultimaConsulta = 0;
+  var REARMAR_APOS = 4 * 60 * 1000;
+  function dormir(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+  // -1 = erro, 0 = vazio, 1 = veio linha
+  function sonda(tabela){
+    return dbCru.from(tabela).select('organization_id').limit(1)
+      .then(function(r){ return (r && !r.error && r.data) ? r.data.length : -1; }, function(){ return -1; });
+  }
+  function aquecerBanco(){
+    if(aquecendo) return aquecendo;
+    ultimaConsulta = Date.now();
+    aquecendo = (async function(){
+      await sonda('escolhas_casal');   // acorda o banco; a resposta desta nao vale nada
+      for(var i = 0; i < 3; i++){
+        var ns = await Promise.all(TABELAS_DO_APP.map(sonda));
+        var cheias = ns.filter(function(n){ return n > 0; }).length;
+        var vazias = ns.filter(function(n){ return n === 0; }).length;
+        if(vazias === 0) return true;             // nenhuma tabela voltou vazia: acordado
+        if(cheias === 0 && i >= 1) return true;   // tudo vazio duas vezes: conta nova, sem nada gravado
+        await dormir(300);
+      }
+      return false;
+    })();
+    aquecendo.then(function(){ ultimaConsulta = Date.now(); });
+    return aquecendo;
+  }
+  window.__aquecerBanco = aquecerBanco;
+  function ehLeitura(input, init){
+    var m = (init && init.method) || (input && input.method) || 'GET';
+    return String(m).toUpperCase() === 'GET';
+  }
+  function fetchComPortao(input, init){
+    return (async function(){
+      if(aquecendo && (Date.now() - ultimaConsulta) > REARMAR_APOS) aquecendo = null;
+      try{ await aquecerBanco(); }catch(e){}
+      var resp = await fetchCru(input, init);
+      ultimaConsulta = Date.now();
+      if(resp && resp.ok && ehLeitura(input, init)){
+        try{
+          var txt = await resp.clone().text();
+          if(txt.trim() === '[]'){
+            await dormir(250);
+            var deNovo = await fetchCru(input, init);
+            ultimaConsulta = Date.now();
+            if(deNovo && deNovo.ok) return deNovo;
+          }
+        }catch(e){}
+      }
+      return resp;
+    })();
+  }
 
   var db = new NeonPostgrestClient({
-    dataApiUrl: 'https://ep-soft-bread-ac808or4.apirest.sa-east-1.aws.neon.tech/dieta_treino/rest/v1',
+    dataApiUrl: DATA_API,
     options: {
       global: {
-        fetch: fetchWithToken(pegarToken)
+        fetch: fetchComPortao
       }
     }
   });
@@ -2261,6 +2363,9 @@ async function iniciarFluxoAuth(){
   var s = await comTimeout(neon.getSession(), 8000).catch(function(){ return null; });
   if(s && s.data && s.data.session){
     sessaoAtual = s.data;
+    // o token que acabou de chegar ja serve pras consultas ao banco - sem
+    // isso a primeira consulta pedia a sessao de novo pelo proxy do Vercel
+    if(window.__semearToken) window.__semearToken(s.data.session.token);
     await entrarNoApp();
     return;
   }
@@ -2431,6 +2536,14 @@ async function carregarOrganizacaoAtiva(){
 }
 
 async function entrarNoApp(){
+  // acorda o banco AGORA, em paralelo com as chamadas de organizacao abaixo
+  // (que sao varias viagens de rede em fila): quando o app chegar nas
+  // consultas de verdade, o banco ja esta de pe e o portao ja esta aberto -
+  // ver "AQUECIMENTO DO BANCO" no modulo do Neon, la em cima
+  if(sessaoAtual && sessaoAtual.session && window.__semearToken){
+    window.__semearToken(sessaoAtual.session.token);
+  }
+  if(window.__aquecerBanco) window.__aquecerBanco();
   // signIn ja funcionou nesse ponto (sessaoAtual existe) - se algo aqui
   // embaixo falhar (rede instavel, ou travar de vez - dai o comTimeout
   // dentro de carregarOrganizacaoAtiva entra em cena), tenta mais 1 vez
@@ -2447,10 +2560,11 @@ async function entrarNoApp(){
   document.getElementById('tela-auth').hidden = true;
   document.getElementById('app-shell').hidden = false;
 
+  // a foto guardada no aparelho ja entra no primeiro desenho; a do banco
+  // vem depois (nao trava a entrada) e so troca se responder de verdade
+  fotosDoCache();
   montarContaUsuario();
   atualizarMarca();
-  // as fotos vêm depois (não travam a entrada no app); quando chegam, o
-  // avatar e o menu se redesenham sozinhos
   carregarFotosPerfil().then(montarContaUsuario);
   iniciarApp();
 }
@@ -2509,17 +2623,30 @@ function atualizarMarca(){
 const FOTO_CHAVE = 'foto_perfil';
 let fotosPerfil = {};      // uid -> data URL
 function fotoDoPerfil(uid){ return fotosPerfil[uid] || null; }
+/* As fotos seguem a mesma regra dos planos: o aparelho guarda a ultima
+   resposta e desenha com ela na hora; a consulta ao banco so TROCA o que
+   esta na tela quando responde de verdade. Antes, uma resposta com erro
+   (rede, banco acordando) virava "ninguem tem foto" e o avatar sumia ate a
+   pessoa mexer em algo. */
+function chaveFotos(){ return 'fotos|' + (orgAtiva && orgAtiva.id); }
+function fotosDoCache(){
+  if(!orgAtiva) return;
+  const c = cacheLer(chaveFotos());
+  if(c && typeof c === 'object') fotosPerfil = c;
+}
 async function carregarFotosPerfil(){
   if(!db || !orgAtiva) return;
   try{
     const r = await db.from('escolhas_individuais').select('user_id,valor')
       .eq('organization_id', orgAtiva.id).eq('chave', FOTO_CHAVE);
+    if(!r || r.error || !r.data) return;   // nao deu pra saber: fica o que ja tinha
     const mapa = {};
-    ((r && r.data) || []).forEach(function(l){
+    r.data.forEach(function(l){
       const u = l.valor && (l.valor.url || l.valor);
       if(typeof u === 'string' && u) mapa[l.user_id] = u;
     });
     fotosPerfil = mapa;
+    cacheGravar(chaveFotos(), mapa);
   }catch(e){}
 }
 async function salvarFotoPerfil(dataUrl){
@@ -2537,6 +2664,7 @@ async function salvarFotoPerfil(dataUrl){
         .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('chave', FOTO_CHAVE), 'a foto');
       delete fotosPerfil[uid];
     }
+    cacheGravar(chaveFotos(), fotosPerfil);
     montarContaUsuario();
     return true;
   }catch(e){ return false; }
@@ -5145,7 +5273,11 @@ async function carregarDiario(){
   try{
     if(db && orgAtiva){
       const r = await db.from('diario_dias').select('user_id,dia,registro').eq('organization_id', orgAtiva.id);
-      if(r && r.data){
+      // "veio do banco" so quando veio ALGUMA linha: uma lista vazia pode
+      // ser o banco acordando (ver AQUECIMENTO DO BANCO), e tratar isso
+      // como "o banco nao tem nada" fazia o passo 3 subir a copia velha
+      // deste aparelho por cima do que a outra pessoa marcou no dela.
+      if(r && !r.error && r.data && r.data.length){
         veioDoBanco = true;
         r.data.forEach(function(row){
           const dia = String(row.dia).slice(0,10);
@@ -7430,33 +7562,48 @@ async function renderTreino(){
     return;
   }
   const uid = p;
+  // 1) desenha JA com o que o aparelho guardou (mesma regra do card da tela
+  //    inicial) - antes esta aba ia direto ao banco, por fora do cache, e
+  //    qualquer resposta vazia ou com erro virava "ainda nao tem
+  //    periodizacao cadastrada"
+  const linhaCache = planoGuardado('planos_treino', uid);
+  if(linhaCache && linhaCache.conteudo){
+    vazio.hidden = true;
+    conteudoBox.hidden = false;
+    montarTreino(linhaCache.conteudo, linhaCache.versao_label, linhaCache.vigente_a_partir, []);
+  }
   try{
-    const r = await db.from('planos_treino')
-      .select('conteudo,vigente_a_partir,versao_label')
-      .eq('organization_id', orgAtiva.id).eq('user_id', uid)
-      .order('vigente_a_partir', { ascending:false }).limit(20);
-    const linha = escolherVigente(r && r.data);
-    if(!linha){
+    // 2) confirma com o banco: as duas consultas saem juntas
+    const [linha, rr] = await Promise.all([
+      buscarPlanoGenerico('planos_treino', uid),
+      db.from('treino_registros')
+        .select('dia,treino_chave,semana,exercicios')
+        .eq('organization_id', orgAtiva.id).eq('user_id', p)
+        .order('dia', { ascending:false }).limit(30)
+        .then(function(r){ return r; }, function(){ return null; })
+    ]);
+    const registros = (rr && rr.data) || [];
+    if(linha === undefined){
+      // nao deu pra saber (rede): o que esta na tela fica; sem nada
+      // guardado, avisa em vez de dizer que o plano nao existe
+      if(!linhaCache) vazioTxt.textContent = 'Não deu pra carregar o treino agora.';
+      return;
+    }
+    if(!linha || !linha.conteudo){
       const ehAdmin = papelAtual === 'owner' || papelAtual === 'admin';
+      conteudoBox.hidden = true;
+      vazio.hidden = false;
       vazioTxt.textContent = ehAdmin
         ? 'Ainda não tem periodização cadastrada pra essa pessoa. Cadastre uma em "Gerenciar versões de plano".'
         : 'Ainda não tem periodização cadastrada pra essa pessoa. Peça pro admin cadastrar.';
       return;
     }
-    let registros = [];
-    try{
-      const rr = await db.from('treino_registros')
-        .select('dia,treino_chave,semana,exercicios')
-        .eq('organization_id', orgAtiva.id).eq('user_id', p)
-        .order('dia', { ascending:false }).limit(30);
-      registros = (rr && rr.data) || [];
-    }catch(e){ registros = []; }
     vazio.hidden = true;
     conteudoBox.hidden = false;
     arrumarPlanoTreino(linha.conteudo);
     montarTreino(linha.conteudo, linha.versao_label, linha.vigente_a_partir, registros);
   }catch(e){
-    vazioTxt.textContent = 'Não deu pra carregar o treino agora.';
+    if(!linhaCache) vazioTxt.textContent = 'Não deu pra carregar o treino agora.';
   }
 }
 
