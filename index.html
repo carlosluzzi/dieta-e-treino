@@ -816,12 +816,15 @@
     padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;
     background:rgba(255,255,255,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);
     backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid rgba(0,0,0,.08)}
-  .sessao-treino-head button{width:32px;height:32px;flex-shrink:0;border-radius:10px;border:0;
+  #sessao-treino-fechar{width:32px;height:32px;flex-shrink:0;border-radius:10px;border:0;
     background:var(--fill);color:var(--ink);font-size:18px;line-height:1;cursor:pointer}
   .sessao-treino-head h1{font-size:18px;font-weight:700;letter-spacing:-.019em;margin:0}
+  .sessao-treino-head.com-tempo h1{display:none}
   .sessao-treino-corpo{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
     overscroll-behavior-y:contain;max-width:720px;margin:0 auto;width:100%;
-    padding:16px 16px calc(24px + env(safe-area-inset-bottom,0px))}
+    /* folga embaixo do tamanho do cartão do descanso, pra última série
+       sempre poder rolar pra cima dele */
+    padding:16px 16px calc(150px + env(safe-area-inset-bottom,0px))}
   /* ---------- preparo no topo da sessão ---------- */
   .prep-caixa{background:var(--fill2);border-radius:var(--r);margin:0 0 14px;overflow:hidden}
   .prep-resumo{display:flex;align-items:center;justify-content:space-between;gap:8px;
@@ -847,24 +850,39 @@
   .prep-como{font-size:12.5px;color:var(--ink2);line-height:1.45;margin:3px 0 0}
 
   /* ---------- teclado da sessão ---------- */
+  /* Tudo que sobe da base da tela usa a mesma curva das folhas do iPhone
+     (arranca rápido e assenta devagar), em 200 ms: o teclado e o cartão do
+     descanso/cronômetro. */
+  :root{--sobe:cubic-bezier(.32,.72,0,1);--sobe-t:200ms}
+  /* O teclado desliza de trás da barra (a barra fica por cima dele) em vez
+     de aparecer de uma vez. É só transform: as teclas já respondem desde o
+     primeiro quadro, a animação não atrasa a digitação. */
   .tr-teclado{flex-shrink:0;background:#1C1E22;
-    padding:8px 7px max(calc(8px + env(safe-area-inset-bottom,0px)), 22px);z-index:6}
+    padding:9px 8px max(calc(9px + env(safe-area-inset-bottom,0px)), 26px);z-index:4;
+    transform:none;transition:transform var(--sobe-t) var(--sobe)}
+  .tr-teclado.fora{transform:translateY(100%);transition:none}
+  /* descendo: sai do fluxo na hora (o treino volta a ocupar o espaço) e
+     escorrega por cima dele até sumir atrás da barra */
+  .tr-teclado.saindo{position:absolute;left:0;right:0;transform:translateY(100%)}
+  #tela-sessao-treino{overflow:hidden}
   /* com o teclado aberto, quem segura a margem de baixo é ele: a barra volta
      ao espaçamento normal pra não abrir um vão entre as duas */
-  .tr-teclado:not([hidden]) ~ .tr-barra{padding-bottom:12px}
-  .tr-teclado[hidden]{display:none}
-  .tr-teclado .tec-grade{display:grid;grid-template-columns:repeat(3,1fr) 96px;
-    grid-template-rows:repeat(4,46px);gap:7px;max-width:720px;margin:0 auto}
-  .tr-teclado .tecla{border-radius:9px;border:0;background:#2C3037;font-family:inherit;
-    font-size:22px;font-weight:500;color:#fff;display:flex;align-items:center;
+    .tr-teclado[hidden]{display:none}
+  /* 54px de altura e números de 27px: do tamanho das outras coisas do app
+     (antes, 46/22, o teclado parecia de outro aplicativo, miúdo) */
+  .tr-teclado .tec-grade{display:grid;grid-template-columns:repeat(3,1fr) 100px;
+    grid-template-rows:repeat(4,54px);gap:8px;max-width:720px;margin:0 auto}
+  .tr-teclado .tecla{border-radius:11px;border:0;background:#2C3037;font-family:inherit;
+    box-shadow:0 1px 0 rgba(0,0,0,.45);
+    font-size:27px;font-weight:500;color:#fff;display:flex;align-items:center;
     justify-content:center;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .tr-teclado .tecla:active{background:#3B414A}
-  .tr-teclado .tecla.aux{background:#23262B;font-size:17px;color:#D6DAE2}
-  .tr-teclado .tecla.icone{font-size:15px}
-  .tr-teclado .tecla.next{background:var(--azul);color:#fff;font-size:15px;font-weight:700}
-  .tr-teclado .tecla.mm{background:none;display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0}
-  .tr-teclado .tecla.mm span{background:#23262B;border-radius:9px;display:flex;align-items:center;
-    justify-content:center;font-size:20px;color:#D6DAE2}
+  .tr-teclado .tecla.aux{background:#23262B;font-size:19px;font-weight:600;color:#D6DAE2}
+  .tr-teclado .tecla.icone svg{width:34px;height:31px;display:block}
+  .tr-teclado .tecla.next{background:var(--azul);color:#fff;font-size:17px;font-weight:700}
+  .tr-teclado .tecla.mm{background:none;box-shadow:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0}
+  .tr-teclado .tecla.mm span{background:#23262B;border-radius:11px;display:flex;align-items:center;
+    justify-content:center;font-size:24px;color:#D6DAE2;box-shadow:0 1px 0 rgba(0,0,0,.45)}
   .tr-teclado .tecla.mm span:active{background:#3B414A}
   /* escolher o RIR daquela série, saindo de cima do teclado */
   .rir-pop{position:absolute;left:8px;right:8px;bottom:100%;margin-bottom:8px;background:#2C3037;
@@ -884,6 +902,9 @@
   /* campo em edição pelo nosso teclado */
   .tr-serie-kg.emfoco,.tr-serie-reps.emfoco{box-shadow:inset 0 0 0 2px var(--azul);
     background:var(--card)}
+  /* valor "selecionado": o próximo dígito vai substituir ele inteiro */
+  .tr-serie-kg.emfoco.substituir,.tr-serie-reps.emfoco.substituir{
+    background:rgba(171,24,30,.12);color:var(--azul);font-weight:700}
 
   /* ---------- barra fixa da sessão ---------- */
   /* O `env(safe-area-inset-bottom)` deste app vale ZERO: a tag de viewport
@@ -891,29 +912,21 @@
      segurança. Por isso o espaço de baixo tem um piso próprio de 26px, que é
      o que sobra da curva da tela e do risquinho de casa - com ou sem
      `env`, o botão não encosta na borda. */
-  .tr-barra{flex-shrink:0;background:var(--card);border-top:1px solid var(--hair);
-    box-shadow:0 -6px 20px rgba(0,0,0,.07);
-    padding:12px 16px max(calc(12px + env(safe-area-inset-bottom,0px)), 26px);z-index:5}
+  /* tempo · pausa · Finalizar, no cabeçalho da sessão (antes era uma barra
+     presa no rodapé, que somava com o teclado e o descanso e comia mais da
+     metade da tela) */
+  .tr-barra{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:10px}
   .tr-barra[hidden]{display:none}
-  .tr-barra-linha{display:flex;align-items:center;gap:12px;max-width:720px;margin:0 auto}
-  .tr-barra-tempo{flex:1 1 auto;min-width:0;display:flex;align-items:baseline;gap:8px}
-  /* o tempo é a informação da barra - com o "Finalizar" em 44px, o número
-     de 22px ficava miúdo do lado dele. Sobe junto, e o rótulo vai pra cima
-     do número em vez de dividir a linha, que é o que abre espaço pros dois
-     crescerem sem apertar o botão. */
-  .tr-barra-tempo{flex-direction:column;align-items:flex-start;gap:0}
-  .tr-barra-rot{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-    color:var(--ink3);white-space:nowrap;line-height:1.1}
-  .tr-barra-num{font-size:28px;font-weight:800;letter-spacing:-.025em;
+  .tr-barra-tempo{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:0}
+  .tr-barra-rot{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--ink3);white-space:nowrap;line-height:1.15}
+  .tr-barra-num{font-size:24px;font-weight:800;letter-spacing:-.025em;
     font-variant-numeric:tabular-nums;line-height:1.1}
   .tr-barra-btns{display:flex;gap:8px;flex-shrink:0}
-  /* "Finalizar" é o botão principal da tela e estava menor que o "Pular" do
-     cartão de descanso, que é secundário. Mesma altura dos botões do cartão
-     (44px) e mais largura, pra hierarquia bater com a importância. */
-  .tr-barra-ico{width:44px;height:44px;border-radius:12px;border:1px solid var(--hair);
-    background:var(--card);color:var(--ink);font-size:14px;font-family:inherit;display:flex;
+  .tr-barra-ico{width:40px;height:40px;border-radius:12px;border:1px solid var(--hair);
+    background:var(--card);color:var(--ink);font-size:13px;font-family:inherit;display:flex;
     align-items:center;justify-content:center;padding:0;cursor:pointer}
-  .tr-barra-fim{padding:0 22px;height:44px;border-radius:12px;border:none;background:var(--ink);
+  .tr-barra-fim{padding:0 18px;height:40px;border-radius:12px;border:none;background:var(--ink);
     color:#fff;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;
     letter-spacing:-.01em}
   .tr-barra.pausado .tr-barra-num{color:var(--ink3)}
@@ -921,8 +934,34 @@
      flutuante arredondado de sempre - só sobe pra ficar acima da barra, em
      vez de nascer atrás dela. Colar os dois numa peça só ficou feio: o
      cartão perde o contorno e vira um bloco quadrado no pé da tela. */
-  .tr-descanso-toast.na-sessao{bottom:calc(var(--tr-barra-h,64px) + 12px)}
-  .tr-descanso-toast.na-sessao.minimizado{bottom:calc(var(--tr-barra-h,64px) + 12px)}
+  .tr-descanso-toast.na-sessao{
+    bottom:max(calc(var(--tr-rodape-h,0px) + 12px), calc(env(safe-area-inset-bottom,0px) + 34px));
+    transition:bottom var(--sobe-t) var(--sobe)}
+  /* Digitando com o descanso correndo: o cartão vira uma faixa fina colada
+     em cima do teclado - tempo, +30 s e Pular numa linha só. Fechou o
+     teclado, volta a ser o cartão. */
+  #tr-descanso-toast.sobre-teclado{left:0;right:0;width:auto;transform:none;
+    bottom:var(--tr-rodape-h,0px);border-radius:0;border:0;border-bottom:1px solid #2C3037;
+    background:#1C1E22;color:#fff;box-shadow:0 -6px 18px rgba(0,0,0,.12);
+    padding:10px 12px 9px 14px;animation:none;cursor:default;transition:none}
+  #tr-descanso-toast.sobre-teclado::before{content:'';position:absolute;left:0;top:0;height:3px;
+    width:var(--desc-fatia,100%);background:var(--ok);transition:width 1s linear}
+  #tr-descanso-toast.sobre-teclado .tr-desc-corpo{gap:10px;align-items:center}
+  #tr-descanso-toast.sobre-teclado .tr-desc-anel{order:2;flex:0 0 auto;width:auto;height:auto;margin-right:auto}
+  #tr-descanso-toast.sobre-teclado .tr-desc-anel svg,
+  #tr-descanso-toast.sobre-teclado .tr-desc-topo-btns,
+  #tr-descanso-toast.sobre-teclado .tr-desc-aviso,
+  #tr-descanso-toast.sobre-teclado .tr-desc-vol-caixa{display:none}
+  #tr-descanso-toast.sobre-teclado .tr-desc-tempo{position:static;font-size:22px;color:#fff}
+  #tr-descanso-toast.sobre-teclado.acabando .tr-desc-tempo{color:#FF8A80}
+  #tr-descanso-toast.sobre-teclado.fim .tr-desc-tempo{color:#7FD08A;font-size:20px}
+  #tr-descanso-toast.sobre-teclado .tr-desc-col{display:contents}
+  #tr-descanso-toast.sobre-teclado .tr-desc-topo{order:1;flex:0 0 auto}
+  #tr-descanso-toast.sobre-teclado .tr-desc-rot{color:#7FD08A}
+  #tr-descanso-toast.sobre-teclado .tr-desc-acoes{display:flex;order:3;margin:0;gap:6px;flex:0 0 auto}
+  #tr-descanso-toast.sobre-teclado .tr-desc-btn{flex:0 0 auto;height:36px;padding:0 14px;border:0;
+    border-radius:10px;background:#2C3037;color:#E6E9EE;font-weight:700}
+  #tr-descanso-toast.sobre-teclado .tr-desc-btn.forte{background:#fff;color:#111}
   .tr-chip-sel{font-size:13px;font-weight:600;padding:8px 16px;border-radius:10px;
     background:var(--fill);color:var(--ink2);border:0;cursor:pointer}
   .tr-chip-sel[aria-pressed="true"]{background:var(--azul);color:#fff}
@@ -1625,7 +1664,11 @@
     bottom:calc(env(safe-area-inset-bottom,0px) + 34px);
     transform:translateX(-50%);z-index:120;background:var(--card);color:var(--ink);
     width:min(420px, calc(100vw - 32px));border-radius:24px;padding:14px 16px 16px;
-    border:1px solid var(--hair);box-shadow:0 12px 34px rgba(0,0,0,.2)}
+    border:1px solid var(--hair);box-shadow:0 12px 34px rgba(0,0,0,.2);
+    animation:cartaoSobe var(--sobe-t) var(--sobe) backwards}
+  /* nasce subindo um pouco, na mesma curva do teclado */
+  @keyframes cartaoSobe{from{transform:translate(-50%,24px);opacity:0}
+    to{transform:translate(-50%,0);opacity:1}}
   /* F4: anel com o tempo dentro à esquerda; rótulo, exercício e ações à direita */
   .tr-desc-corpo{display:flex;align-items:center;gap:14px}
   .tr-desc-anel{position:relative;flex:0 0 84px;width:84px;height:84px}
@@ -1649,6 +1692,11 @@
   .tr-descanso-toast.acabando .tr-desc-tempo{color:var(--ad)}
   .tr-descanso-toast.fim .tr-desc-tempo{color:var(--ok);font-size:17px}
   .tr-desc-acoes{display:flex;gap:8px}
+  /* som recusado pelo iPhone: aparece só nesse caso, no lugar de ficar mudo */
+  .tr-desc-aviso{display:none;width:100%;margin:6px 0 0;padding:6px 8px;border:0;
+    border-radius:8px;background:#FFF3E0;color:#8A4B00;font-family:inherit;font-size:12px;
+    font-weight:700;text-align:left;line-height:1.3;cursor:pointer}
+  .som-barrado .tr-desc-aviso{display:block}
   .tr-desc-btn{flex:1 1 0;padding:11px;border-radius:var(--rc);border:1px solid var(--hair);
     background:var(--card);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
   .tr-desc-btn.forte{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -2074,7 +2122,20 @@
 <div id="tela-sessao-treino" hidden>
   <div class="sessao-treino-head">
     <button type="button" id="sessao-treino-fechar" aria-label="Fechar">×</button>
-    <h1>Treino de hoje</h1>
+    <h1 id="sessao-treino-tit">Treino de hoje</h1>
+    <!-- O tempo do treino, a pausa e o Finalizar moram no cabeçalho: o pé da
+         tela fica livre pra lista, e lá embaixo só aparece o cartão do
+         descanso. Enquanto não há treino em andamento, vale o título. -->
+    <div id="tr-barra" class="tr-barra" hidden>
+      <span class="tr-barra-tempo">
+        <span class="tr-barra-rot" id="tr-barra-rot">Treino</span>
+        <span class="tr-barra-num" id="tr-barra-num">0:00</span>
+      </span>
+      <span class="tr-barra-btns">
+        <button type="button" class="tr-barra-ico" id="tr-barra-pausa" aria-label="Pausar treino">❚❚</button>
+        <button type="button" class="tr-barra-fim" id="tr-barra-fim">Finalizar</button>
+      </span>
+    </div>
   </div>
   <div id="sessao-treino-corpo" class="sessao-treino-corpo"></div>
   <!-- Teclado próprio da sessão. O do iPhone não serve aqui: cobre meia tela,
@@ -2085,7 +2146,7 @@
       <button type="button" class="tecla" data-n="1">1</button>
       <button type="button" class="tecla" data-n="2">2</button>
       <button type="button" class="tecla" data-n="3">3</button>
-      <button type="button" class="tecla aux icone" data-a="fechar" aria-label="Baixar o teclado">⌨︎ ⌄</button>
+      <button type="button" class="tecla aux icone" data-a="fechar" aria-label="Baixar o teclado"><svg viewBox="0 0 28 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="1.5" width="24" height="14" rx="3"/><g fill="currentColor" stroke="none"><rect x="5.6" y="4.6" width="2" height="2" rx=".5"/><rect x="9.6" y="4.6" width="2" height="2" rx=".5"/><rect x="13" y="4.6" width="2" height="2" rx=".5"/><rect x="16.4" y="4.6" width="2" height="2" rx=".5"/><rect x="20.4" y="4.6" width="2" height="2" rx=".5"/><rect x="7.6" y="8" width="2" height="2" rx=".5"/><rect x="11.3" y="8" width="2" height="2" rx=".5"/><rect x="14.7" y="8" width="2" height="2" rx=".5"/><rect x="18.4" y="8" width="2" height="2" rx=".5"/></g><path d="M9.5 12h9"/><path d="M9.5 19.5 14 23.8l4.5-4.3"/></svg></button>
 
       <button type="button" class="tecla" data-n="4">4</button>
       <button type="button" class="tecla" data-n="5">5</button>
@@ -2101,22 +2162,6 @@
       <button type="button" class="tecla" data-n="0">0</button>
       <button type="button" class="tecla aux" data-a="apagar" aria-label="Apagar">⌫</button>
       <button type="button" class="tecla next" data-a="prox">Próximo</button>
-    </div>
-  </div>
-  <!-- barra presa no rodapé da sessão: o tempo do treino correndo, pausa e
-       finalizar. O painel de descanso encosta em cima dela, virando uma peça
-       só - é lá que ficam o descanso e, depois, o cronômetro dos exercícios
-       por tempo. -->
-  <div id="tr-barra" class="tr-barra" hidden>
-    <div class="tr-barra-linha">
-      <span class="tr-barra-tempo">
-        <span class="tr-barra-rot" id="tr-barra-rot">Treino</span>
-        <span class="tr-barra-num" id="tr-barra-num">0:00</span>
-      </span>
-      <span class="tr-barra-btns">
-        <button type="button" class="tr-barra-ico" id="tr-barra-pausa" aria-label="Pausar treino">❚❚</button>
-        <button type="button" class="tr-barra-fim" id="tr-barra-fim">Finalizar</button>
-      </span>
     </div>
   </div>
 </div>
@@ -8758,13 +8803,46 @@ let rirAberto = false;
 
 function tecladoVisivel(){
   const t = document.getElementById('tr-teclado');
-  return !!(t && !t.hidden);
+  return !!(t && !t.hidden && !t.classList.contains('saindo'));
+}
+let tecladoSaindoTimer = null;
+/* Voltar num campo já preenchido é pra TROCAR o número, não pra continuar
+   escrevendo nele: 18 digitado por engano, "Próximo", toca de volta no 18 e
+   digita 10 - antes virava "1810". Agora o campo entra "armado": o valor
+   aparece realçado (como texto selecionado) e o primeiro dígito substitui
+   tudo; do segundo em diante, digita normal. Sair sem digitar deixa o valor
+   como estava. Só troca o número - não mexe no ✓ da série nem no descanso. */
+function desarmarSubstituicao(input){
+  if(!input) return;
+  input.__substituir = false;
+  input.classList.remove('substituir');
 }
 function fecharTeclado(){
   const t = document.getElementById('tr-teclado');
-  if(t) t.hidden = true;
+  if(t && !t.hidden && !t.classList.contains('saindo')){
+    const tela = document.getElementById('tela-sessao-treino');
+    const barra = document.getElementById('tr-barra');
+    if(!tela || tela.hidden){
+      // a sessão já foi fechada: não tem o que animar
+      t.hidden = true;
+    } else {
+      // encosta o teclado no topo da barra, exatamente onde ele já está
+      // (altura da barra medida ANTES dela voltar ao espaçamento sem teclado),
+      // pra ele não dar pulo e sumir atrás dela
+      const hb = (barra && !barra.hidden) ? barra.offsetHeight : 0;
+      t.style.bottom = hb + 'px';
+      t.classList.add('saindo');
+      clearTimeout(tecladoSaindoTimer);
+      tecladoSaindoTimer = setTimeout(function(){
+        tecladoSaindoTimer = null;
+        t.hidden = true;
+        t.classList.remove('saindo');
+        t.style.bottom = '';
+      }, 220);
+    }
+  }
   fecharRirPop();
-  if(tecladoAlvo) tecladoAlvo.classList.remove('emfoco');
+  if(tecladoAlvo){ tecladoAlvo.classList.remove('emfoco'); desarmarSubstituicao(tecladoAlvo); }
   tecladoAlvo = null;
   pintarBarraTreino();
 }
@@ -8775,11 +8853,29 @@ function fecharRirPop(){
 }
 function abrirTeclado(input){
   if(!input) return;
-  if(tecladoAlvo && tecladoAlvo !== input) tecladoAlvo.classList.remove('emfoco');
+  if(tecladoAlvo && tecladoAlvo !== input){
+    tecladoAlvo.classList.remove('emfoco');
+    desarmarSubstituicao(tecladoAlvo);
+  }
   tecladoAlvo = input;
   input.classList.add('emfoco');
+  // tem valor? então o próximo dígito troca ele inteiro
+  input.__substituir = String(input.value || '') !== '';
+  input.classList.toggle('substituir', input.__substituir);
   const t = document.getElementById('tr-teclado');
-  if(t) t.hidden = false;
+  if(t){
+    // reabriu no meio da descida: cancela e volta de onde está
+    if(tecladoSaindoTimer){ clearTimeout(tecladoSaindoTimer); tecladoSaindoTimer = null; }
+    const estavaFechado = t.hidden;
+    t.classList.remove('saindo');
+    t.style.bottom = '';
+    if(estavaFechado){
+      t.classList.add('fora');     // começa escondido atrás da barra...
+      t.hidden = false;
+      void t.offsetHeight;         // ...o navegador registra essa posição...
+      t.classList.remove('fora');  // ...e daí desliza até o lugar
+    }
+  }
   fecharRirPop();
   pintarBarraTreino();
   // a linha que está sendo digitada não pode ficar atrás do teclado
@@ -8860,14 +8956,24 @@ let sessaoTreinoRirSemana = '';
   if(!t) return;
   t.addEventListener('click', function(ev){
     const meia = ev.target.closest('.tecla.mm span');
-    if(meia && tecladoAlvo){ passoDoCampo(tecladoAlvo, meia.dataset.a === 'mais' ? 1 : -1); return; }
+    if(meia && tecladoAlvo){
+      // o − / + ajusta a partir do valor que está lá, então ele "aceita" o
+      // valor e desarma a troca
+      desarmarSubstituicao(tecladoAlvo);
+      passoDoCampo(tecladoAlvo, meia.dataset.a === 'mais' ? 1 : -1);
+      return;
+    }
     const tecla = ev.target.closest('.tecla');
     if(!tecla || !tecladoAlvo) return;
     const n = tecla.dataset.n, a = tecla.dataset.a;
     if(n !== undefined){
       // repetição não tem meia: a vírgula só vale no peso
       if(n === ',' && !tecladoAlvo.classList.contains('tr-serie-kg')) return;
-      if(n === ','){
+      if(tecladoAlvo.__substituir){
+        // primeiro dígito depois de voltar no campo: substitui tudo
+        tecladoAlvo.value = (n === ',') ? '0,' : n;
+        desarmarSubstituicao(tecladoAlvo);
+      }else if(n === ','){
         if(String(tecladoAlvo.value).indexOf(',') >= 0) return;
         tecladoAlvo.value = (tecladoAlvo.value || '0') + ',';
       }else{
@@ -8875,7 +8981,14 @@ let sessaoTreinoRirSemana = '';
       }
       agendarSalvarSessao();
     }else if(a === 'apagar'){
-      tecladoAlvo.value = String(tecladoAlvo.value).slice(0, -1);
+      // com o valor realçado, apagar limpa ele inteiro - igual texto
+      // selecionado no iPhone
+      if(tecladoAlvo.__substituir){
+        tecladoAlvo.value = '';
+        desarmarSubstituicao(tecladoAlvo);
+      }else{
+        tecladoAlvo.value = String(tecladoAlvo.value).slice(0, -1);
+      }
       agendarSalvarSessao();
     }else if(a === 'fechar'){
       fecharTeclado();
@@ -9463,7 +9576,26 @@ function salvarVolumeDescanso(){
 }
 /* toque de teste: só o "tum" do fim, na altura que o dedo acabou de soltar */
 let audioTeste = null, audioTesteUrl = null;
+/* O Spotify pausava a cada série marcada. O apito do descanso é um áudio
+   com o tempo todo do descanso (silêncio + bipe no fim), e o iPhone tratava
+   ele como "música": tomava o som pra si e pausava quem estivesse tocando.
+   "ambient" diz ao iPhone que é som de fundo, que MISTURA: o Spotify segue
+   tocando e o bipe sai por cima dele.
+   O preço (é regra do iPhone, não dá pra contornar numa página): som de
+   fundo não toca com o app em segundo plano ou a tela bloqueada. Por isso a
+   tela fica acesa durante o descanso (já ficava), e se você bloquear mesmo
+   assim, o apito é remontado com o tempo que falta quando você voltar -
+   ou o cartão diz há quanto tempo terminou. */
+function misturarComMusica(){
+  try{
+    if(navigator.audioSession && navigator.audioSession.type !== 'ambient'){
+      navigator.audioSession.type = 'ambient';
+    }
+  }catch(e){}
+}
+misturarComMusica();
 function tocarTesteVolume(){
+  misturarComMusica();
   if(!(descansoVolume > 0)) return;
   try{
     if(audioTeste){ try{ audioTeste.pause(); }catch(e){} }
@@ -9484,16 +9616,47 @@ function tocarSomDescanso(segundos){
   if(!descansoSomLigado || !(segundos > 0)) return;
   try{
     descansoUltimoArme = Date.now();
+    misturarComMusica();
     descansoAudioUrl = URL.createObjectURL(montarWavDescanso(segundos, descansoVolume));
     descansoAudio = new Audio(descansoAudioUrl);
     descansoAudio.preload = 'auto';
-    // o iPhone às vezes trata um áudio novo como "mídia" e para a música de
-    // quem estiver ouvindo; isto pede pra ele não roubar a sessão de áudio.
+    // quem impede de pausar a música é o misturarComMusica() lá em cima;
+    // o playsinline só evita o player de tela cheia
     descansoAudio.setAttribute('playsinline','');
     const pr = descansoAudio.play();
-    if(pr && pr.catch) pr.catch(function(){ /* navegador barrou: fica só o visual */ });
-  }catch(e){ pararSomDescanso(); }
+    // Recusa do play() NÃO pode ser silenciosa. Acontece de verdade: depois
+    // que outro app toma o som do iPhone (ditado, áudio do WhatsApp, Siri,
+    // ligação), o iOS às vezes só deixa a página voltar a tocar a partir de
+    // um toque na tela. Aí o cartão do descanso passa a dizer isso, com um
+    // botão pra religar - em vez de o descanso seguir mudo sem ninguém saber.
+    if(pr && pr.then){
+      pr.then(function(){ marcarSomBarrado(false); },
+              function(){ marcarSomBarrado(true); });
+    }
+  }catch(e){ pararSomDescanso(); marcarSomBarrado(true); }
 }
+let descansoSomBarrado = false;
+function marcarSomBarrado(v){
+  descansoSomBarrado = !!v && descansoSomLigado;
+  const el = document.getElementById('tr-descanso-toast');
+  if(el) el.classList.toggle('som-barrado', descansoSomBarrado);
+}
+/* A "sessão de áudio" do iPhone (Safari 16.4+). Quando outro app pega o som
+   ela fica "interrupted"; quando devolve, volta a "active" - mas o áudio que
+   estava tocando NÃO volta sozinho (é o que diz a especificação e é o que
+   acontece). Então, ao voltar pra "active", o descanso remonta o apito na
+   hora, com o tempo que falta. Com o app em segundo plano esse aviso só
+   chega quando você volta pra ele - o JavaScript fica congelado até lá. */
+try{
+  if(navigator.audioSession && navigator.audioSession.addEventListener){
+    navigator.audioSession.addEventListener('statechange', function(){
+      if(navigator.audioSession.state === 'active' && window.__pintarDescanso){
+        descansoUltimoArme = 0;
+        window.__pintarDescanso();
+      }
+    });
+  }
+}catch(e){}
 /* Remonta o bipe com o tempo que ainda falta. É o conserto pro caso em que o
    iPhone pausa o áudio enquanto o app está em segundo plano (ou outro app
    toma a saída de som): sem isto o descanso seguia contando na tela, mas o
@@ -9566,18 +9729,27 @@ function fmtRelogio(seg){
    descanso se apoia nela pra ficar SEMPRE acima dos dois - sem somar o
    teclado, ele caía por cima das teclas. */
 function medirRodapeSessao(){
-  const barra = document.getElementById('tr-barra');
+  // a barra do tempo subiu pro cabeçalho: o que ocupa o pé agora é só o
+  // teclado (quando aberto)
   const tec = document.getElementById('tr-teclado');
-  let h = 0;
-  if(barra && !barra.hidden) h += barra.offsetHeight;
-  if(tec && !tec.hidden) h += tec.offsetHeight;
-  document.documentElement.style.setProperty('--tr-barra-h', (h || 64) + 'px');
+  const aberto = !!(tec && !tec.hidden && !tec.classList.contains('saindo') && sessaoAberta());
+  document.documentElement.style.setProperty('--tr-rodape-h', (aberto ? tec.offsetHeight : 0) + 'px');
+  // descanso correndo + teclado aberto = faixa fina em cima do teclado
+  const toast = document.getElementById('tr-descanso-toast');
+  if(toast) toast.classList.toggle('sobre-teclado', aberto);
 }
 function pintarBarraTreino(){
   const barra = document.getElementById('tr-barra');
   if(!barra) return;
-  if(!andamento || !sessaoAberta()){ barra.hidden = true; medirRodapeSessao(); return; }
+  const cab = barra.parentNode;
+  if(!andamento || !sessaoAberta()){
+    barra.hidden = true;
+    if(cab) cab.classList.remove('com-tempo');
+    medirRodapeSessao();
+    return;
+  }
   barra.hidden = false;
+  if(cab) cab.classList.add('com-tempo');
   barra.classList.toggle('pausado', !!andamento.pausaEm);
   const rot = document.getElementById('tr-barra-rot');
   const num = document.getElementById('tr-barra-num');
@@ -9819,6 +9991,7 @@ function iniciarDescanso(txt, nomeExercicio){
     +   '</div>'
     +   '<div class="tr-desc-col">'
     +     '<div class="tr-desc-topo"><span class="tr-desc-rot">Descanso</span>' + BOTOES + '</div>'
+    +     '<button type="button" class="tr-desc-aviso">Som pausado · toque pra religar</button>'
     +     '<div class="tr-desc-vol-caixa" hidden>'
     +       '<input type="range" class="tr-desc-vol" min="0" max="100" step="5" aria-label="Altura do som">'
     +     '</div>'
@@ -9829,6 +10002,7 @@ function iniciarDescanso(txt, nomeExercicio){
     +   '</div>'
     + '</div>';
   document.body.appendChild(el);
+  medirRodapeSessao();
   const tempoEl = el.querySelector('.tr-desc-tempo');
   const arco = el.querySelector('#tr-desc-arco');
   const VOLTA = 2 * Math.PI * 46;          // circunferência do anel
@@ -9838,9 +10012,17 @@ function iniciarDescanso(txt, nomeExercicio){
     tempoEl.textContent = mm + ':' + (ss<10?'0':'') + ss;
     const fatia = maior > 0 ? Math.max(0, Math.min(1, restante/maior)) : 0;
     arco.style.strokeDasharray = (VOLTA*fatia).toFixed(1) + ' ' + VOLTA.toFixed(1);
+    el.style.setProperty('--desc-fatia', (fatia * 100).toFixed(1) + '%');
     el.classList.toggle('acabando', restante <= 5 && restante > 0);
   }
   const rotuloEl = el.querySelector('.tr-desc-rot');
+  if(descansoSomBarrado) el.classList.add('som-barrado');
+  const avisoEl = el.querySelector('.tr-desc-aviso');
+  if(avisoEl) avisoEl.onclick = function(ev){
+    ev.stopPropagation();
+    descansoUltimoArme = 0;
+    if(restante > 0) tocarSomDescanso(restante);
+  };
   function tick(){
     restante = Math.round((fimEm - Date.now()) / 1000);
     // o bipe caiu no meio do caminho? refaz com o tempo que falta.
@@ -9851,9 +10033,14 @@ function iniciarDescanso(txt, nomeExercicio){
       // acabou enquanto o app estava em segundo plano? o certo é dizer que
       // terminou, não mostrar "Vai!" como se fosse agora (nem o número
       // congelado de quando o Safari parou o contador).
-      const acabouFazTempo = (Date.now() - fimEm) > 3000;
+      const atraso = Math.round((Date.now() - fimEm) / 1000);
+      const acabouFazTempo = atraso > 3;
       el.classList.add('fim');
-      if(rotuloEl) rotuloEl.textContent = acabouFazTempo ? 'Descanso terminado' : 'Descanso';
+      el.classList.remove('som-barrado');
+      // voltou do segundo plano depois do fim: diz há quanto tempo acabou,
+      // pra você saber se está atrasado pra série - e não só "terminou"
+      const ha = atraso < 60 ? (atraso + ' s') : (Math.round(atraso / 60) + ' min');
+      if(rotuloEl) rotuloEl.textContent = acabouFazTempo ? ('Terminou há ' + ha) : 'Descanso';
       tempoEl.textContent = acabouFazTempo ? 'Fim' : 'Vai!';
       arco.style.strokeDasharray = '0 ' + VOLTA.toFixed(1);
       if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
@@ -9863,7 +10050,7 @@ function iniciarDescanso(txt, nomeExercicio){
       setTimeout(function(){
         // some sozinho, mas só se não tiver começado outro descanso no meio
         if(document.getElementById('tr-descanso-toast') === el) el.remove();
-      }, 2500);
+      }, acabouFazTempo ? 6000 : 2500);
       return;
     }
     pintar();
