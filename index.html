@@ -847,20 +847,24 @@
     padding:16px 16px calc(150px + env(safe-area-inset-bottom,0px))}
   /* ---------- preparo no topo da sessão ---------- */
   .prep-caixa{background:var(--fill2);border-radius:var(--r);margin:0 0 14px;overflow:hidden}
-  .prep-resumo{display:flex;align-items:center;justify-content:space-between;gap:8px;
-    padding:11px 14px;font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;
+  .prep-resumo{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:14px 16px;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;
     list-style:none}
   .prep-resumo::-webkit-details-marker{display:none}
-  .prep-resumo::after{content:'⌄';margin-left:4px;color:var(--ink3);font-size:15px;line-height:1;
-    transition:transform .18s ease}
-  .prep-caixa[open] .prep-resumo::after{transform:rotate(180deg)}
-  .prep-conta{font-size:12px;font-weight:600;color:var(--ink3);margin-left:auto}
-  .prep-corpo{padding:0 14px 12px}
-  .prep-grupo{margin-bottom:12px}
+  /* o mesmo chevron desenhado dos outros lugares do app (refeições, anotação):
+     um cantinho de borda girado, 7px - e não o caractere "⌄", que saía com
+     outro peso e outro tamanho em cada aparelho */
+  .prep-resumo::after{content:'';flex:0 0 auto;width:7px;height:7px;margin:-4px 2px 0 4px;
+    border-right:1.8px solid var(--ink3);border-bottom:1.8px solid var(--ink3);
+    transform:rotate(45deg);transition:transform .18s ease}
+  .prep-caixa[open] .prep-resumo::after{transform:rotate(-135deg);margin-top:4px}
+  .prep-conta{font-size:13px;font-weight:600;color:var(--ink3);margin-left:auto}
+  .prep-corpo{padding:2px 16px 16px}
+  .prep-grupo{margin-bottom:18px}
   .prep-grupo:last-child{margin-bottom:0}
-  .prep-tit{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
-    color:var(--ink3);margin:0 0 5px}
-  .prep-item{padding:5px 0;border-bottom:.5px dotted var(--hair)}
+  .prep-tit{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--ink3);margin:0 0 8px}
+  .prep-item{padding:9px 0;border-bottom:.5px solid var(--hair)}
   .prep-item:last-child{border-bottom:0}
   .prep-linha{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
   .prep-nome{flex:1 1 auto;min-width:0;font-size:13.5px;color:var(--ink);line-height:1.3;
@@ -1442,7 +1446,7 @@
      ("Séries válidas" em tela estreita), os três valores continuam na mesma
      altura em vez de cada um flutuar num lugar. */
   .tr-sem-celula{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-    gap:3px;background:none;padding:10px 6px 4px;min-width:0}
+    gap:5px;background:none;padding:12px 8px 10px;min-width:0}
   .tr-sem-celula + .tr-sem-celula{border-left:1px solid var(--hair)}
   /* as três células têm exatamente o mesmo rótulo: era o botãozinho "?" que
      entrava no flex de "Intensidade" e espremia a palavra, deixando ela menor
@@ -1664,7 +1668,7 @@
   .tr-along-tit{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
     color:var(--ink3);margin:0 0 6px}
   .tr-serie-ativacao-label{font-size:14px;color:var(--ink2)}
-  .tr-semana-cartao-sessao{margin:0 0 8px}
+  .tr-semana-cartao-sessao{margin:4px 0 16px}
   /* pré-série de aquecimento (ex.: "2x15" antes da carga que vale): entra
      como as primeiras linhas da MESMA tabela das séries, com "AQ" no lugar do
      número. Antes era um bloco à parte com faixa cinza de ponta a ponta -
