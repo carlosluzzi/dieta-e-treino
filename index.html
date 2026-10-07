@@ -550,12 +550,16 @@
   #dlg-refeicoes .dlg-body{padding-top:10px}
   .dia-box h3{font-size:20px;font-weight:700;letter-spacing:-.019em;margin:0;padding:16px 16px 2px}
   .dia-box .sub{font-size:13px;color:var(--ink2);padding:0 16px 14px;display:block;line-height:1.4}
-  .ref{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:12px 8px 12px 12px;
-    border-top:.5px solid var(--hair);flex-wrap:nowrap}
-  .ref .nm{font-size:16px;font-weight:500;flex:1 1 auto;min-width:0;letter-spacing:-.01em}
+  /* Nome da refeição em cima, inteiro; seguiu/adaptou/não fiz embaixo
+     dividindo a largura em três. Na mesma linha, "Café da manhã" era cortado
+     em reticências pelos três botões ao lado - o nome é o que menos pode
+     ser cortado aqui. */
+  .ref{display:flex;align-items:center;justify-content:space-between;gap:9px 6px;padding:12px 12px;
+    border-top:.5px solid var(--hair);flex-wrap:wrap}
+  .ref .nm{font-size:16px;font-weight:500;flex:1 1 100%;min-width:0;letter-spacing:-.01em}
   .ref .nm-btn{display:flex;align-items:center;gap:7px;text-align:left;background:none;border:0;
     padding:0;cursor:pointer;color:var(--ink);width:100%;min-width:0}
-  .ref .nm-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .ref .nm-txt{flex:1 1 auto;min-width:0;white-space:normal;line-height:1.25}
   /* aviso de "comi algo a mais" na linha fechada da refeição: sem isso o
      extra some dentro da refeição recolhida e as calorias do dia aparecem
      sem nada marcado na tela. */
@@ -563,11 +567,11 @@
     vertical-align:super;line-height:0;margin-left:1px}
   /* o nome da refeição não pode encolher até virar duas letras por causa do
      chip do lado - daí o chip ser curto ("+1") e o nome ter um piso */
-  .ref .nm-txt{min-width:4.2rem}
   .ref .nm-btn::after{content:'';flex:0 0 auto;width:6px;height:6px;margin-top:-3px;
     border-right:1.6px solid var(--ink3);border-bottom:1.6px solid var(--ink3);transform:rotate(45deg)}
   .ref .nm-btn[aria-expanded="true"]::after{transform:rotate(-135deg);margin-top:3px}
-  .ref .estados{flex:0 0 auto}
+  .ref .estados{flex:1 1 100%;display:flex}
+  .ref .estados button{flex:1 1 0;min-width:0;text-align:center;padding-left:6px;padding-right:6px}
 
   .estados{display:inline-flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px}
   .estados{flex-shrink:0}
@@ -609,6 +613,17 @@
   .item-dia .idn{flex:1;min-width:96px;font-size:15px;letter-spacing:-.01em}
   .item-dia .idq{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink2)}
   .item-dia .idn{overflow:hidden;text-overflow:ellipsis}
+  /* o nome do alimento é o botão de trocar: texto normal, com um ⇄ miúdo
+     na cor de ação pra dizer que dá pra tocar */
+  .item-dia .idn-troca{background:none;border:0;padding:0;margin:0;text-align:left;color:var(--ink);
+    font-family:inherit;cursor:pointer;white-space:nowrap;line-height:1.3;
+    -webkit-tap-highlight-color:transparent}
+  .item-dia .idn-troca::after{content:'⇄';margin-left:6px;font-size:12px;color:var(--azul);opacity:.85}
+  .item-dia .idn-troca:active{opacity:.6}
+  .item-dia.trocado .idn-troca{color:var(--azul);font-weight:600}
+  /* "no lugar de ..." embaixo do alimento trocado */
+  .item-dia .idn-de{flex:1 1 100%;min-width:0;font-size:12px;color:var(--ink2);margin-top:-6px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   /* tudo/metade/nada/troquei ocupa a linha inteira, com os quatro botões
      dividindo o espaço por igual - antes o grupo só tinha a largura do texto
      e sobrava um vazio do lado direito. */
@@ -724,7 +739,6 @@
   noscript{display:block;background:var(--card);border-radius:var(--r);padding:18px;margin-top:16px;box-shadow:var(--sh)}
 
   @media (max-width:400px){
-    .ref{padding-left:12px;padding-right:6px;gap:5px}
     .estados button{padding:7px 9px}
   }
   @media (max-width:390px){
@@ -940,9 +954,14 @@
   /* Digitando com o descanso correndo: o cartão vira uma faixa fina colada
      em cima do teclado - tempo, +30 s e Pular numa linha só. Fechou o
      teclado, volta a ser o cartão. */
-  #tr-descanso-toast.sobre-teclado{left:0;right:0;width:auto;transform:none;
-    bottom:var(--tr-rodape-h,0px);border-radius:0;border:0;border-bottom:1px solid #2C3037;
-    background:#1C1E22;color:#fff;box-shadow:0 -6px 18px rgba(0,0,0,.12);
+  /* A faixa fica DENTRO do teclado (ver encaixarToastNoTeclado): é um bloco
+     normal no topo dele, que anula o padding do teclado com margem negativa
+     pra encostar nas bordas. Por estar dentro, ela sobe e desce colada no
+     teclado - sem o vão que aparecia quando ela era posicionada por fora. */
+  #tr-descanso-toast.sobre-teclado{position:relative;left:auto;right:auto;bottom:auto;
+    width:auto;transform:none;margin:-9px -8px 9px;
+    border-radius:0;border:0;border-bottom:1px solid #2C3037;
+    background:#1C1E22;color:#fff;box-shadow:none;
     padding:10px 12px 9px 14px;animation:none;cursor:default;transition:none}
   #tr-descanso-toast.sobre-teclado::before{content:'';position:absolute;left:0;top:0;height:3px;
     width:var(--desc-fatia,100%);background:var(--ok);transition:width 1s linear}
@@ -1072,6 +1091,38 @@
   .tabbar-item span{font-size:10px;font-weight:500;letter-spacing:-.005em;white-space:nowrap;line-height:1.2}
   .tabbar-item[aria-pressed="true"]{color:var(--azul);background:var(--fill)}
   .tabbar-item:focus-visible{outline:2px solid var(--azul);outline-offset:1px;border-radius:10px}
+
+  /* ---------- barrinha "Voltar ao treino" (treino aberto por trás) ---------- */
+  .tr-mini{position:fixed;left:12px;right:12px;bottom:calc(var(--tabbar-h) + 10px);z-index:41;
+    display:flex;align-items:center;gap:12px;padding:10px 12px 10px 16px;border:0;border-radius:16px;
+    background:var(--ink);color:#fff;font-family:inherit;text-align:left;cursor:pointer;
+    box-shadow:0 10px 28px rgba(0,0,0,.22);animation:miniSobe var(--sobe-t) var(--sobe) backwards;
+    -webkit-tap-highlight-color:transparent}
+  @keyframes miniSobe{from{transform:translateY(18px);opacity:0}to{transform:none;opacity:1}}
+  .tr-mini[hidden]{display:none}
+  .tr-mini-tempo{display:flex;flex-direction:column;min-width:0;flex:0 0 auto}
+  .tr-mini-rot{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    color:rgba(255,255,255,.62);line-height:1.15;white-space:nowrap}
+  .tr-mini-num{font-size:20px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+  .tr-mini-desc{flex:1 1 auto;min-width:0;text-align:center;font-size:14px;font-weight:700;
+    font-variant-numeric:tabular-nums;color:#7FD08A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tr-mini-desc.acabando{color:#FFB74D}
+  .tr-mini-desc.fim{color:#7FD08A}
+  .tr-mini-desc[hidden]{display:none}
+  .tr-mini-voltar{flex:0 0 auto;margin-left:auto;font-size:13px;font-weight:700;
+    background:rgba(255,255,255,.14);border-radius:10px;padding:8px 12px;white-space:nowrap}
+  /* a lista não pode acabar escondida atrás da barrinha */
+  body.com-mini-treino .wrap{padding-bottom:calc(var(--tabbar-h) + 8px + 72px)}
+  /* com a sessão fechada o cartão grande do descanso sai da tela (o tempo
+     dele continua correndo e aparece na barrinha) */
+  body:not(.sessao-aberta) #tr-descanso-toast{display:none}
+
+  /* pílula "Atualização pronta" (versão nova do app já baixada; ver sw.js) */
+  #atualizacao-pronta{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 10px);
+    transform:translateX(-50%);z-index:200;border:0;border-radius:999px;padding:10px 16px;
+    background:var(--ink);color:#fff;font-family:inherit;font-size:13px;font-weight:700;
+    box-shadow:0 8px 24px rgba(0,0,0,.22);cursor:pointer;white-space:nowrap;
+    animation:miniSobe var(--sobe-t) var(--sobe) backwards}
 
   /* ---------- aba Hoje ---------- */
   .hoje-cabecalho{padding:20px 0 4px}
@@ -1752,6 +1803,7 @@
       margin:0;padding:11px 14px;border-radius:10px;width:100%}
     .tabbar-item span{font-size:15px}
     .tabbar-item[aria-pressed="true"]{background:var(--fill)}
+    .tr-mini{left:auto;right:24px;bottom:24px;width:380px}
   }
 </style>
 </head>
@@ -2117,6 +2169,16 @@
     <span>Evolução</span>
   </button>
 </nav>
+<!-- Treino em andamento com a sessão fechada: barrinha presa acima das abas
+     com o tempo do treino e o descanso correndo. Tocar volta pra sessão. -->
+<button type="button" id="tr-mini" class="tr-mini" hidden aria-label="Voltar ao treino">
+  <span class="tr-mini-tempo">
+    <span class="tr-mini-rot" id="tr-mini-rot">Treino</span>
+    <span class="tr-mini-num" id="tr-mini-num">0:00</span>
+  </span>
+  <span class="tr-mini-desc" id="tr-mini-desc" hidden></span>
+  <span class="tr-mini-voltar">Voltar ao treino ›</span>
+</button>
 </div>
 
 <div id="tela-sessao-treino" hidden>
@@ -2246,6 +2308,33 @@ function fecharAbertura(){
   setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 420);
 }
 setTimeout(function(){ fecharAbertura(); }, 9000);
+
+/* ---------------------------------------------------------
+   SERVICE WORKER (ver sw.js): o index.html e as bibliotecas do Neon passam
+   a abrir do aparelho. Quando uma versão nova do app chega por trás, a
+   página é avisada: ainda na abertura, recarrega na hora (ninguém percebe);
+   com o app em uso, mostra "Atualização pronta" e espera um toque - nunca
+   recarrega sozinha no meio de um treino.
+   --------------------------------------------------------- */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  });
+  navigator.serviceWorker.addEventListener('message', function(ev){
+    if(!ev.data || ev.data.tipo !== 'nova-versao') return;
+    if(!aberturaFechada){ location.reload(); return; }
+    mostrarAtualizacaoPronta();
+  });
+}
+function mostrarAtualizacaoPronta(){
+  if(document.getElementById('atualizacao-pronta')) return;
+  var el = document.createElement('button');
+  el.type = 'button';
+  el.id = 'atualizacao-pronta';
+  el.textContent = 'Atualização pronta · toque pra recarregar';
+  el.onclick = function(){ location.reload(); };
+  document.body.appendChild(el);
+}
 function fecharAberturaNoProximoQuadro(){
   if(typeof requestAnimationFrame !== 'function'){ fecharAbertura(); return; }
   requestAnimationFrame(function(){ requestAnimationFrame(fecharAbertura); });
@@ -2402,9 +2491,59 @@ function alternarAuth(qual){
 document.getElementById('ir-cadastro').onclick = function(){ alternarAuth('cadastro'); };
 document.getElementById('ir-login').onclick = function(){ alternarAuth('login'); };
 
+/* ---------------------------------------------------------
+   ENTRADA GUARDADA (o app abre antes da rede responder)
+   ---------------------------------------------------------
+   Abrir o app era uma fila de idas à rede antes de qualquer coisa aparecer:
+   baixar as bibliotecas do Neon, perguntar se a sessão vale, listar as
+   organizações, buscar a organização, marcar ela como ativa, acordar o
+   banco (uma rodada de sondas por tabela), e só então o plano, o diário e os
+   três cards. Com o banco dormindo, isso passava de dez segundos olhando a
+   tela de abertura. Agora quem já entrou uma vez neste aparelho guarda a
+   sessão e a organização aqui, e o app DESENHA NA HORA com o que o aparelho
+   já sabe (plano, diário, cards - tudo já ficava guardado): a abertura some
+   em um quadro. A rede continua fazendo tudo que fazia, só que por trás, e a
+   tela se atualiza quando as respostas chegam. Se a sessão guardada não
+   valer mais (saiu da conta em outro aparelho), cai pra tela de entrar. */
+var ENTRADA_CHAVE = 'entrada-v1';
+function guardarEntrada(){
+  try{
+    if(!sessaoAtual || !sessaoAtual.session || !orgAtiva) return;
+    localStorage.setItem(ENTRADA_CHAVE, JSON.stringify({
+      sessao: { user: sessaoAtual.user, session: { token: sessaoAtual.session.token } },
+      org: orgAtiva, papel: papelAtual || 'member', em: Date.now()
+    }));
+  }catch(e){}
+}
+function lerEntradaGuardada(){
+  try{
+    var bruto = localStorage.getItem(ENTRADA_CHAVE);
+    var d = bruto ? JSON.parse(bruto) : null;
+    if(d && d.sessao && d.sessao.user && d.sessao.user.id && d.org && d.org.id) return d;
+  }catch(e){}
+  return null;
+}
+function apagarEntradaGuardada(){ try{ localStorage.removeItem(ENTRADA_CHAVE); }catch(e){} }
+var entradaPeloCache = false;
+
 async function iniciarFluxoAuth(){
+  // 1) desenha já, do que está guardado, sem esperar rede nenhuma
+  var guardada = lerEntradaGuardada();
+  if(guardada){
+    sessaoAtual = guardada.sessao;
+    orgAtiva = guardada.org;
+    papelAtual = guardada.papel || papelAtual;
+    entradaPeloCache = true;
+    try{ entrarNoAppDoCache(); }catch(e){ entradaPeloCache = false; }
+  }
+  // 2) a rede confirma (ou derruba) por trás
   neon = await window.neonReadyPromise;
   db = window.neonDb;
+  // o token guardado já serve pras primeiras consultas, sem esperar o
+  // getSession voltar pelo proxy
+  if(guardada && guardada.sessao.session && guardada.sessao.session.token && window.__semearToken){
+    window.__semearToken(guardada.sessao.session.token);
+  }
   var s = await comTimeout(neon.getSession(), 8000).catch(function(){ return null; });
   if(s && s.data && s.data.session){
     sessaoAtual = s.data;
@@ -2414,6 +2553,17 @@ async function iniciarFluxoAuth(){
     await entrarNoApp();
     return;
   }
+  if(guardada && !s){
+    // rede fora ou demorando: fica com o que está na tela (modo guardado),
+    // em vez de derrubar pra tela de entrar por causa de sinal fraco. Ainda
+    // tenta sincronizar com o token guardado - se não der, segue assim.
+    try{ await entrarNoApp(); }catch(e){}
+    return;
+  }
+  // sessão não vale mais: a entrada guardada sai e volta pra tela de entrar
+  apagarEntradaGuardada();
+  sessaoAtual = null; orgAtiva = null; entradaPeloCache = false;
+  document.getElementById('app-shell').hidden = true;
   var conviteId = pegarConviteDaUrl();
   document.getElementById('tela-auth').hidden = false;
   fecharAbertura();
@@ -2520,6 +2670,29 @@ document.getElementById('form-convite').onsubmit = async function(ev){
 };
 
 async function carregarOrganizacaoAtiva(){
+  // já se sabe qual é a organização (entrada guardada): vai direto nela, em
+  // vez de listar primeiro - uma ida de rede a menos na fila da abertura.
+  var guardada = lerEntradaGuardada();
+  if(guardada && guardada.org && guardada.org.id){
+    try{
+      var paresG = await Promise.all([
+        comTimeout(neon.organization.getFullOrganization({ query: { organizationId: guardada.org.id } }), 6000),
+        comTimeout(neon.organization.setActive({ organizationId: guardada.org.id }), 6000).catch(function(){ return null; })
+      ]);
+      if(paresG[0] && paresG[0].data && paresG[0].data.id){
+        orgAtiva = paresG[0].data;
+        try{ papelAtual = papelAtual || localStorage.getItem('papelAtual') || 'member'; }
+        catch(e){ papelAtual = papelAtual || 'member'; }
+        comTimeout(neon.organization.getActiveMemberRole(), 6000).then(function(papel){
+          papelAtual = (papel && papel.data && papel.data.role) || (papel && papel.data) || 'member';
+          try{ localStorage.setItem('papelAtual', papelAtual); }catch(e){}
+          guardarEntrada();
+          if(typeof montarContaUsuario === 'function') montarContaUsuario();
+        }).catch(function(){});
+        return;
+      }
+    }catch(e){ /* cai no caminho completo abaixo */ }
+  }
   var lista = await comTimeout(neon.organization.list(), 6000);
   var orgs = (lista && lista.data) || [];
   if(orgs.length === 0){
@@ -2601,6 +2774,7 @@ async function entrarNoApp(){
     await carregarOrganizacaoAtiva();
   }
 
+  guardarEntrada();
   document.getElementById('tela-instalar').hidden = true;
   document.getElementById('tela-auth').hidden = true;
   document.getElementById('app-shell').hidden = false;
@@ -2612,6 +2786,17 @@ async function entrarNoApp(){
   atualizarMarca();
   carregarFotosPerfil().then(montarContaUsuario);
   iniciarApp();
+}
+/* Mesma entrada, só que sem rede: sessão e organização guardadas, plano e
+   diário do aparelho. É o que faz a abertura sumir em um quadro. */
+function entrarNoAppDoCache(){
+  document.getElementById('tela-instalar').hidden = true;
+  document.getElementById('tela-auth').hidden = true;
+  document.getElementById('app-shell').hidden = false;
+  fotosDoCache();
+  montarContaUsuario();
+  atualizarMarca();
+  pintarDoCache();
 }
 
 /* Cabeçalho e <title> nunca citam nomes fixos (Isabella/Carlos) nem nutricionista
@@ -2862,6 +3047,7 @@ document.getElementById('btn-fechar-conta').onclick = function(){
 document.getElementById('btn-sair').onclick = async function(){
   await neon.signOut();
   if(window.__limparToken) window.__limparToken();
+  apagarEntradaGuardada();
   try{ await window.storage.remove(CACHE_KEY); }catch(e){}
   location.reload();
 };
@@ -4145,12 +4331,24 @@ function escolherVigente(linhas){
 async function buscarPlanoDe(uid){
   if(!uid) return null;
   try{
-    const r = await db.from('planos_dieta').select('conteudo,vigente_a_partir')
-      .eq('organization_id', orgAtiva.id).eq('user_id', uid)
-      .order('vigente_a_partir', {ascending:false}).limit(20);
-    const linha = escolherVigente(r && r.data);
-    return linha ? linha.conteudo : null;
+    // pelo mesmo caminho dos outros planos: fica guardado no aparelho (é o
+    // que deixa a aba Dieta e o diário abrirem na hora, antes da rede) e
+    // duas telas pedindo juntas dividem a mesma ida ao banco
+    const linha = await buscarPlanoGenerico('planos_dieta', uid);
+    return (linha && linha.conteudo) ? linha.conteudo : null;
   }catch(e){ return null; }
+}
+/* O plano guardado no aparelho, no mesmo formato de carregarPlanoAtivo - pra
+   desenhar antes da rede responder. */
+function planoAtivoDoCache(){
+  const uidI = uidDoSlot('i'), uidC = uidDoSlot('c');
+  const lI = planoGuardado('planos_dieta', uidI), lC = planoGuardado('planos_dieta', uidC);
+  const docI = lI && lI.conteudo, docC = lC && lC.conteudo;
+  if(!docI && !docC) return false;
+  PLANO = zipPlano(docI || null, docC || null);
+  const vazio = document.getElementById('plano-vazio');
+  if(vazio) vazio.hidden = true;
+  return true;
 }
 async function carregarPlanoAtivo(){
   const vazio = document.getElementById('plano-vazio');
@@ -5181,7 +5379,8 @@ function somaMacros(a,b,peso){
 }
 const ZERO = {k:0,p:0,c:0,g:0};
 const FRACAO = {tudo:1, meia:0.5, nada:0};
-const FRACOES = [['tudo','tudo'],['meia','metade'],['nada','nada'],['troca','troquei']];
+const FRACOES = [['tudo','tudo'],['meia','metade'],['nada','nada']];
+// trocar não é mais um quarto botão: é tocar no alimento (ver renderDiaBox)
 
 /* =========================================================
    12. DIÁRIO: perfil, calendário, marcação e relatório
@@ -5294,12 +5493,7 @@ async function salvarDiario(){
     avisarErro('Não deu pra salvar no servidor', String(e && e.message || e) + ' · ficou salvo só neste aparelho');
   }
 }
-async function carregarDiario(){
-  // 1) começa pela cópia local. Ela é o que garante que uma atualização do
-  //    app (ou o banco demorando pra responder) não apague o que já estava
-  //    marcado no dia: antes o banco ENTRAVA NO LUGAR do que havia, e se ele
-  //    viesse vazio o app seguia como se nada tivesse sido marcado - e a
-  //    primeira marcação seguinte gravava o dia por cima, já sem o resto.
+async function carregarDiarioLocal(){
   let local = null;
   try{
     const r = await window.storage.get(DIARIO_KEY);
@@ -5311,6 +5505,15 @@ async function carregarDiario(){
     }
   }catch(e){}
   if(local) diario.log = local;
+  return local;
+}
+async function carregarDiario(){
+  // 1) começa pela cópia local. Ela é o que garante que uma atualização do
+  //    app (ou o banco demorando pra responder) não apague o que já estava
+  //    marcado no dia: antes o banco ENTRAVA NO LUGAR do que havia, e se ele
+  //    viesse vazio o app seguia como se nada tivesse sido marcado - e a
+  //    primeira marcação seguinte gravava o dia por cima, já sem o resto.
+  const local = await carregarDiarioLocal();
 
   // 2) o banco manda no que ele tem, dia a dia (e não substituindo o pacote
   //    inteiro): dia que só existe aqui no aparelho continua existindo.
@@ -5460,6 +5663,18 @@ function setItem(reg, mealId, idx, valor){
     reg.r[mealId] = valor.ok ? (reg.r[mealId]==='ok' ? 'ok' : 'ok') : 'ad';
   } else if(valor === 'tudo'){
     if(!reg.r[mealId]) reg.r[mealId] = 'ok';
+    // desfez a troca (ou a metade) e nada mais fugiu do plano nessa
+    // refeição: ela volta a contar como "seguiu"
+    else if(reg.r[mealId] === 'ad'){
+      const marcas = reg.itens[mealId];
+      let desvio = extrasDa(reg, mealId).length > 0;
+      Object.keys(marcas).forEach(function(k){
+        const m = marcas[k];
+        if(m && typeof m === 'object'){ if(!m.ok) desvio = true; }
+        else if(m && m !== 'tudo') desvio = true;
+      });
+      if(!desvio) reg.r[mealId] = 'ok';
+    }
   } else {
     reg.r[mealId] = 'ad';
   }
@@ -5550,15 +5765,15 @@ function itensDaRefeicao(reg, meal){
   const v = versaoDoDia(reg, meal);
   return {vIdx:v, itens:meal.versoes[v].itens};
 }
-/* valor da porção daquele perfil, respeitando a troca escolhida no plano */
+/* valor da porção daquele perfil: SEMPRE o alimento que o nutricionista
+   escreveu. O "Trocar por" da aba Dieta é planejamento (lista de compras) e
+   não muda o plano - antes ele entrava aqui e o diário passava a dizer que o
+   café da manhã era "Coxão mole grelhado" no lugar dos ovos, como se a troca
+   tivesse virado dieta. Troca de verdade é por dia, tocando no alimento. */
 function porcaoPerfil(meal, vIdx, item, iIdx){
   const p = chaveIC(diario.perfil);
   if(!p || item[p]===null || item[p]===undefined) return {nome:null, valor:null};
-  const modoAntes = estado.modo;
-  estado.modo = (PLANO.semana.indexOf(meal)>=0) ? 'semana' : 'fds';
-  const opt = optDe(meal, vIdx, item, iIdx, p);
-  estado.modo = modoAntes;
-  return {nome: opt.base ? item.n : opt.n, valor: valorPara(item, opt, p)};
+  return {nome: item.n, valor: item[p]};
 }
 function contasDoDia(dia){
   const d = deIso(dia);
@@ -5690,7 +5905,7 @@ function qtdEquivalente(itemDoPlano, nome){
    branco por cima do que já está na tela, sem rótulo no seletor (o botão que
    abriu já diz o que é) e sem a dica de "escolha para calcular" - ali o
    silêncio já diz que falta escolher. */
-function editorTroca(t, itemDoPlano, aoMudar, aoRemover, modoExtra){
+function editorTroca(t, itemDoPlano, aoMudar, aoRemover, modoExtra, rotuloRemover){
   const box = document.createElement('div');
   box.className = 'troca-box' + (modoExtra ? ' nu' : '');
 
@@ -5845,7 +6060,7 @@ function editorTroca(t, itemDoPlano, aoMudar, aoRemover, modoExtra){
 
   if(aoRemover){
     const rm = document.createElement('button');
-    rm.type='button'; rm.className='rm'; rm.textContent='Remover';
+    rm.type='button'; rm.className='rm'; rm.textContent=rotuloRemover || 'Remover';
     rm.onclick = aoRemover;
     box.appendChild(rm);
   }
@@ -5958,11 +6173,23 @@ function renderDiaBox(){
         const pc = porcaoPerfil(meal, info.vIdx, item, iIdx);
         if(pc.nome===null) return;
         const li = document.createElement('div'); li.className='item-dia';
-        const nm = document.createElement('span'); nm.className='idn';
+        // o nome é o botão de trocar: tocar nele abre "o que você comeu no
+        // lugar" (o quarto botão "troquei" saiu da fileira - tudo/metade/nada
+        // é sobre QUANTO comeu; trocar é outra coisa e mora no alimento)
+        const nm = document.createElement('button'); nm.type='button'; nm.className='idn idn-troca';
         nm.textContent = pc.nome;
+        nm.title = 'Toque pra trocar por outro alimento';
         const qt = document.createElement('span'); qt.className='idq';
         qt.textContent = fmt(pc.valor);
         const est = estadoItem(reg, meal.id, iIdx);
+        const chaveT = meal.id+':'+iIdx;
+        nm.onclick = function(){
+          const atual = trocaDoItem(reg, meal.id, iIdx);
+          setItem(reg, meal.id, iIdx, atual || {n:'', q:'', u:'g'});
+          // sempre abre o editor - inclusive pra corrigir uma troca já feita
+          trocaAbertaChave = chaveT;
+          salvarDiario(); renderDiario();
+        };
         const g = document.createElement('div'); g.className='estados fr';
         FRACOES.forEach(function(fr){
           const b = document.createElement('button');
@@ -5970,16 +6197,8 @@ function renderDiaBox(){
           b.setAttribute('data-f', fr[0]);
           b.setAttribute('aria-pressed', est===fr[0] ? 'true':'false');
           b.onclick = function(){
-            if(fr[0]==='troca'){
-              const atual = trocaDoItem(reg, meal.id, iIdx);
-              setItem(reg, meal.id, iIdx, atual || {n:'', q:'', u:'g'});
-              // tocar em "Troquei" sempre abre o editor - inclusive pra
-              // corrigir uma troca que já estava pronta.
-              trocaAbertaChave = meal.id+':'+iIdx;
-            } else {
-              setItem(reg, meal.id, iIdx, fr[0]);
-              if(trocaAbertaChave === meal.id+':'+iIdx) trocaAbertaChave = null;
-            }
+            setItem(reg, meal.id, iIdx, fr[0]);
+            if(trocaAbertaChave === chaveT) trocaAbertaChave = null;
             salvarDiario(); renderDiario();
           };
           g.appendChild(b);
@@ -5987,20 +6206,17 @@ function renderDiaBox(){
         li.appendChild(nm); li.appendChild(qt); li.appendChild(g);
         if(est==='troca'){
           const t = trocaDoItem(reg, meal.id, iIdx);
-          const chaveT = meal.id+':'+iIdx;
           const pronta = !!macrosDaTroca(t);
           if(pronta && trocaAbertaChave !== chaveT){
             // trocado e fechado: a linha vira o alimento que ele comeu de
-            // verdade. Repetir o nome do plano em cima e a troca embaixo não
-            // ajudava - o "Troquei" aceso já diz que aquilo saiu do prato.
+            // verdade, e embaixo fica dito o que era no plano.
             nm.textContent = nomeDaTroca(t);
             qt.textContent = quantidadeDaTroca(t);
             nm.title = 'No lugar de ' + pc.nome + (pc.valor!==null ? ' ('+fmt(pc.valor)+')' : '');
             li.classList.add('trocado');
-            li.onclick = function(ev){
-              if(ev.target.closest('button')) return;
-              trocaAbertaChave = chaveT; renderDiario();
-            };
+            const deQue = document.createElement('span'); deQue.className='idn-de';
+            deQue.textContent = 'no lugar de ' + pc.nome;
+            li.insertBefore(deQue, g);
           } else {
             const linhaEd = document.createElement('div'); linhaEd.className='extra-linha';
             const ok = document.createElement('button');
@@ -6008,6 +6224,12 @@ function renderDiaBox(){
             ok.textContent = 'OK';
             ok.disabled = !pronta;
             ok.onclick = function(){ trocaAbertaChave = null; salvarDiario(); renderDiario(); };
+            // desfazer: volta a ser o alimento do plano, comido inteiro
+            function desfazerTroca(){
+              setItem(reg, meal.id, iIdx, 'tudo');
+              trocaAbertaChave = null;
+              salvarDiario(); renderDiario();
+            }
             linhaEd.appendChild(editorTroca(t, item, function(soSalvar){
               // reavalia se a refeição fica "seguiu" ou "adaptou" toda vez que
               // a troca muda (inclusive ao marcar/desmarcar "liberada pelo plano")
@@ -6017,7 +6239,7 @@ function renderDiaBox(){
               // foco), então o OK é religado na mão.
               if(soSalvar){ atualizaBalanco(); ok.disabled = !macrosDaTroca(t); }
               else renderDiario();
-            }, null));
+            }, desfazerTroca, false, 'Não troquei'));
             linhaEd.appendChild(ok);
             li.appendChild(linhaEd);
           }
@@ -6588,7 +6810,8 @@ document.getElementById('hoje-ir-habitos').onclick = function(){ abrirHabitosDlg
 document.getElementById('hoje-ir-suplementacao').onclick = function(){ abrirHabitosDlg('suplementacao'); };
 document.getElementById('hoje-ir-iniciar-treino').onclick = function(){
   const emAndamento = lerAndamento();
-  abrirSessaoTreino((emAndamento && emAndamento.chave) || treinoHojeEscolhido);
+  if(emAndamento){ andamento = emAndamento; voltarParaSessao(); return; }
+  abrirSessaoTreino(treinoHojeEscolhido);
 };
 
 // chaves únicas de treino (A/B/C/A2/D...) na ordem da divisão, sem "OFF" -
@@ -6734,7 +6957,7 @@ async function atualizarCardTreinoHoje(diaSel){
   const btnIniciar = document.getElementById('hoje-ir-iniciar-treino');
   if(!chaveBtn || !nota) return;
   const uid = diario.perfil;
-  if(!db || !orgAtiva || !sessaoAtual || !uid){
+  if(!orgAtiva || !sessaoAtual || !uid){
     chaveBtn.hidden = true; nota.textContent = '';
     listarTreinosFeitos([], null, null);
     treinoHojeEscolhido = null; treinoHojeConteudo = null;
@@ -6785,6 +7008,8 @@ async function atualizarCardTreinoHoje(diaSel){
     }
   }
 
+  // sem banco ainda (desenhando do guardado): fica com o passo 1
+  if(!db) return;
   try{
     // ---- 2) confirma com o banco ----
     // as quatro consultas são independentes entre si, então saem juntas: uma
@@ -7447,7 +7672,10 @@ function planoGuardado(tabela, uid){
   return linha;
 }
 async function buscarPlanoGenerico(tabela, uid){
-  if(!db || !orgAtiva || !uid) return null;
+  if(!orgAtiva || !uid) return null;
+  // sem banco ainda (app recém-aberto, desenhando do guardado): o guardado
+  // vale como resposta; `undefined` = "não deu pra saber"
+  if(!db) return planoGuardado(tabela, uid) || undefined;
   const k = chavePlano(tabela, uid);
   if(planoIndo[k]) return planoIndo[k];
   planoIndo[k] = (async function(){
@@ -7477,13 +7705,19 @@ async function buscarPlanoGenerico(tabela, uid){
 }
 
 async function buscarRegistroDia(tabela, uid, dia){
-  if(!db || !orgAtiva || !uid) return [];
+  if(!orgAtiva || !uid) return [];
+  const k = 'reg|' + tabela + '|' + uid + '|' + dia;
+  // sem banco ainda: o que ficou guardado da última vez
+  if(!db) return cacheLer(k) || [];
   try{
     const r = await db.from(tabela).select('marcados')
       .eq('organization_id', orgAtiva.id).eq('user_id', uid).eq('dia', dia)
       .maybeSingle();
-    return (r && r.data && r.data.marcados) || [];
-  }catch(e){ return []; }
+    if(r && r.error) return cacheLer(k) || [];
+    const lista = (r && r.data && r.data.marcados) || [];
+    cacheGravar(k, lista);
+    return lista;
+  }catch(e){ return cacheLer(k) || []; }
 }
 
 /* Hábitos e suplementação são dois cartões separados na tela inicial: são
@@ -7505,7 +7739,7 @@ async function atualizarCardHabitos(diaSel){
     const barra = document.getElementById(a.barra);
     if(!num || !barra) return;
     function zerar(txt){ num.textContent = txt || ''; barra.style.width = '0%'; }
-    if(!db || !orgAtiva || !sessaoAtual || !uid){ zerar(); return; }
+    if(!orgAtiva || !sessaoAtual || !uid){ zerar(); return; }
     try{
       const r = await Promise.all([
         buscarPlanoGenerico(a.plano, uid),
@@ -7917,6 +8151,8 @@ async function finalizarTreino(c, box, btn){
     function(chk){ return chk.getAttribute('aria-pressed') === 'true'; }).length;
   // só aqui o treino acaba de verdade
   andamento = null; gravarAndamento();
+  gravarRascunhoSessao(null);
+  fecharDescanso();
   fecharSessaoTreino();
   const detalhe = plural(feitas, 'série registrada', 'séries registradas')
     + (duracao > 30 ? ' · ' + fmtRelogio(duracao) : '');
@@ -7943,13 +8179,54 @@ function salvarSessaoAgora(){
   const box = document.getElementById('sessao-treino-registro');
   if(!box || !sessaoTreinoConteudo || !sessaoTreinoChave) return;
   if(!sessaoTreinoJaGravou && !temAlgumaSerieMarcada(box)) return;
+  // sem banco ainda (app desenhado do guardado): o rascunho local segura;
+  // quando a rede chegar, iniciarApp manda gravar (ver fim de iniciarApp)
+  if(!db) return;
   sessaoTreinoJaGravou = true;
   // sem botão: a mensagem de erro, se houver, aparece na tarja
   salvarRegistroTreino(sessaoTreinoChave, sessaoTreinoConteudo, box, null).catch(function(){});
 }
 function agendarSalvarSessao(){
+  // a cópia local sai na hora (é barata e é ela que segura o treino se o app
+  // for descartado em segundo plano); o banco espera as digitações juntarem
+  gravarRascunhoSessao();
   clearTimeout(salvarSessaoTimer);
   salvarSessaoTimer = setTimeout(salvarSessaoAgora, 700);
+}
+
+/* =========================================================
+   RASCUNHO DA SESSÃO (cópia local do treino em andamento)
+   =========================================================
+   O iPhone descarta o app em segundo plano sem avisar e, na volta, ele abre
+   do zero. O banco só recebe a sessão depois da primeira série marcada (e
+   com 700 ms de atraso), então tudo que estava digitado antes disso - e
+   qualquer série a mais adicionada - se perdia. Agora cada toque grava uma
+   cópia completa da tela no aparelho; ao reabrir, ela entra por cima do que
+   veio do banco (é sempre mais nova) e a sessão volta como estava. */
+const RASCUNHO_CHAVE = 'treinoRascunho';
+function chaveRascunho(){ return RASCUNHO_CHAVE + '|' + (diario.perfil || 'eu'); }
+function gravarRascunhoSessao(apagar){
+  try{
+    if(apagar === null){ localStorage.removeItem(chaveRascunho()); return; }
+    const box = document.getElementById('sessao-treino-registro');
+    const t = sessaoTreinoConteudo && sessaoTreinoChave && sessaoTreinoConteudo.treinos
+      && sessaoTreinoConteudo.treinos[sessaoTreinoChave];
+    if(!box || !t) return;
+    localStorage.setItem(chaveRascunho(), JSON.stringify({
+      dia: iso(new Date()), chave: sessaoTreinoChave, semana: treinoSemana,
+      exercicios: montarExerciciosDaSessao(t, box),
+      notas: sessaoTreinoNotas || {},
+      em: Date.now()
+    }));
+  }catch(e){}
+}
+function lerRascunhoSessao(){
+  try{
+    const bruto = localStorage.getItem(chaveRascunho());
+    const r = bruto ? JSON.parse(bruto) : null;
+    if(r && r.dia === iso(new Date())) return r;
+  }catch(e){}
+  return null;
 }
 
 /* Monta o que vai pro banco a partir do que está na tela. Fica separado do
@@ -8038,21 +8315,23 @@ let sessaoTreinoChaveInicial = null;
 let sessaoTreinoRegistros = [];
 async function abrirSessaoTreino(chaveInicial){
   document.getElementById('tela-sessao-treino').hidden = false;
+  document.body.classList.add('sessao-aberta');
   sessaoTreinoChave = null;
   sessaoTreinoChaveInicial = chaveInicial || null;
   sessaoTreinoJaGravou = false;
   const corpo = document.getElementById('sessao-treino-corpo');
   corpo.innerHTML = '<p class="pg-vazio">Carregando...</p>';
   const uid = diario.perfil;
-  if(!db || !orgAtiva || !sessaoAtual || !uid){
+  if(!orgAtiva || !sessaoAtual || !uid){
     corpo.innerHTML = '<p class="pg-vazio">Entre na conta pra registrar o treino.</p>';
     return;
   }
   try{
     // mesma consulta do card de Treino: passando por buscarPlanoGenerico, as
     // duas dividem a mesma ida ao banco (e o plano que já está guardado no
-    // aparelho abre a sessão na hora, sem espera).
-    const linha = await buscarPlanoGenerico('planos_treino', uid) || planoGuardado('planos_treino', uid);
+    // aparelho abre a sessão na hora, sem espera). Sem banco ainda (app
+    // recém-aberto, desenhando do que tem guardado), vale só o guardado.
+    const linha = (db ? await buscarPlanoGenerico('planos_treino', uid) : null) || planoGuardado('planos_treino', uid);
     if(!linha || !linha.conteudo){
       corpo.innerHTML = '<p class="pg-vazio">Ainda não tem periodização cadastrada. Peça pro admin cadastrar em "Gerenciar versões de plano".</p>';
       return;
@@ -8076,24 +8355,34 @@ async function abrirSessaoTreino(chaveInicial){
     // exercício) chegam em paralelo - não seguram a montagem da tela
     carregarVolumeDescanso();
     carregarDescansosEscolhidos();
+    // a semana que estava escolhida quando o app foi descartado vale de novo
+    const rascSemana = lerRascunhoSessao();
+    if(rascSemana && rascSemana.chave === sessaoTreinoChave && rascSemana.semana) treinoSemana = rascSemana.semana;
     const semanas = sessaoTreinoConteudo.semanas || [];
     if(!semanas.some(function(s){ return s.n===treinoSemana; })) treinoSemana = semanas[0] ? semanas[0].n : 1;
     // histórico do usuário, pra saber o "Anterior" (kg x reps da última vez
     // que essa série desse exercício foi feita) e pré-preencher os campos -
     // igual a um app de treino de verdade, em vez de começar tudo em branco.
+    // Fica guardado no aparelho: a sessão abre na hora com o histórico da
+    // última vez, e sem banco (app recém-aberto) é ele que vale.
     try{
-      const rr = await db.from('treino_registros')
-        .select('dia,treino_chave,exercicios')
-        .eq('organization_id', orgAtiva.id).eq('user_id', uid)
-        .order('dia', { ascending:false }).limit(30);
-      sessaoTreinoRegistros = (rr && rr.data) || [];
+      let lista = null;
+      if(db){
+        const rr = await db.from('treino_registros')
+          .select('dia,treino_chave,exercicios')
+          .eq('organization_id', orgAtiva.id).eq('user_id', uid)
+          .order('dia', { ascending:false }).limit(30);
+        if(rr && !rr.error && rr.data){ lista = rr.data; cacheGravar('registros|' + uid, lista); }
+      }
+      if(!lista) lista = cacheLer('registros|' + uid) || [];
+      sessaoTreinoRegistros = lista;
       // treino de hoje que já existe no banco: daí em diante o salvamento
       // automático pode continuar atualizando ele normalmente
       const hojeAgora = iso(new Date());
       sessaoTreinoJaGravou = sessaoTreinoRegistros.some(function(rg){
         return rg.dia === hojeAgora && rg.treino_chave === sessaoTreinoChave;
       });
-    }catch(e){ sessaoTreinoRegistros = []; }
+    }catch(e){ sessaoTreinoRegistros = cacheLer('registros|' + uid) || []; }
     montarSessaoTreino();
   }catch(e){
     corpo.innerHTML = '<p class="pg-vazio">Não deu pra carregar o treino agora.</p>';
@@ -8103,18 +8392,41 @@ function fecharSessaoTreino(){
   // o × esconde a tela, não encerra o treino: quem encerra é "Finalizar".
   // Antes fechar aqui apagava qualquer noção de treino em andamento e o card
   // voltava a dizer "Iniciar treino" no meio do treino.
+  if(andamento) andamento.telaAberta = false;
   encerrarAndamentoSeVazio();
   document.getElementById('tela-sessao-treino').hidden = true;
+  document.body.classList.remove('sessao-aberta');
   fecharMenuExercicio();
   fecharCrono();
   fecharTeclado();
-  const toast = document.getElementById('tr-descanso-toast');
-  if(toast) toast.remove();
-  if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
+  // O descanso NÃO para ao fechar: fechar é "deixa eu olhar a dieta enquanto
+  // descanso", não "cancelar o descanso". O cartão some da tela (CSS de
+  // body:not(.sessao-aberta)), mas o relógio dele continua, e o tempo que
+  // falta aparece na barrinha "Voltar ao treino" no pé da tela inicial.
+  medirRodapeSessao();
   pintarBarraTreino();
   atualizarCardTreinoHoje();
 }
 document.getElementById('sessao-treino-fechar').onclick = fecharSessaoTreino;
+/* Voltar pra sessão que ficou aberta por trás (barrinha do pé da tela ou
+   botão "Continuar treino"). Se a tela ainda está montada pro mesmo treino,
+   só reaparece - com tudo que estava digitado, sem remontar nada. Só vai
+   ao banco de novo se a tela não existe (app recém-aberto, por exemplo). */
+function voltarParaSessao(){
+  const chave = andamento && andamento.chave;
+  const tela = document.getElementById('tela-sessao-treino');
+  const corpo = document.getElementById('sessao-treino-corpo');
+  const montada = chave && sessaoTreinoChave === chave && corpo && corpo.querySelector('.tr-serie-bloco');
+  if(montada){
+    tela.hidden = false;
+    document.body.classList.add('sessao-aberta');
+    andamento.telaAberta = true; gravarAndamento();
+    medirRodapeSessao();
+    pintarBarraTreino();
+    return;
+  }
+  abrirSessaoTreino(chave || treinoHojeEscolhido);
+}
 // Quantas séries mostrar de saída pra um exercício, a partir do texto de
 // "séries válidas" do plano (ex.: "3x8–10" -> 3). Sem número reconhecível,
 // cai pra 3 (o mais comum na periodização) - o "+ Adicionar série" cobre
@@ -8163,8 +8475,11 @@ function partesPrescricao(txt){
   const s = String(txt == null ? '' : txt).trim();
   const m = /^(\d+)\s*[x×]\s*(.+)$/i.exec(s);
   if(!m) return { vezes: 1, reps: '' };
+  // só o número (ou a faixa) interessa: "3x10 fixo" é 10, "3x30 s/lado" é
+  // 30, "3x8–10 reps" é 8-10. Antes só "s/seg/reps" eram tirados, e o
+  // "fixo" da retração escapular virava placeholder "10fixo" no campo.
   const reps = m[2].replace(/[–—]/g, '-')
-    .replace(/\s*(s|seg|segundos?|reps?|repetiç(ões|ao|ão))\b.*$/i, '')
+    .replace(/^\s*(\d+(?:\s*-\s*\d+)?)[\s\S]*$/, '$1')
     .replace(/\s+/g, '').trim();
   return { vezes: Math.max(1, parseInt(m[1], 10) || 1), reps: reps };
 }
@@ -8745,6 +9060,12 @@ function montarSessaoTreino(){
     };
   }
   restaurarSessaoDeHoje();
+  // descanso que estava correndo quando o app foi descartado volta de onde
+  // estava (ou avisa que já acabou)
+  const descGuardado = lerDescansoAtivo();
+  if(descGuardado && !document.getElementById('tr-descanso-toast')){
+    iniciarDescanso(null, descGuardado.nome, descGuardado);
+  }
   pintarBarraTreino();
 }
 /* =========================================================
@@ -8838,6 +9159,9 @@ function fecharTeclado(){
         t.hidden = true;
         t.classList.remove('saindo');
         t.style.bottom = '';
+        // o teclado sumiu de vez: a faixa do descanso (se tiver) volta a ser
+        // o cartão flutuante
+        medirRodapeSessao();
       }, 220);
     }
   }
@@ -9318,6 +9642,7 @@ function abrirNotaExercicio(idx){
       if(v) sessaoTreinoNotas[idx] = v; else delete sessaoTreinoNotas[idx];
       const notaEl = document.querySelector('.tr-serie-nota[data-ex="'+idx+'"]');
       if(notaEl){ notaEl.textContent = v; notaEl.hidden = !v; }
+      gravarRascunhoSessao();
     }
     wrap.remove();
   });
@@ -9733,15 +10058,74 @@ function medirRodapeSessao(){
   // teclado (quando aberto)
   const tec = document.getElementById('tr-teclado');
   const aberto = !!(tec && !tec.hidden && !tec.classList.contains('saindo') && sessaoAberta());
+  // descanso correndo + teclado aberto = faixa fina em cima do teclado.
+  // A faixa MORA DENTRO do teclado (primeiro filho dele) enquanto ele está
+  // na tela: assim ela sobe e desce junto com ele, no mesmo movimento. Antes
+  // ela era um elemento solto com `bottom` = altura do teclado, e nos 200 ms
+  // em que o teclado ainda estava subindo (ou descendo) sobrava um buraco
+  // entre os dois. Sai de dentro só quando o teclado já sumiu de vez (ver o
+  // fim da animação em fecharTeclado).
+  encaixarToastNoTeclado();
   document.documentElement.style.setProperty('--tr-rodape-h', (aberto ? tec.offsetHeight : 0) + 'px');
-  // descanso correndo + teclado aberto = faixa fina em cima do teclado
+}
+function encaixarToastNoTeclado(){
+  const tec = document.getElementById('tr-teclado');
   const toast = document.getElementById('tr-descanso-toast');
-  if(toast) toast.classList.toggle('sobre-teclado', aberto);
+  if(!toast) return;
+  const dentro = !!(tec && !tec.hidden && sessaoAberta());
+  if(dentro){
+    toast.classList.add('sobre-teclado');
+    if(toast.parentNode !== tec) tec.insertBefore(toast, tec.firstChild);
+  }else{
+    toast.classList.remove('sobre-teclado');
+    if(toast.parentNode !== document.body) document.body.appendChild(toast);
+  }
+}
+/* Barrinha "Voltar ao treino" no pé da tela inicial: aparece enquanto existe
+   treino em andamento com a sessão fechada. Mostra o tempo do treino e o
+   descanso correndo (os dois ao vivo, repintados a cada segundo junto com o
+   resto), e tocar nela volta pra sessão exatamente como estava. */
+function pintarMiniTreino(){
+  const mini = document.getElementById('tr-mini');
+  if(!mini) return;
+  const mostrar = !!(andamento && !sessaoAberta() && andamento.dia === iso(new Date()));
+  mini.hidden = !mostrar;
+  document.body.classList.toggle('com-mini-treino', mostrar);
+  if(!mostrar) return;
+  const rot = document.getElementById('tr-mini-rot');
+  const num = document.getElementById('tr-mini-num');
+  const desc = document.getElementById('tr-mini-desc');
+  if(rot) rot.textContent = andamento.pausaEm ? 'Pausado' : ('Treino ' + (andamento.chave || ''));
+  if(num) num.textContent = fmtRelogio(segundosDoTreino());
+  const d = window.__descansoInfo ? window.__descansoInfo() : null;
+  // sempre do horário de término, nunca do número guardado: depois que o
+  // descanso acaba o relógio dele para de bater
+  const rest = d ? Math.round((d.fimEm - Date.now()) / 1000) : null;
+  if(desc){
+    if(d && rest > 0){
+      desc.hidden = false;
+      desc.textContent = 'Descanso ' + fmtRelogio(rest);
+      desc.classList.toggle('acabando', rest <= 5);
+      desc.classList.remove('fim');
+    }else if(d && rest <= 0 && rest > -4){
+      desc.hidden = false; desc.textContent = 'Vai!';
+      desc.classList.remove('acabando'); desc.classList.add('fim');
+    }else{
+      desc.hidden = true;
+    }
+  }
 }
 function pintarBarraTreino(){
   const barra = document.getElementById('tr-barra');
   if(!barra) return;
   const cab = barra.parentNode;
+  pintarMiniTreino();
+  // o botão do card também acompanha o relógio (antes ficava congelado no
+  // número de quando o card foi desenhado)
+  const btnCard = document.getElementById('hoje-ir-iniciar-treino');
+  if(btnCard && andamento && andamento.dia === iso(new Date()) && !sessaoAberta()){
+    btnCard.textContent = 'Continuar treino ' + andamento.chave + ' · ' + fmtRelogio(segundosDoTreino());
+  }
   if(!andamento || !sessaoAberta()){
     barra.hidden = true;
     if(cab) cab.classList.remove('com-tempo');
@@ -9769,6 +10153,10 @@ function comecarAndamento(chave){
   else if(!andamento || andamento.chave !== chave){
     andamento = { dia: iso(new Date()), chave: chave, inicio: Date.now(), pausaEm: null, pausaTotal: 0 };
   }
+  // `telaAberta` diz se a sessão estava na tela quando o app foi descartado
+  // (iPhone em segundo plano): é o que decide se ela reabre sozinha na volta
+  andamento.telaAberta = true;
+  gravarAndamento();
   pintarBarraTreino();
 }
 /* Fechou a tela sem ter marcado nada e sem registro no banco: não era treino,
@@ -9779,6 +10167,8 @@ function encerrarAndamentoSeVazio(){
   if(!sessaoTreinoJaGravou && !temAlgumaSerieMarcada(box)){
     andamento = null;
     gravarAndamento();
+    gravarRascunhoSessao(null);
+    fecharDescanso();
   }else{
     gravarAndamento();
   }
@@ -9800,6 +10190,8 @@ setInterval(pintarBarraTreino, 1000);
   alvo.addEventListener(ev, pintarBarraTreino, {passive:true});
 });
 (function(){
+  const mini = document.getElementById('tr-mini');
+  if(mini) mini.onclick = function(){ voltarParaSessao(); };
   const pausa = document.getElementById('tr-barra-pausa');
   if(pausa) pausa.onclick = alternarPausaTreino;
   const fim = document.getElementById('tr-barra-fim');
@@ -9900,14 +10292,45 @@ function restaurarSessaoDeHoje(){
   const rg = (sessaoTreinoRegistros || []).find(function(x){
     return x.dia === hoje && x.treino_chave === sessaoTreinoChave;
   });
-  if(!rg) return;
+  if(rg){
+    aplicarRegistroNaTela(corpo, rg.exercicios);
+    // já existe registro do dia: o salvamento automático pode seguir normal
+    sessaoTreinoJaGravou = true;
+  }
+  // a cópia local do aparelho entra por cima: ela é gravada a cada toque, então
+  // é sempre igual ou mais nova que o banco (e tem o que o banco ainda não
+  // recebeu - digitado antes da primeira série marcada, série a mais, nota).
+  const rasc = lerRascunhoSessao();
+  if(rasc && rasc.chave === sessaoTreinoChave){
+    aplicarRegistroNaTela(corpo, rasc.exercicios);
+    if(rasc.notas){
+      sessaoTreinoNotas = rasc.notas;
+      Object.keys(rasc.notas).forEach(function(idx){
+        const notaEl = corpo.querySelector('.tr-serie-nota[data-ex="'+idx+'"]');
+        if(notaEl){ notaEl.textContent = rasc.notas[idx]; notaEl.hidden = !rasc.notas[idx]; }
+      });
+    }
+    // criar linha a mais durante a restauração regrava o rascunho pela
+    // metade; regrava inteiro agora que a tela está completa
+    gravarRascunhoSessao();
+  }
+}
+/* Escreve um registro (do banco ou do rascunho local) por cima da tela já
+   montada: kg, reps, ✓, RIR e segundos do cronômetro, série por série e tipo
+   por tipo (AQ, TC, válidas), na mesma ordem em que a tela desenha. Série a
+   mais no registro do que linhas na tela? Cria a linha antes (o mesmo botão
+   "+ Adicionar série"), senão ela sumia a cada reabertura. */
+function aplicarRegistroNaTela(corpo, exercicios){
   Array.prototype.forEach.call(corpo.querySelectorAll('.tr-serie-bloco'), function(bloco){
     const nome = bloco.getAttribute('data-nome') || '';
-    const ex = (rg.exercicios || []).find(function(x){ return norm(x.nome) === norm(nome); });
+    const ex = (exercicios || []).find(function(x){ return norm(x.nome) === norm(nome); });
     if(!ex) return;
     // separa por tipo, na mesma ordem em que a tela desenha
     const fila = { aq: seriesDoTipo(ex, 'aq').slice(), tc: seriesDoTipo(ex, 'tc').slice(),
                    v: seriesDoTipo(ex, '').slice() };
+    const naTela = bloco.querySelectorAll('.tr-serie-linha').length;
+    const btAdd = bloco.querySelector('.tr-serie-add');
+    for(let k = naTela; k < fila.v.length && btAdd; k++) btAdd.click();
     Array.prototype.forEach.call(
       bloco.querySelectorAll('.tr-serie-linha, .tr-preserie-linha'), function(linha){
       const tipo = linha.getAttribute('data-tipo-linha') || 'v';
@@ -9916,33 +10339,36 @@ function restaurarSessaoDeHoje(){
       const kgIn = linha.querySelector('.tr-serie-kg');
       const repsIn = linha.querySelector('.tr-serie-reps');
       const crono = linha.querySelector('.tr-serie-crono');
-      if(kgIn && s.kg != null) kgIn.value = fmtNum(s.kg, 1);
-      if(repsIn && s.reps != null) repsIn.value = s.reps;
-      if(crono && s.reps != null){
-        crono.textContent = s.reps + ' s';
-        crono.setAttribute('data-valor', s.reps);
+      if(kgIn) kgIn.value = (s.kg != null) ? fmtNum(s.kg, 1) : '';
+      if(repsIn) repsIn.value = (s.reps != null) ? s.reps : '';
+      if(crono){
+        if(s.reps != null){ crono.textContent = s.reps + ' s'; crono.setAttribute('data-valor', s.reps); }
+        else { crono.textContent = '▶ 0:00'; crono.removeAttribute('data-valor'); }
       }
-      if(s.feita){
-        const chk = linha.querySelector('.tr-serie-check');
-        if(chk){ chk.setAttribute('aria-pressed','true'); linha.classList.add('feita'); }
-      }
+      const chk = linha.querySelector('.tr-serie-check');
+      if(chk){ chk.setAttribute('aria-pressed', s.feita ? 'true' : 'false'); }
+      linha.classList.toggle('feita', !!s.feita);
+      const velhaTag = linha.querySelector('.rir-tag');
+      if(velhaTag) velhaTag.remove();
       if(s.rir != null){
         linha.setAttribute('data-rir', s.rir);
         const tag = document.createElement('i');
         tag.className = 'rir-tag';
         tag.textContent = s.rir;
         linha.appendChild(tag);
+      } else {
+        linha.removeAttribute('data-rir');
       }
     });
   });
-  // já existe registro do dia: o salvamento automático pode seguir normal
-  sessaoTreinoJaGravou = true;
 }
 
 function fecharDescanso(){
   if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
   sessaoTreinoDescansoTimer = null;
   window.__pintarDescanso = null;
+  window.__descansoInfo = null;
+  gravarDescansoAtivo(null);
   pararSomDescanso();
   soltarTela();
   const el = document.getElementById('tr-descanso-toast');
@@ -9959,20 +10385,42 @@ function fecharDescanso(){
    propósito - dá pra ler o tempo de longe, com o celular apoiado no banco,
    sem precisar aproximar o rosto no meio da série. */
 let descansoComecouEm = 0;
-function iniciarDescanso(txt, nomeExercicio){
+/* O descanso que está correndo fica guardado no aparelho (horário absoluto
+   de término). Se o iPhone descartar o app em segundo plano e ele reabrir
+   do zero, o descanso volta de onde estava em vez de sumir. */
+const DESCANSO_ATIVO_CHAVE = 'descansoAtivo';
+function chaveDescansoAtivo(){ return DESCANSO_ATIVO_CHAVE + '|' + (diario.perfil || 'eu'); }
+function gravarDescansoAtivo(d){
+  try{
+    if(d) localStorage.setItem(chaveDescansoAtivo(), JSON.stringify(d));
+    else localStorage.removeItem(chaveDescansoAtivo());
+  }catch(e){}
+}
+function lerDescansoAtivo(){
+  try{
+    const bruto = localStorage.getItem(chaveDescansoAtivo());
+    const d = bruto ? JSON.parse(bruto) : null;
+    // só vale se ainda está correndo (ou acabou há pouquíssimo tempo)
+    if(d && d.fimEm && d.fimEm > Date.now() - 4000) return d;
+  }catch(e){}
+  return null;
+}
+function iniciarDescanso(txt, nomeExercicio, restaurar){
   // trava contra começar duas vezes: um toque que vira "touch + click" no
   // iPhone, ou o app voltando do segundo plano com o evento repetido, zerava
   // um descanso que já estava correndo.
   const agoraMs = Date.now();
-  if(agoraMs - descansoComecouEm < 1500 && document.getElementById('tr-descanso-toast')) return;
+  if(!restaurar && agoraMs - descansoComecouEm < 1500 && document.getElementById('tr-descanso-toast')) return;
   descansoComecouEm = agoraMs;
-  const total = parseDescansoSegundos(txt);
+  const total = restaurar ? restaurar.total : parseDescansoSegundos(txt);
   // O QUE MANDA É O RELÓGIO, não a contagem de batidas: em segundo plano o
   // iOS congela o setInterval, então somar "-1 por tick" atrasava o número
   // enquanto o áudio seguia no tempo real - o bipe parecia adiantado.
-  let fimEm = Date.now() + total * 1000;
-  let restante = total;
+  let fimEm = restaurar ? restaurar.fimEm : (Date.now() + total * 1000);
+  let restante = Math.round((fimEm - Date.now()) / 1000);
   fecharDescanso();
+  gravarDescansoAtivo({ fimEm: fimEm, total: total, nome: nomeExercicio || '' });
+  window.__descansoInfo = function(){ return { restante: restante, fimEm: fimEm, total: total }; };
   const el = document.createElement('div');
   el.id = 'tr-descanso-toast';
   el.className = 'tr-descanso-toast' + (sessaoAberta() ? ' na-sessao' : '');
@@ -10045,6 +10493,7 @@ function iniciarDescanso(txt, nomeExercicio){
       arco.style.strokeDasharray = '0 ' + VOLTA.toFixed(1);
       if(sessaoTreinoDescansoTimer) clearInterval(sessaoTreinoDescansoTimer);
       sessaoTreinoDescansoTimer = null;
+      gravarDescansoAtivo(null);
       try{ if(navigator.vibrate) navigator.vibrate([120,70,120]); }catch(e){}
       soltarTela();
       setTimeout(function(){
@@ -10074,7 +10523,7 @@ function iniciarDescanso(txt, nomeExercicio){
   window.addEventListener('focus', aoVoltar);
   window.addEventListener('pageshow', aoVoltar);
   el.__aoVoltar = aoVoltar;
-  tocarSomDescanso(total);
+  tocarSomDescanso(restaurar ? Math.max(0, restante) : total);
   segurarTela();
 
   const btSom = el.querySelector('.tr-desc-som');
@@ -10131,6 +10580,7 @@ function iniciarDescanso(txt, nomeExercicio){
       if(b.getAttribute('data-acao') === 'pular'){ fecharDescanso(); return; }
       fimEm += 30000;
       restante = Math.round((fimEm - Date.now()) / 1000);
+      gravarDescansoAtivo({ fimEm: fimEm, total: total, nome: nomeExercicio || '' });
       maior = Math.max(maior, restante); pintar();
       el.classList.remove('fim');
       // o áudio antigo tem o bipe na hora velha - refaz com o tempo novo
@@ -10402,6 +10852,48 @@ setInterval(function(){ if(window.__pintarDescanso) window.__pintarDescanso(); }
   alvo.addEventListener(ev, function(){ if(window.__pintarDescanso) window.__pintarDescanso(); }, {passive:true});
 });
 
+/* Primeira pintura, sem rede: tudo que o aparelho guardou da última vez
+   (escolhas do plano, diário, planos, histórico). É o que faz a abertura
+   sumir em um quadro. Depois, iniciarApp() refaz tudo com o banco. */
+let appPintado = false;
+async function pintarDoCache(){
+  try{
+    try{
+      const r = await window.storage.get(STORE_KEY);
+      const txt = r && (r.value !== undefined ? r.value : r);
+      if(txt) aplicar(JSON.parse(txt));
+    }catch(e){}
+    await carregarDiarioLocal();
+    montarSwitchesPerfil();
+    if(!planoAtivoDoCache()) return;     // primeira vez neste aparelho: espera a rede
+    renderListas();
+    render();
+    setAba('diario');
+    appPintado = true;
+    try{ await pinturaInicial; }catch(ePint){}
+    fecharAberturaNoProximoQuadro();
+    retomarTreinoEmAndamento();
+  }catch(e){}
+}
+/* Treino que ficou aberto quando o app foi descartado em segundo plano: a
+   sessão reabre sozinha, do jeito que estava (ver RASCUNHO DA SESSÃO), e o
+   descanso que estava correndo volta a contar. Se a pessoa tinha fechado a
+   sessão pra olhar o resto do app, fica só a barrinha "Voltar ao treino". */
+let treinoRetomado = false;
+function retomarTreinoEmAndamento(){
+  if(treinoRetomado) return;
+  const a = lerAndamento();
+  if(!a) return;
+  treinoRetomado = true;
+  andamento = a;
+  if(a.telaAberta){
+    voltarParaSessao();
+  }else{
+    const d = lerDescansoAtivo();
+    if(d && !document.getElementById('tr-descanso-toast')) iniciarDescanso(null, d.nome, d);
+  }
+  pintarBarraTreino();
+}
 async function iniciarApp(){
   try{
     await carregar();
@@ -10425,7 +10917,18 @@ async function iniciarApp(){
     ]);
     renderListas();
     render();
-    setAba('diario');
+    if(appPintado){
+      // a tela já estava desenhada do guardado: só atualiza o que está
+      // aberto, sem mandar a pessoa de volta pra primeira aba
+      renderDiario();
+      const vistaTreino = document.getElementById('vista-treino');
+      if(vistaTreino && !vistaTreino.hidden) renderTreino();
+      const vistaProg = document.getElementById('vista-progresso');
+      if(vistaProg && !vistaProg.hidden && typeof renderProgresso === 'function') renderProgresso();
+    }else{
+      setAba('diario');
+      appPintado = true;
+    }
     // a abertura so sai agora: plano, diario e os tres cards (dieta, habitos
     // e treino) ja desenhados. E o que tira a sensacao de ver o app sendo
     // montado ao vivo.
@@ -10433,6 +10936,9 @@ async function iniciarApp(){
     // um quadro pro navegador pintar o que acabou de chegar antes da
     // cortina levantar - sem isso a abertura sai um piscar antes da tela
     fecharAberturaNoProximoQuadro();
+    retomarTreinoEmAndamento();
+    // treino que andou enquanto o banco ainda não respondia: sobe agora
+    if(sessaoTreinoChave && lerRascunhoSessao()) agendarSalvarSessao();
   }catch(e){
     document.getElementById('refeicoes').innerHTML =
       '<div class="meal"><div class="meal-head"><h2>Deu erro ao montar o cardápio</h2><div class="horas">'+
