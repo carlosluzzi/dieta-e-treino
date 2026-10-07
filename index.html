@@ -6443,7 +6443,10 @@ function estatisticas(){
         const v = versaoDoDia(reg, meal);
         meal.versoes[v].itens.forEach(function(item, iIdx){
           const t = trocaDoItem(reg, meal.id, iIdx);
-          if(t && (t.n)) trocas.push({dia:s, ref:meal.nome, de:item.n, para:rotuloTroca(t)});
+          // troca que o plano libera (mamão por melancia, frango por
+          // tilápia) é seguir a dieta - não é desvio e não entra no
+          // relatório. Aqui só o que SAIU do plano.
+          if(t && t.n && !t.ok) trocas.push({dia:s, ref:meal.nome, de:item.n, para:rotuloTroca(t)});
         });
         extrasDa(reg, meal.id).forEach(function(ex){
           if(ex && ex.n) trocas.push({dia:s, ref:meal.nome, de:null, para:rotuloTroca(ex)});
@@ -6509,7 +6512,7 @@ function renderResumo(){
   alvo.appendChild(tab);
 
   if(e.trocas.length){
-    const t = document.createElement('div'); t.className='grupo-tit'; t.textContent='Trocas e acréscimos';
+    const t = document.createElement('div'); t.className='grupo-tit'; t.textContent='Fora do plano';
     alvo.appendChild(t);
     const ul = document.createElement('ul');
     ul.style.margin='0'; ul.style.paddingLeft='16px'; ul.style.fontSize='13.5px'; ul.style.lineHeight='1.6';
@@ -6564,7 +6567,7 @@ function textoRelatorio(){
   });
   if(e.trocas.length){
     L.push('');
-    L.push('Trocas e acréscimos:');
+    L.push('Fora do plano:');
     e.trocas.forEach(function(t){
       L.push('- '+brData(t.dia)+' '+t.ref+': '+(t.de ? 'trocou '+t.de+' por '+t.para : 'comeu a mais '+t.para));
     });
@@ -6653,7 +6656,7 @@ function montarFolhaRelatorio(){
   }
 
   if(e.trocas && e.trocas.length){
-    h += '<div class="fr-bloco"><h2>Trocas e acréscimos</h2><ul class="fr-lista">';
+    h += '<div class="fr-bloco"><h2>Fora do plano</h2><ul class="fr-lista">';
     e.trocas.forEach(function(t){
       h += '<li><b>'+brData(t.dia)+'</b> · '+esc(t.ref)+' — '
          + (t.de ? 'trocou '+esc(t.de)+' por '+esc(t.para) : 'comeu a mais '+esc(t.para))+'</li>';
