@@ -232,7 +232,7 @@
     --ok:#2E9E52; --ad:#DE8C0A; --nao:#DB4436;
     --ok-soft:#E3F5E9; --ad-soft:#FCEEDA; --nao-soft:#FBE8E6;
     --pan:#3A3A3C; --azul:#AB181E; --azul-soft:#FBEAEB;
-    --r:14px; --rc:10px;
+    --r:18px; --rc:12px;
     --sh:0 1px 4px rgba(0,0,0,.05);
     --sh-min:0 1px 3px rgba(0,0,0,.06);
     --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
@@ -248,13 +248,13 @@
      grandes (menu lateral, @media(min-width:1100px) mais abaixo) isso é
      desfeito - não existe esse gesto no computador, e ali a página inteira
      volta a rolar do jeito de sempre. Mesma técnica do pilotquest. */
-  body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.45;
+  body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:18px;line-height:1.45;
     -webkit-font-smoothing:antialiased;font-feature-settings:'tnum' 0;
     height:100%;position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavior:none}
   button,select,textarea,input{font-family:inherit}
   /* iOS aproxima a tela ao focar campo com menos de 16px. Todos os campos ficam
      em 16px e o tamanho aparente é ajustado pelo espaçamento. */
-  select,textarea,input{font-size:16px}
+  select,textarea,input{font-size:18px}
   /* altura em 100dvh, igual ao .app do PSCPP Tracker - e position:relative
      em vez de fixed, também igual ao PSCPP Tracker. Essa troca de fixed pra
      relative é o que resolve a faixa sobrando embaixo: o body já é
@@ -272,7 +272,7 @@
      (padding-topo + ícone + gap + linha do rótulo + padding-baixo, ver
      .tabbar-ico/.tabbar-item span/.tabbar-item mais abaixo) - se um mudar,
      mudar o outro junto, senão o .wrap volta a sobrar/faltar espaço embaixo */
-  :root{--tabbar-h:calc(18px + 21px + 4px + 12px + 20px + env(safe-area-inset-bottom,0px))}
+  :root{--tabbar-h:calc(18px + 21px + 4px + 13px + 20px + env(safe-area-inset-bottom,0px))}
   /* overflow-x:hidden é rede de segurança, não conserto: o app rola só na
      vertical, e qualquer texto comprido demais que escape de um conserto
      específico não pode transformar a tela inteira num carrossel lateral. */
@@ -291,7 +291,7 @@
      cinzas, parecendo legenda solta). Agora lê "Carlos e Isabella" do lado
      da maçã, com peso de título. */
   .marca{display:flex;align-items:center;gap:9px;min-width:0;
-    font-size:22px;font-weight:700;letter-spacing:-.021em;line-height:1.18}
+    font-size:24px;font-weight:700;letter-spacing:-.021em;line-height:1.18}
   .marca-logo{flex:0 0 auto;display:block;width:32px;height:32px}
   .marca-logo svg{width:100%;height:100%;display:block}
   .marca small{min-width:0;font-size:18px;font-weight:700;color:var(--ink);
@@ -342,7 +342,7 @@
   /* ---------- segmented control ---------- */
   .switch{display:inline-flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px}
   .estados{padding:1px;gap:1px}
-  .switch button{font-size:14px;font-weight:500;letter-spacing:-.01em;color:var(--ink2);
+  .switch button{font-size:15.5px;font-weight:500;letter-spacing:-.01em;color:var(--ink2);
     background:none;border:0;padding:7px 14px;border-radius:10px;cursor:pointer;white-space:nowrap;
     transition:background .15s ease,color .15s ease}
   .switch button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--sh-min)}
@@ -358,7 +358,7 @@
 
   /* ---------- abas ---------- */
   .abas{display:inline-flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px;margin-top:16px}
-  .abas button{font-size:15px;font-weight:500;letter-spacing:-.01em;color:var(--ink2);background:none;
+  .abas button{font-size:17px;font-weight:500;letter-spacing:-.01em;color:var(--ink2);background:none;
     border:0;padding:8px 22px;border-radius:10px;cursor:pointer}
   .abas button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--sh-min)}
   .abas button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
@@ -366,56 +366,56 @@
   /* ---------- blocos ---------- */
   .planejador{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);
     border-radius:var(--r);padding:14px 16px;margin-top:16px;box-shadow:var(--sh)}
-  .planejador span.rot{font-size:15px;font-weight:500}
-  .planejador span.exp{font-size:13px;color:var(--ink2);flex:1 1 100%;line-height:1.4}
+  .planejador span.rot{font-size:17px;font-weight:500}
+  .planejador span.exp{font-size:14.5px;color:var(--ink2);flex:1 1 100%;line-height:1.4}
 
   .stepper{display:inline-flex;align-items:center;background:var(--fill);border-radius:10px;padding:2px}
-  .stepper button{width:32px;height:32px;font-size:20px;font-weight:400;line-height:1;background:var(--card);
+  .stepper button{width:32px;height:32px;font-size:22px;font-weight:400;line-height:1;background:var(--card);
     border:0;border-radius:10px;color:var(--azul);cursor:pointer;box-shadow:var(--sh-min)}
   .stepper button:disabled{color:var(--ink3);box-shadow:none;background:none}
   .stepper button:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
-  .stepper .n{min-width:38px;text-align:center;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+  .stepper .n{min-width:38px;text-align:center;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
 
   .meal{background:var(--card);border-radius:var(--r);margin-top:14px;box-shadow:var(--sh);overflow:hidden}
   .meal-head{padding:16px 16px 12px}
-  .meal-head h2{font-size:20px;font-weight:700;letter-spacing:-.019em;margin:0;line-height:1.2}
-  .horas{font-size:13px;color:var(--ink2);margin-top:2px}
+  .meal-head h2{font-size:22px;font-weight:700;letter-spacing:-.019em;margin:0;line-height:1.2}
+  .horas{font-size:14.5px;color:var(--ink2);margin-top:2px}
   .horas b{font-weight:600}
   .horas .hi{color:var(--isa)} .horas .hc{color:var(--car)}
 
   .vlista{padding:2px 16px 14px}
-  .vtit{font-size:13px;color:var(--ink2);margin-bottom:2px}
+  .vtit{font-size:14.5px;color:var(--ink2);margin-bottom:2px}
   .vlinha{display:flex;align-items:center;gap:12px;padding:7px 0;border-top:.5px solid var(--hair)}
   .vlinha:first-of-type{border-top:0}
-  .vnome{flex:1;text-align:left;font-size:15px;font-weight:400;color:var(--ink2);background:none;
+  .vnome{flex:1;text-align:left;font-size:17px;font-weight:400;color:var(--ink2);background:none;
     border:0;padding:6px 0;cursor:pointer;min-width:0}
   .vnome[aria-pressed="true"]{color:var(--ink);font-weight:600}
   .vnome::before{content:'';display:inline-block;width:8px;height:8px;border-radius:10px;
     background:var(--hair);margin-right:9px;vertical-align:1px}
   .vnome[aria-pressed="true"]::before{background:var(--azul)}
   .vnome:focus-visible{outline:2px solid var(--azul);outline-offset:2px;border-radius:7px}
-  .vaviso{font-size:13px;font-weight:500;color:var(--ad);margin-top:8px}
+  .vaviso{font-size:14.5px;font-weight:500;color:var(--ad);margin-top:8px}
 
   .cols,li.item{display:grid;grid-template-columns:minmax(0,1fr) 3.8rem 3.8rem 3.2rem;gap:0 8px}
   .cols{padding:6px 16px 6px;align-items:end}
   /* nome de cada um no cabeçalho: letra maior e sempre numa linha só - com
      3.4rem e 12px um nome tipo "Isabella" quebrava em duas linhas e parecia
      estar escrito embaixo do alimento, em vez de do lado dele */
-  .cols span{font-size:13.5px;font-weight:600;color:var(--ink3);text-align:right;
+  .cols span{font-size:15px;font-weight:600;color:var(--ink3);text-align:right;
     line-height:1.2;white-space:nowrap}
-  .cols span:last-child{font-size:12px;font-weight:500}
+  .cols span:last-child{font-size:13px;font-weight:500}
   .cols span.ci{color:var(--isa)} .cols span.cc{color:var(--car)}
   ul.itens{list-style:none;margin:0;padding:0}
   li.item{padding:11px 16px;border-top:.5px solid var(--hair);align-items:center;gap:6px 8px}
   .food{min-width:0}
-  .food .nome{font-size:15px;font-weight:400;display:block;letter-spacing:-.01em}
+  .food .nome{font-size:17px;font-weight:400;display:block;letter-spacing:-.01em}
   .food .nome .ni{color:var(--isa)} .food .nome .nc{color:var(--car)}
-  .food .sub{font-size:13px;color:var(--ink2);margin-top:1px;display:block;line-height:1.35}
-  .val{text-align:right;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;
+  .food .sub{font-size:14.5px;color:var(--ink2);margin-top:1px;display:block;line-height:1.35}
+  .val{text-align:right;font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;
     line-height:1.2;overflow-wrap:anywhere;letter-spacing:-.01em}
   .val.i{color:var(--isa)} .val.c{color:var(--car)} .val.p{color:var(--ink)}
   .val.zero{color:var(--ink3);font-weight:400}
-  .val.sep{font-size:12px;font-weight:500;color:var(--ink3)}
+  .val.sep{font-size:13px;font-weight:500;color:var(--ink3)}
   button.val{background:none;border:0;cursor:pointer;padding:3px 6px;margin:-3px -6px;border-radius:10px}
   button.val:focus-visible{outline:2px solid var(--azul);outline-offset:0}
   button.val.i[aria-expanded="true"]{background:var(--isa);color:#fff}
@@ -425,64 +425,64 @@
   .trocas{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px}
   .trocas.uma{grid-template-columns:1fr}
   .tr{min-width:0}
-  .tr label{display:block;font-size:11px;font-weight:600;margin-bottom:3px;letter-spacing:-.005em}
+  .tr label{display:block;font-size:12px;font-weight:600;margin-bottom:3px;letter-spacing:-.005em}
   .tr.i label{color:var(--isa)} .tr.c label{color:var(--car)}
-  select{width:100%;font-size:16px;letter-spacing:-.01em;font-weight:400;color:var(--ink);border:0;border-radius:var(--rc);
+  select{width:100%;font-size:18px;letter-spacing:-.01em;font-weight:400;color:var(--ink);border:0;border-radius:var(--rc);
     padding:9px 10px;background:var(--fill);cursor:pointer;appearance:none;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M3 4.5L6 7.5L9 4.5' stroke='%236E6E73' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
     background-repeat:no-repeat;background-position:right 9px center;padding-right:26px;
     text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
   .tr.i select{background-color:var(--isa-soft)} .tr.c select{background-color:var(--car-soft)}
   select:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
-  .livre{font-size:13px;color:var(--ink2);margin-top:2px}
-  .livre button{font-size:13px;font-weight:400;color:var(--azul);background:none;border:0;padding:0;cursor:pointer}
-  .nota{grid-column:1/-1;font-size:13px;color:var(--ink2);background:var(--fill2);border-radius:var(--rc);
+  .livre{font-size:14.5px;color:var(--ink2);margin-top:2px}
+  .livre button{font-size:14.5px;font-weight:400;color:var(--azul);background:none;border:0;padding:0;cursor:pointer}
+  .nota{grid-column:1/-1;font-size:14.5px;color:var(--ink2);background:var(--fill2);border-radius:var(--rc);
     padding:10px 12px;margin-top:4px;line-height:1.45}
   .meal > .nota{margin:0 16px 16px}
 
   /* ---------- compras ---------- */
   .compras{margin-top:24px;background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--sh)}
-  .compras h2{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0 0 3px}
-  .compras p.intro{font-size:14px;color:var(--ink2);margin:0 0 14px;line-height:1.45}
-  .secao{font-size:13px;font-weight:600;color:var(--ink2);margin:20px 0 2px;letter-spacing:-.005em}
+  .compras h2{font-size:24px;font-weight:700;letter-spacing:-.021em;margin:0 0 3px}
+  .compras p.intro{font-size:15.5px;color:var(--ink2);margin:0 0 14px;line-height:1.45}
+  .secao{font-size:14.5px;font-weight:600;color:var(--ink2);margin:20px 0 2px;letter-spacing:-.005em}
   .secao:first-of-type{margin-top:0}
   ul.compra{list-style:none;margin:0;padding:0}
   ul.compra li{display:flex;justify-content:space-between;gap:14px;padding:10px 0;
-    border-top:.5px solid var(--hair);font-size:15px}
-  ul.compra li b{font-variant-numeric:tabular-nums;white-space:nowrap;font-size:15px;font-weight:600}
-  .det{display:block;font-size:13px;color:var(--ink2);font-weight:400;margin-top:2px;line-height:1.4}
+    border-top:.5px solid var(--hair);font-size:17px}
+  ul.compra li b{font-variant-numeric:tabular-nums;white-space:nowrap;font-size:17px;font-weight:600}
+  .det{display:block;font-size:14.5px;color:var(--ink2);font-weight:400;margin-top:2px;line-height:1.4}
   /* duas colunas iguais: os botões têm sempre a mesma largura, lado a lado.
      Antes era uma fileira que quebrava quando não cabia e deixava um botão
      sobrando embaixo, maior que os outros. Uma terceira ação, se existir, é
      um link discreto embaixo dos dois (.link), não um terceiro botão. */
   .acoes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}
-  .acoes button{font-size:15px;font-weight:500;letter-spacing:-.01em;background:var(--azul);color:#fff;
+  .acoes button{font-size:17px;font-weight:500;letter-spacing:-.01em;background:var(--azul);color:#fff;
     border:0;border-radius:10px;padding:12px 10px;cursor:pointer;min-width:0;white-space:nowrap;
     overflow:hidden;text-overflow:ellipsis}
   .acoes button.sec{background:var(--fill);color:var(--ink)}
-  .acoes button.link{grid-column:1/-1;background:none;color:var(--azul);padding:6px 10px 0;font-size:14px}
+  .acoes button.link{grid-column:1/-1;background:none;color:var(--azul);padding:6px 10px 0;font-size:15.5px}
   .acoes button:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
-  .aviso{font-size:13px;color:var(--ink2);margin-top:12px;line-height:1.5}
+  .aviso{font-size:14.5px;color:var(--ink2);margin-top:12px;line-height:1.5}
   .aviso.forte{color:var(--ad)}
 
   /* ---------- listas ---------- */
   .listas{margin-top:26px}
-  .listas h2{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0 0 10px}
+  .listas h2{font-size:24px;font-weight:700;letter-spacing:-.021em;margin:0 0 10px}
   details{background:var(--card);border-radius:var(--r);margin-bottom:10px;box-shadow:var(--sh);overflow:hidden}
-  summary{padding:15px 16px;cursor:pointer;font-size:16px;font-weight:500;list-style:none;letter-spacing:-.01em}
+  summary{padding:15px 16px;cursor:pointer;font-size:18px;font-weight:500;list-style:none;letter-spacing:-.01em}
   summary::-webkit-details-marker{display:none}
   summary::after{content:'';float:right;width:8px;height:8px;margin-top:6px;
     border-right:1.6px solid var(--ink3);border-bottom:1.6px solid var(--ink3);transform:rotate(45deg)}
   details[open] summary::after{transform:rotate(-135deg);margin-top:9px}
-  .det-body{padding:2px 16px 16px;font-size:15px}
-  .det-body p{margin:0 0 12px;color:var(--ink2);font-size:14px;line-height:1.5}
-  table{width:100%;border-collapse:collapse;font-size:15px}
+  .det-body{padding:2px 16px 16px;font-size:17px}
+  .det-body p{margin:0 0 12px;color:var(--ink2);font-size:15.5px;line-height:1.5}
+  table{width:100%;border-collapse:collapse;font-size:17px}
   th,td{text-align:left;padding:9px 2px;border-top:.5px solid var(--hair);vertical-align:top}
-  th{font-size:12px;color:var(--ink2);font-weight:500;border-top:0}
+  th{font-size:13px;color:var(--ink2);font-weight:500;border-top:0}
   td.q{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
   .tags{display:flex;flex-wrap:wrap;gap:6px}
-  .tags span{background:var(--fill);border-radius:10px;padding:5px 11px;font-size:14px}
-  .grupo-tit{font-size:13px;font-weight:600;color:var(--ink2);margin:16px 0 7px}
+  .tags span{background:var(--fill);border-radius:10px;padding:5px 11px;font-size:15.5px}
+  .grupo-tit{font-size:14.5px;font-weight:600;color:var(--ink2);margin:16px 0 7px}
   .grupo-tit:first-child{margin-top:0}
 
   /* ---------- diálogo e balão ---------- */
@@ -491,8 +491,8 @@
   dialog::backdrop{background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
   .dlg-head{display:flex;justify-content:space-between;align-items:center;padding:15px 18px;
     border-bottom:.5px solid var(--hair)}
-  .dlg-head h3{font-size:17px;margin:0;font-weight:600;letter-spacing:-.015em}
-  .dlg-head button{font-size:15px;font-weight:400;background:none;border:0;cursor:pointer;color:var(--azul)}
+  .dlg-head h3{font-size:19px;margin:0;font-weight:600;letter-spacing:-.015em}
+  .dlg-head button{font-size:17px;font-weight:400;background:none;border:0;cursor:pointer;color:var(--azul)}
   /* o <dialog> joga o foco no primeiro botão ao abrir, e o navegador pinta
      o contorno azul de foco em volta do "Fechar". Como o popup já abre em
      cima de tudo, esse contorno só polui - tira o anel nesse botão. */
@@ -509,26 +509,26 @@
      Antes valia pra QUALQUER popup e acabava pegando o "O que mudou nesse
      dia" do popup de refeições, que saía com fonte de código e 42vh de
      altura. Agora fica presa ao popup genérico. */
-  #dlg .dlg-body textarea{width:100%;height:42vh;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:16px;
+  #dlg .dlg-body textarea{width:100%;height:42vh;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:18px;
     line-height:1.5;border:0;border-radius:var(--rc);padding:12px;background:var(--fill);color:var(--ink);resize:vertical}
 
   .balao{position:absolute;z-index:60;width:274px;max-width:calc(100vw - 24px);background:var(--card);
     border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.18);padding:13px 15px}
   .balao .seta{position:absolute;width:12px;height:12px;background:var(--card);transform:rotate(45deg)}
   .balao.abaixo .seta{top:-5px} .balao.acima .seta{bottom:-5px}
-  .porcao .quem{font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:3px}
+  .porcao .quem{font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:3px}
   .porcao.i .quem{color:var(--isa)} .porcao.c .quem{color:var(--car)}
-  .porcao .cabeca{font-size:16px;font-weight:500;line-height:1.3;letter-spacing:-.015em}
-  .porcao .cabeca b{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
-  .porcao .exp{font-size:13px;color:var(--ink2);margin-top:6px;line-height:1.45}
+  .porcao .cabeca{font-size:18px;font-weight:500;line-height:1.3;letter-spacing:-.015em}
+  .porcao .cabeca b{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+  .porcao .exp{font-size:14.5px;color:var(--ink2);margin-top:6px;line-height:1.45}
 
   /* ---------- diário ---------- */
   .perfil{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px}
-  .perfil .rot{font-size:15px;color:var(--ink2)}
+  .perfil .rot{font-size:17px;color:var(--ink2)}
   .mes{display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px}
-  .mes h2{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0}
+  .mes h2{font-size:24px;font-weight:700;letter-spacing:-.021em;margin:0}
   .mes .nav{display:flex;gap:6px;align-items:center}
-  .mes .nav button{height:34px;min-width:34px;padding:0 12px;font-size:15px;font-weight:500;background:var(--card);
+  .mes .nav button{height:34px;min-width:34px;padding:0 12px;font-size:17px;font-weight:500;background:var(--card);
     border:0;border-radius:10px;cursor:pointer;color:var(--azul);box-shadow:var(--sh-min)}
   .cal{background:var(--card);border-radius:var(--r);padding:10px;box-shadow:var(--sh)}
   .cal .sem{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
@@ -543,7 +543,7 @@
   .cal button.d[aria-pressed="true"] .barra{background:rgba(255,255,255,.28)}
   .cal .barra i{display:block;height:100%}
   .b-ok{background:var(--ok)} .b-ad{background:var(--ad)} .b-nao{background:var(--nao)}
-  .legenda{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:13px;color:var(--ink2);
+  .legenda{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:14.5px;color:var(--ink2);
     margin-top:12px;padding:0 4px}
   .legenda span{display:flex;align-items:center;gap:6px}
   .legenda i{width:8px;height:8px;border-radius:10px;display:block}
@@ -554,22 +554,22 @@
   #dlg-refeicoes .dia-box{margin-top:0;box-shadow:none;border-radius:0;background:none}
   #dlg-refeicoes .dia-box h3{padding-top:0}
   #dlg-refeicoes .dlg-body{padding-top:10px}
-  .dia-box h3{font-size:20px;font-weight:700;letter-spacing:-.019em;margin:0;padding:16px 16px 2px}
-  .dia-box .sub{font-size:13px;color:var(--ink2);padding:0 16px 14px;display:block;line-height:1.4}
+  .dia-box h3{font-size:22px;font-weight:700;letter-spacing:-.019em;margin:0;padding:16px 16px 2px}
+  .dia-box .sub{font-size:14.5px;color:var(--ink2);padding:0 16px 14px;display:block;line-height:1.4}
   /* Nome da refeição em cima, inteiro; seguiu/adaptou/não fiz embaixo
      dividindo a largura em três. Na mesma linha, "Café da manhã" era cortado
      em reticências pelos três botões ao lado - o nome é o que menos pode
      ser cortado aqui. */
-  .ref{display:flex;align-items:center;justify-content:space-between;gap:9px 6px;padding:12px 12px;
+  .ref{display:flex;align-items:center;justify-content:space-between;gap:10px 6px;padding:14px 14px;
     border-top:.5px solid var(--hair);flex-wrap:wrap}
-  .ref .nm{font-size:16px;font-weight:500;flex:1 1 100%;min-width:0;letter-spacing:-.01em}
+  .ref .nm{font-size:18px;font-weight:500;flex:1 1 100%;min-width:0;letter-spacing:-.01em}
   .ref .nm-btn{display:flex;align-items:center;gap:7px;text-align:left;background:none;border:0;
     padding:0;cursor:pointer;color:var(--ink);width:100%;min-width:0}
   .ref .nm-txt{flex:1 1 auto;min-width:0;white-space:normal;line-height:1.25}
   /* aviso de "comi algo a mais" na linha fechada da refeição: sem isso o
      extra some dentro da refeição recolhida e as calorias do dia aparecem
      sem nada marcado na tela. */
-  .ref .nm-extra{font-size:10px;font-weight:800;letter-spacing:0;color:var(--ad);
+  .ref .nm-extra{font-size:11px;font-weight:800;letter-spacing:0;color:var(--ad);
     vertical-align:super;line-height:0;margin-left:1px}
   /* o nome da refeição não pode encolher até virar duas letras por causa do
      chip do lado - daí o chip ser curto ("+1") e o nome ter um piso */
@@ -581,7 +581,7 @@
 
   .estados{display:inline-flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px}
   .estados{flex-shrink:0}
-  .estados button{font-size:13px;font-weight:500;background:none;border:0;padding:7px 10px;
+  .estados button{font-size:15px;font-weight:500;background:none;border:0;padding:9px 12px;
     border-radius:10px;cursor:pointer;color:var(--ink2);white-space:nowrap}
   .estados button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--sh-min)}
   .estados button[aria-pressed="true"][data-e="ok"],.estados button[aria-pressed="true"][data-f="tudo"]{background:var(--ok);color:#fff}
@@ -591,13 +591,13 @@
   /* mesmo motivo do campo de kg: a linha do alimento também mora num
      invólucro que recorta o que passa da borda (o Excluir do arrasto). */
   .estados button:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--azul)}
-  .estados.fr button{font-size:12px;padding:6px 10px}
+  .estados.fr button{font-size:14px;padding:8px 10px}
 
   /* sem tapete cinza: os itens da refeição ficam no mesmo fundo do cartão,
      e a linha de cima já basta pra separar do cabeçalho da refeição */
   .itens-dia{background:none;border-top:.5px solid var(--hair);padding:6px 16px 14px}
   .vsel{padding:10px 0 6px}
-  .vsel label{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:4px}
+  .vsel label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:4px}
   .vsel select{background-color:var(--card)}
   .trocas select{padding:8px 24px 8px 9px}
   /* "comi algo a mais" usa a mesma linha dos alimentos do plano, dentro de um
@@ -614,28 +614,28 @@
      dela, mas tem que ser o MESMO fundo da lista - senão vira um cartãozinho
      branco no meio dos outros itens. */
   .item-dia-wrap .item-dia{background:var(--card);position:relative;z-index:1;touch-action:pan-y}
-  .item-dia{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0;border-top:.5px solid var(--hair)}
+  .item-dia{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0;border-top:.5px solid var(--hair)}
   .item-dia.sem-linha{border-top:0}
-  .item-dia .idn{flex:1;min-width:96px;font-size:15px;letter-spacing:-.01em}
-  .item-dia .idq{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink2)}
+  .item-dia .idn{flex:1;min-width:96px;font-size:17px;letter-spacing:-.01em}
+  .item-dia .idq{font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink2)}
   .item-dia .idn{overflow:hidden;text-overflow:ellipsis}
   /* o nome do alimento é o botão de trocar: texto normal, com um ⇄ miúdo
      na cor de ação pra dizer que dá pra tocar */
   .item-dia .idn-troca{background:none;border:0;padding:0;margin:0;text-align:left;color:var(--ink);
-    font-family:inherit;cursor:pointer;white-space:nowrap;line-height:1.3;
+    font-family:inherit;cursor:pointer;white-space:normal;line-height:1.3;
     -webkit-tap-highlight-color:transparent}
-  .item-dia .idn-troca::after{content:'⇄';margin-left:6px;font-size:12px;color:var(--azul);opacity:.85}
+  .item-dia .idn-troca::after{content:'⇄';margin-left:6px;font-size:13px;color:var(--azul);opacity:.85}
   .item-dia .idn-troca:active{opacity:.6}
   .item-dia.trocado .idn-troca{color:var(--azul);font-weight:600}
   /* "no lugar de ..." embaixo do alimento trocado */
-  .item-dia .idn-de{flex:1 1 100%;min-width:0;font-size:12px;color:var(--ink2);margin-top:-6px;
+  .item-dia .idn-de{flex:1 1 100%;min-width:0;font-size:13px;color:var(--ink2);margin-top:-6px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   /* tudo/metade/nada/troquei ocupa a linha inteira, com os quatro botões
      dividindo o espaço por igual - antes o grupo só tinha a largura do texto
      e sobrava um vazio do lado direito. */
   .item-dia .estados{flex:0 0 100%;width:100%;display:flex}
   .item-dia .estados button{flex:1 1 0;min-width:0;text-align:center;padding-left:4px;padding-right:4px}
-  .itens-dia .vazio{font-size:13px;color:var(--ink2);padding:10px 0}
+  .itens-dia .vazio{font-size:14.5px;color:var(--ink2);padding:10px 0}
 
   .troca-box{flex:1 1 100%;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;
     background:var(--card);border-radius:var(--rc);padding:10px;margin-top:4px;box-shadow:var(--sh-min)}
@@ -648,45 +648,45 @@
   /* colada no nome: essa linha é a continuação do alimento, não um bloco
      separado. O gap de 10px da .item-dia (que serve pros botões de
      tudo/metade/nada) deixava ela caída lá embaixo. */
-  .item-macros{flex:1 1 100%;min-width:0;font-size:12.5px;color:var(--ink2);line-height:1.35;
+  .item-macros{flex:1 1 100%;min-width:0;font-size:13.5px;color:var(--ink2);line-height:1.35;
     margin-top:-7px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .troca-box .campo{flex:1 1 100%;min-width:0}
   .troca-box .campo.pq{flex:0 0 96px}
   .troca-box .campo.md{flex:1 1 120px}
-  .troca-box label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:4px}
+  .troca-box label{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:4px}
   /* o <select> e o <input> têm caixas nativas de alturas diferentes; sem uma
      altura explícita, o seletor de unidade fica mais alto que o campo de
      quantidade do lado. */
-  .troca-box input,.troca-box select{width:100%;height:40px;font-size:16px;border:0;
+  .troca-box input,.troca-box select{width:100%;height:40px;font-size:18px;border:0;
     border-radius:var(--rc);padding:0 10px;background:var(--fill);color:var(--ink);
     font-variant-numeric:tabular-nums;box-sizing:border-box;line-height:normal}
   .troca-box select{padding-right:30px}
   .troca-box input:focus-visible{outline:2px solid var(--azul);outline-offset:1px}
-  .troca-selo{flex:1 1 100%;font-size:12px;font-weight:600;line-height:1.35;padding:6px 10px;
+  .troca-selo{flex:1 1 100%;font-size:13px;font-weight:600;line-height:1.35;padding:6px 10px;
     border-radius:8px;margin-top:2px}
   .troca-selo.dentro{background:var(--ok-soft);color:#1B6B36}
   .troca-selo.fora{background:var(--ad-soft);color:#8A5600}
   .troca-box .kcal{flex:1 1 100%;font-size:13px;color:var(--ink2);margin-top:-2px;min-height:18px}
   .troca-box .kcal b{color:var(--ink)}
-  .add-extra{margin-top:10px;font-size:14px;font-weight:500;color:var(--azul);background:none;
+  .add-extra{margin-top:10px;font-size:15.5px;font-weight:500;color:var(--azul);background:none;
     border:0;padding:6px 0;cursor:pointer}
   .extra-linha{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 0 0}
   /* extra já preenchido: vira uma linha só, igual às outras refeições */
   .extra-resumo{flex:1 1 auto;min-width:0;display:flex;align-items:baseline;gap:8px;text-align:left;
     background:none;border:0;padding:0;cursor:pointer;font-family:inherit}
-  .extra-resumo-txt{flex:1 1 auto;font-size:14px;color:var(--ink);line-height:1.35}
+  .extra-resumo-txt{flex:1 1 auto;font-size:15.5px;color:var(--ink);line-height:1.35}
   .extra-resumo-kcal{flex:0 0 auto;font-size:12.5px;color:var(--ink2)}
   .extra-x{flex:0 0 auto;width:26px;height:26px;border-radius:10px;border:0;background:var(--fill);
-    color:var(--ink2);font-size:15px;line-height:1;cursor:pointer}
+    color:var(--ink2);font-size:17px;line-height:1;cursor:pointer}
   .extra-ok{flex:1 1 100%;margin-top:4px}
   /* o editor da troca mora dentro da linha do alimento, então precisa ocupar
      a largura toda dela (a .item-dia é flex com quebra) */
   .item-dia > .extra-linha{flex:1 1 100%;min-width:0}
   /* linha que virou troca: nome e quantidade são do que ele comeu no lugar */
   .item-dia.trocado{cursor:pointer}
-  .extra-linha .tag{font-size:11px;font-weight:600;color:var(--azul);background:var(--car-soft);
+  .extra-linha .tag{font-size:12px;font-weight:600;color:var(--azul);background:var(--car-soft);
     border-radius:10px;padding:3px 9px}
-  .rm{background:none;border:0;color:var(--nao);font-size:13px;cursor:pointer;padding:6px 8px;font-weight:500}
+  .rm{background:none;border:0;color:var(--nao);font-size:14.5px;cursor:pointer;padding:6px 8px;font-weight:500}
 
   /* o <details> já vira cartão pela regra genérica lá de cima (fundo, raio e
      sombra). A linha de separação que existia aqui era desenhada POR CIMA
@@ -697,19 +697,19 @@
      fazia aquele arco solto). */
   .obs{padding:14px 16px;background:none;box-shadow:none;border-radius:0;margin:6px 0 0;
     border-top:.5px solid var(--hair)}
-  .obs label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px}
+  .obs label{display:block;font-size:14.5px;font-weight:600;color:var(--ink2);margin-bottom:6px}
   .obs > summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;
-    font-size:13px;font-weight:600;color:var(--ink2)}
+    font-size:14.5px;font-weight:600;color:var(--ink2)}
   .obs > summary::-webkit-details-marker{display:none}
   .obs > summary > span:first-child{flex:1 1 auto}
-  .obs-marca{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--azul);background:var(--azul-soft);
+  .obs-marca{flex:0 0 auto;font-size:12px;font-weight:700;color:var(--azul);background:var(--azul-soft);
     padding:2px 7px;border-radius:8px}
   .obs > summary::after{content:'';flex:0 0 auto;width:7px;height:7px;
     border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);
     transform:rotate(45deg) translate(-2px,-2px);transition:transform .18s ease}
   .obs[open] > summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
   .obs[open] textarea{margin-top:8px}
-  .obs textarea{width:100%;min-height:70px;font-size:15px;line-height:1.45;border-radius:var(--rc);
+  .obs textarea{width:100%;min-height:70px;font-size:17px;line-height:1.45;border-radius:var(--rc);
     border:1px solid var(--hair);
     padding:11px;background:var(--card);color:var(--ink);
     /* sem alça de redimensionar: o risquinho no canto parecia uma linha
@@ -724,23 +724,23 @@
   .balanco .bl.forte{background:var(--ink);color:#fff}
   .balanco .bl b{display:block;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;
     line-height:1.1;letter-spacing:-.024em}
-  .balanco .bl span{font-size:12px;font-weight:400;opacity:.7}
-  .balanco .bnota{flex:1 1 100%;font-size:13px;color:var(--ink2);line-height:1.5}
+  .balanco .bl span{font-size:13px;font-weight:400;opacity:.7}
+  .balanco .bnota{flex:1 1 100%;font-size:14.5px;color:var(--ink2);line-height:1.5}
 
   .resumo{background:var(--card);border-radius:var(--r);padding:16px;margin-top:24px;box-shadow:var(--sh)}
-  .resumo h2{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0 0 12px}
+  .resumo h2{font-size:24px;font-weight:700;letter-spacing:-.021em;margin:0 0 12px}
   .placar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
   .placar div{flex:1 1 84px;background:var(--fill);border-radius:var(--rc);padding:11px 12px}
   .placar b{display:block;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;
     line-height:1.1;letter-spacing:-.024em}
-  .placar span{font-size:12px;color:var(--ink2)}
+  .placar span{font-size:13px;color:var(--ink2)}
   .placar .ok b{color:var(--ok)} .placar .ad b{color:var(--ad)} .placar .nao b{color:var(--nao)}
-  .calresumo{background:var(--fill);border-radius:var(--rc);padding:12px 14px;font-size:14px;
+  .calresumo{background:var(--fill);border-radius:var(--rc);padding:12px 14px;font-size:15.5px;
     color:var(--ink2);line-height:1.55;margin-bottom:14px}
   .calresumo b{font-size:22px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 
-  .rodape{margin-top:26px;font-size:13px;color:var(--ink2);line-height:1.6}
-  .reset{font-size:15px;font-weight:500;background:var(--card);border:0;border-radius:10px;
+  .rodape{margin-top:26px;font-size:14.5px;color:var(--ink2);line-height:1.6}
+  .reset{font-size:17px;font-weight:500;background:var(--card);border:0;border-radius:10px;
     padding:11px 20px;cursor:pointer;color:var(--nao);box-shadow:var(--sh-min)}
   noscript{display:block;background:var(--card);border-radius:var(--r);padding:18px;margin-top:16px;box-shadow:var(--sh)}
 
@@ -750,7 +750,7 @@
   @media (max-width:390px){
     .cols,li.item{grid-template-columns:minmax(0,1fr) 3.6rem 3.6rem 3rem;gap:5px 5px;
       padding-left:13px;padding-right:13px}
-    .cols span{font-size:12.5px}
+    .cols span{font-size:13.5px}
   }
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
@@ -816,8 +816,8 @@
   .tela-cheia .logo-app{width:64px;height:64px;border-radius:14px;margin:0 auto 16px;
     display:flex;align-items:center;justify-content:center;overflow:hidden}
   .tela-cheia .logo-app img,.tela-cheia .logo-app svg{width:100%;height:100%;object-fit:contain;display:block}
-  .tela-cheia h1{font-size:22px;font-weight:700;letter-spacing:-.021em;margin:0 0 6px}
-  .tela-cheia p.sub{font-size:15px;color:var(--ink2);margin:0 0 22px;line-height:1.45}
+  .tela-cheia h1{font-size:24px;font-weight:700;letter-spacing:-.021em;margin:0 0 6px}
+  .tela-cheia p.sub{font-size:17px;color:var(--ink2);margin:0 0 22px;line-height:1.45}
   /* ---------- tela cheia da sessão de treino ("Iniciar treino" no Diário) ----------
      Não é um dialog nem reaproveita .tela-cheia (que centraliza um cartão único) -
      aqui é página inteira mesmo, com cabeçalho fixo e corpo rolável, pro Carlos
@@ -837,8 +837,8 @@
     background:rgba(255,255,255,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);
     backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid rgba(0,0,0,.08)}
   #sessao-treino-fechar{width:32px;height:32px;flex-shrink:0;border-radius:10px;border:0;
-    background:var(--fill);color:var(--ink);font-size:18px;line-height:1;cursor:pointer}
-  .sessao-treino-head h1{font-size:18px;font-weight:700;letter-spacing:-.019em;margin:0}
+    background:var(--fill);color:var(--ink);font-size:20px;line-height:1;cursor:pointer}
+  .sessao-treino-head h1{font-size:20px;font-weight:700;letter-spacing:-.019em;margin:0}
   .sessao-treino-head.com-tempo h1{display:none}
   .sessao-treino-corpo{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
     overscroll-behavior-y:contain;max-width:720px;margin:0 auto;width:100%;
@@ -848,7 +848,7 @@
   /* ---------- preparo no topo da sessão ---------- */
   .prep-caixa{background:var(--fill2);border-radius:var(--r);margin:0 0 14px;overflow:hidden}
   .prep-resumo{display:flex;align-items:center;justify-content:space-between;gap:10px;
-    padding:14px 16px;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;
+    padding:14px 16px;font-size:17px;font-weight:700;color:var(--ink);cursor:pointer;
     list-style:none}
   .prep-resumo::-webkit-details-marker{display:none}
   /* o mesmo chevron desenhado dos outros lugares do app (refeições, anotação):
@@ -858,20 +858,20 @@
     border-right:1.8px solid var(--ink3);border-bottom:1.8px solid var(--ink3);
     transform:rotate(45deg);transition:transform .18s ease}
   .prep-caixa[open] .prep-resumo::after{transform:rotate(-135deg);margin-top:4px}
-  .prep-conta{font-size:13px;font-weight:600;color:var(--ink3);margin-left:auto}
+  .prep-conta{font-size:14.5px;font-weight:600;color:var(--ink3);margin-left:auto}
   .prep-corpo{padding:2px 16px 16px}
   .prep-grupo{margin-bottom:18px}
   .prep-grupo:last-child{margin-bottom:0}
-  .prep-tit{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  .prep-tit{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
     color:var(--ink3);margin:0 0 8px}
   .prep-item{padding:9px 0;border-bottom:.5px solid var(--hair)}
   .prep-item:last-child{border-bottom:0}
   .prep-linha{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
-  .prep-nome{flex:1 1 auto;min-width:0;font-size:13.5px;color:var(--ink);line-height:1.3;
+  .prep-nome{flex:1 1 auto;min-width:0;font-size:15px;color:var(--ink);line-height:1.3;
     overflow-wrap:anywhere}
-  .prep-presc{flex:0 0 auto;font-size:13px;font-weight:700;color:var(--ink2);
+  .prep-presc{flex:0 0 auto;font-size:14.5px;font-weight:700;color:var(--ink2);
     font-variant-numeric:tabular-nums}
-  .prep-como{font-size:12.5px;color:var(--ink2);line-height:1.45;margin:3px 0 0}
+  .prep-como{font-size:13.5px;color:var(--ink2);line-height:1.45;margin:3px 0 0}
 
   /* ---------- teclado da sessão ---------- */
   /* Tudo que sobe da base da tela usa a mesma curva das folhas do iPhone
@@ -906,7 +906,7 @@
   .tr-teclado .tecla.next{background:var(--azul);color:#fff;font-size:17px;font-weight:700}
   .tr-teclado .tecla.mm{background:none;box-shadow:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0}
   .tr-teclado .tecla.mm span{background:#23262B;border-radius:11px;display:flex;align-items:center;
-    justify-content:center;font-size:24px;color:#D6DAE2;box-shadow:0 1px 0 rgba(0,0,0,.45)}
+    justify-content:center;font-size:26px;color:#D6DAE2;box-shadow:0 1px 0 rgba(0,0,0,.45)}
   .tr-teclado .tecla.mm span:active{background:#3B414A}
   /* escolher o RIR daquela série, saindo de cima do teclado */
   .rir-pop{position:absolute;left:8px;right:8px;bottom:100%;margin-bottom:8px;background:#2C3037;
@@ -916,7 +916,7 @@
   .rir-pop p{margin:0 0 9px;font-size:11.5px;color:#A9AFBA;line-height:1.4}
   .rir-bts{display:flex;gap:6px}
   .rir-bts button{flex:1 1 0;height:38px;border-radius:9px;border:0;background:#23262B;
-    color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer}
+    color:#fff;font-family:inherit;font-size:17px;font-weight:700;cursor:pointer}
   .rir-bts button.sel{background:var(--azul)}
   /* etiqueta do RIR no canto do campo de repetições */
   .tr-serie-linha{position:relative}
@@ -942,16 +942,16 @@
   .tr-barra{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:10px}
   .tr-barra[hidden]{display:none}
   .tr-barra-tempo{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:0}
-  .tr-barra-rot{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  .tr-barra-rot{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
     color:var(--ink3);white-space:nowrap;line-height:1.15}
-  .tr-barra-num{font-size:24px;font-weight:800;letter-spacing:-.025em;
+  .tr-barra-num{font-size:26px;font-weight:800;letter-spacing:-.025em;
     font-variant-numeric:tabular-nums;line-height:1.1}
   .tr-barra-btns{display:flex;gap:8px;flex-shrink:0}
   .tr-barra-ico{width:40px;height:40px;border-radius:12px;border:1px solid var(--hair);
-    background:var(--card);color:var(--ink);font-size:13px;font-family:inherit;display:flex;
+    background:var(--card);color:var(--ink);font-size:14.5px;font-family:inherit;display:flex;
     align-items:center;justify-content:center;padding:0;cursor:pointer}
   .tr-barra-fim{padding:0 18px;height:40px;border-radius:12px;border:none;background:var(--ink);
-    color:#fff;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;
+    color:#fff;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer;
     letter-spacing:-.01em}
   .tr-barra.pausado .tr-barra-num{color:var(--ink3)}
   /* Com a sessão aberta o painel do descanso continua sendo o cartão
@@ -981,9 +981,9 @@
   #tr-descanso-toast.sobre-teclado .tr-desc-topo-btns,
   #tr-descanso-toast.sobre-teclado .tr-desc-aviso,
   #tr-descanso-toast.sobre-teclado .tr-desc-vol-caixa{display:none}
-  #tr-descanso-toast.sobre-teclado .tr-desc-tempo{position:static;font-size:22px;color:#fff}
+  #tr-descanso-toast.sobre-teclado .tr-desc-tempo{position:static;font-size:24px;color:#fff}
   #tr-descanso-toast.sobre-teclado.acabando .tr-desc-tempo{color:#FF8A80}
-  #tr-descanso-toast.sobre-teclado.fim .tr-desc-tempo{color:#7FD08A;font-size:20px}
+  #tr-descanso-toast.sobre-teclado.fim .tr-desc-tempo{color:#7FD08A;font-size:22px}
   #tr-descanso-toast.sobre-teclado .tr-desc-col{display:contents}
   #tr-descanso-toast.sobre-teclado .tr-desc-topo{order:1;flex:0 0 auto}
   #tr-descanso-toast.sobre-teclado .tr-desc-rot{color:#7FD08A}
@@ -991,7 +991,7 @@
   #tr-descanso-toast.sobre-teclado .tr-desc-btn{flex:0 0 auto;height:36px;padding:0 14px;border:0;
     border-radius:10px;background:#2C3037;color:#E6E9EE;font-weight:700}
   #tr-descanso-toast.sobre-teclado .tr-desc-btn.forte{background:#fff;color:#111}
-  .tr-chip-sel{font-size:13px;font-weight:600;padding:8px 16px;border-radius:10px;
+  .tr-chip-sel{font-size:14.5px;font-weight:600;padding:8px 16px;border-radius:10px;
     background:var(--fill);color:var(--ink2);border:0;cursor:pointer}
   .tr-chip-sel[aria-pressed="true"]{background:var(--azul);color:#fff}
 
@@ -1002,16 +1002,16 @@
     padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 24px) 24px}
   #tela-instalar .cartao{background:none;box-shadow:none;border-radius:0;padding:0;max-width:432px}
   #tela-instalar h1{all:revert}
-  #tela-instalar .btn-pill{padding:10px;border-radius:10px;font-size:16px;font-weight:500;
+  #tela-instalar .btn-pill{padding:10px;border-radius:10px;font-size:18px;font-weight:500;
     letter-spacing:normal;margin-top:20px}
   /* campo nenhum herda a fonte do app sozinho - sem isto o textarea do "O que
      mudou nesse dia" e os inputs saem com a fonte padrão do navegador, que
      destoa de todo o resto da tela */
   input,select,textarea,button{font-family:var(--sans)}
   .campo{margin-bottom:12px;text-align:left}
-  .campo label{display:block;font-size:13px;font-weight:500;color:var(--ink2);margin:0 0 6px}
+  .campo label{display:block;font-size:14.5px;font-weight:500;color:var(--ink2);margin:0 0 6px}
   .campo input{width:100%;padding:6px 10px;border-radius:7px;border:0.5px solid var(--hair);
-    background:#fff;font-size:16px;color:var(--ink);box-sizing:border-box}
+    background:#fff;font-size:18px;color:var(--ink);box-sizing:border-box}
   .campo input:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:transparent}
   /* campo de data: no Safari do iPhone o controle nativo tem uma largura
      "natural" bem maior que o card, e como ele não encolhe sozinho acabava
@@ -1030,23 +1030,23 @@
     caret-color:var(--ink);
     transition:background-color 5000s ease-in-out 0s}
   .btn-pill{display:block;width:100%;padding:10px;border-radius:10px;border:0;
-    font-size:16px;font-weight:500;cursor:pointer;margin-top:4px;box-sizing:border-box}
+    font-size:18px;font-weight:500;cursor:pointer;margin-top:4px;box-sizing:border-box}
   .btn-pill.primario{background:var(--azul);color:#fff}
   .btn-pill.primario:active{opacity:.85}
   .btn-pill.secundario{background:var(--fill);color:var(--ink)}
   .btn-pill:disabled{opacity:.5;cursor:default}
-  .link-trocar{display:block;width:100%;margin-top:16px;font-size:14px;color:var(--azul);
+  .link-trocar{display:block;width:100%;margin-top:16px;font-size:15.5px;color:var(--azul);
     background:none;border:0;cursor:pointer;text-decoration:none;padding:4px}
-  .erro-auth{font-size:13px;color:var(--nao);font-weight:700;text-align:center;
+  .erro-auth{font-size:14.5px;color:var(--nao);font-weight:700;text-align:center;
     white-space:pre-line;line-height:1.4;max-height:0;margin-bottom:0;overflow:hidden;
     transition:max-height .22s ease,margin-bottom .22s ease}
   .erro-auth.mostra{max-height:4.5em;margin-bottom:12px}
-  .badge-convite{display:inline-block;font-size:12px;font-weight:600;color:var(--azul);
+  .badge-convite{display:inline-block;font-size:13px;font-weight:600;color:var(--azul);
     background:var(--car-soft);border-radius:10px;padding:5px 12px;margin-bottom:14px}
 
   /* ---------- conta / convite ---------- */
   .conta-btn{width:34px;height:34px;border-radius:10px;border:0;background:var(--fill);
-    color:var(--ink);font-size:14px;font-weight:700;cursor:pointer;display:flex;
+    color:var(--ink);font-size:15.5px;font-weight:700;cursor:pointer;display:flex;
     align-items:center;justify-content:center;flex:0 0 auto}
   #dlg-conta{border:0;border-radius:12px;padding:0;max-width:340px;width:90vw;box-shadow:var(--sh)}
   #dlg-conta::backdrop{background:rgba(0,0,0,.28)}
@@ -1058,7 +1058,7 @@
     font-size:44px;font-weight:700}
   .foto-grande img{width:100%;height:100%;object-fit:cover;display:block}
   .foto-acoes{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
-  .foto-acoes .btn-pill{width:auto;margin:0;padding:8px 14px;font-size:13px}
+  .foto-acoes .btn-pill{width:auto;margin:0;padding:8px 14px;font-size:14.5px}
   .cortador[hidden]{display:none}
   .cortador{margin:0 0 14px}
   .cortador-palco{width:220px;height:220px;margin:0 auto 10px;position:relative;overflow:hidden;
@@ -1071,17 +1071,17 @@
   /* avatar do topo mostra a foto quando existe */
   .conta-btn{overflow:hidden;padding:0}
   .conta-btn img{width:100%;height:100%;object-fit:cover;display:block}
-  .conta-nome{font-size:17px;font-weight:700;letter-spacing:-.02em;margin:0 0 2px}
-  .conta-papel{font-size:13px;color:var(--ink2);margin:0 0 18px}
+  .conta-nome{font-size:19px;font-weight:700;letter-spacing:-.02em;margin:0 0 2px}
+  .conta-papel{font-size:14.5px;color:var(--ink2);margin:0 0 18px}
   .conta-acao{display:block;width:100%;text-align:left;padding:12px 14px;border-radius:10px;
-    border:0;background:var(--fill2);font-size:15px;color:var(--ink);cursor:pointer;margin-bottom:8px}
+    border:0;background:var(--fill2);font-size:17px;color:var(--ink);cursor:pointer;margin-bottom:8px}
   .conta-acao.sair{color:var(--nao)}
-  .conv-intro{font-size:13.5px;color:var(--ink2);line-height:1.5;margin:0 0 16px}
-  .conv-passos{font-size:13px;color:var(--ink2);line-height:1.5;margin:14px 0 0}
+  .conv-intro{font-size:15px;color:var(--ink2);line-height:1.5;margin:0 0 16px}
+  .conv-passos{font-size:14.5px;color:var(--ink2);line-height:1.5;margin:14px 0 0}
   .conv-passos b{color:var(--ink)}
   .convite-link-box[hidden]{display:none}
   .convite-link-box{display:flex;gap:8px;align-items:center;background:var(--fill2);
-    border-radius:10px;padding:10px 12px;margin:10px 0;word-break:break-all;font-size:13px}
+    border-radius:10px;padding:10px 12px;margin:10px 0;word-break:break-all;font-size:14.5px}
   .convite-link-box button{flex:0 0 auto;width:auto;padding:8px 14px;margin:0}
 
   /* ---------- barra de abas (navegação principal) ---------- */
@@ -1098,7 +1098,7 @@
     padding:18px 0 calc(20px + env(safe-area-inset-bottom,0px)) 0;
     color:var(--ink3);cursor:pointer;min-width:0;transition:background-color .15s ease}
   .tabbar-ico{width:21px;height:21px}
-  .tabbar-item span{font-size:10px;font-weight:500;letter-spacing:-.005em;white-space:nowrap;line-height:1.2}
+  .tabbar-item span{font-size:11px;font-weight:500;letter-spacing:-.005em;white-space:nowrap;line-height:1.2}
   .tabbar-item[aria-pressed="true"]{color:var(--azul);background:var(--fill)}
   .tabbar-item:focus-visible{outline:2px solid var(--azul);outline-offset:1px;border-radius:10px}
 
@@ -1111,15 +1111,15 @@
   @keyframes miniSobe{from{transform:translateY(18px);opacity:0}to{transform:none;opacity:1}}
   .tr-mini[hidden]{display:none}
   .tr-mini-tempo{display:flex;flex-direction:column;min-width:0;flex:0 0 auto}
-  .tr-mini-rot{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  .tr-mini-rot{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
     color:rgba(255,255,255,.62);line-height:1.15;white-space:nowrap}
-  .tr-mini-num{font-size:20px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
-  .tr-mini-desc{flex:1 1 auto;min-width:0;text-align:center;font-size:14px;font-weight:700;
+  .tr-mini-num{font-size:22px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+  .tr-mini-desc{flex:1 1 auto;min-width:0;text-align:center;font-size:15.5px;font-weight:700;
     font-variant-numeric:tabular-nums;color:#7FD08A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tr-mini-desc.acabando{color:#FFB74D}
   .tr-mini-desc.fim{color:#7FD08A}
   .tr-mini-desc[hidden]{display:none}
-  .tr-mini-voltar{flex:0 0 auto;margin-left:auto;font-size:13px;font-weight:700;
+  .tr-mini-voltar{flex:0 0 auto;margin-left:auto;font-size:14.5px;font-weight:700;
     background:rgba(255,255,255,.14);border-radius:10px;padding:8px 12px;white-space:nowrap}
   /* a lista não pode acabar escondida atrás da barrinha */
   body.com-mini-treino .wrap{padding-bottom:calc(var(--tabbar-h) + 8px + 72px)}
@@ -1130,19 +1130,19 @@
   /* pílula "Atualização pronta" (versão nova do app já baixada; ver sw.js) */
   #atualizacao-pronta{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 10px);
     transform:translateX(-50%);z-index:200;border:0;border-radius:999px;padding:10px 16px;
-    background:var(--ink);color:#fff;font-family:inherit;font-size:13px;font-weight:700;
+    background:var(--ink);color:#fff;font-family:inherit;font-size:14.5px;font-weight:700;
     box-shadow:0 8px 24px rgba(0,0,0,.22);cursor:pointer;white-space:nowrap;
     animation:miniSobe var(--sobe-t) var(--sobe) backwards}
 
   /* ---------- aba Hoje ---------- */
   .hoje-cabecalho{padding:20px 0 4px}
-  .hoje-cabecalho h1{font-size:26px;font-weight:700;letter-spacing:-.022em;margin:0}
-  .hoje-sub{font-size:14px;color:var(--ink2);margin:2px 0 0}
-  .hoje-cartao{background:var(--card);border-radius:var(--r);padding:16px;margin-top:14px;box-shadow:var(--sh)}
+  .hoje-cabecalho h1{font-size:28px;font-weight:700;letter-spacing:-.022em;margin:0}
+  .hoje-sub{font-size:15.5px;color:var(--ink2);margin:2px 0 0}
+  .hoje-cartao{background:var(--card);border-radius:var(--r);padding:18px;margin-top:16px;box-shadow:var(--sh)}
   .hoje-cartao.desabilitado{opacity:.62}
   .hoje-cartao-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-  .hoje-cartao-tit{font-size:18px;font-weight:700;letter-spacing:-.015em}
-  .hoje-cartao-num{font-size:14px;color:var(--ink2);font-weight:500}
+  .hoje-cartao-tit{font-size:20px;font-weight:700;letter-spacing:-.015em}
+  .hoje-cartao-num{font-size:15.5px;color:var(--ink2);font-weight:500}
   .hoje-cartao-barra{height:8px;border-radius:10px;background:var(--fill);overflow:hidden}
   .hoje-cartao-barra-fill{height:100%;background:var(--ok);border-radius:10px;transition:width .3s ease}
   /* treinos já registrados no dia, com saída pra apagar */
@@ -1152,8 +1152,8 @@
      montado contando que a pessoa treina. */
   .at-cab{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:10px 0 8px}
   .at-cab:first-child{margin-top:4px}
-  .at-tit{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3)}
-  .at-tot{font-size:12.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+  .at-tit{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3)}
+  .at-tot{font-size:13.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
   .at-queima{display:flex;align-items:center;gap:14px}
   .at-anel{position:relative;flex:0 0 auto;width:58px;height:58px}
   .at-anel svg{width:58px;height:58px;transform:rotate(-90deg)}
@@ -1161,15 +1161,15 @@
   .at-anel .tr{stroke:var(--fill)}
   .at-anel .pr{stroke:var(--azul);stroke-linecap:round;transition:stroke-dasharray .35s ease}
   .at-anel b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    font-size:13px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+    font-size:14.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
   .at-lado{flex:1 1 auto;min-width:0}
   /* sem fio entre as linhas: o espaçamento sozinho já separa, e o pontilhado
      picotava o bloco inteiro. O padding continua o mesmo pra altura não mudar. */
-  .at-l{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--ink2);padding:5px 0}
+  .at-l{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;color:var(--ink2);padding:5px 0}
   .at-l b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
   .at-l.forte b{font-weight:800}
   .at-l span:last-child{flex:0 0 auto;color:var(--ink3);font-variant-numeric:tabular-nums}
-  .at-nota{font-size:11.5px;color:var(--ink3);margin:8px 0 0;line-height:1.4}
+  .at-nota{font-size:12.5px;color:var(--ink3);margin:8px 0 0;line-height:1.4}
   .hoje-treino-feitos{display:flex;flex-direction:column;gap:6px;margin:8px 0 2px}
   /* invólucro do arrasto: o vermelho do Excluir mora atrás e o recorte
      arredondado impede as pontinhas de aparecerem nos cantos. */
@@ -1178,9 +1178,9 @@
   .hoje-treino-feito{display:flex;align-items:center;gap:8px;background:var(--fill2);
     border-radius:var(--rc);padding:8px 10px;width:100%;border:none;font-family:inherit;
     text-align:left;cursor:pointer;position:relative;touch-action:pan-y}
-  .hoje-treino-feito-txt{flex:1 1 auto;min-width:0;font-size:13px;font-weight:600;color:var(--ink2);
+  .hoje-treino-feito-txt{flex:1 1 auto;min-width:0;font-size:14.5px;font-weight:600;color:var(--ink2);
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .hoje-treino-feito-seta{flex:0 0 auto;font-size:17px;line-height:1;color:var(--ink3);
+  .hoje-treino-feito-seta{flex:0 0 auto;font-size:19px;line-height:1;color:var(--ink3);
     font-weight:400;padding-bottom:2px}
   /* a do relógio continua sendo um <div>: não tem o que abrir nem o que
      apagar, quem manda nela é o app Saúde. */
@@ -1190,11 +1190,11 @@
   .aviso-erro{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));
     z-index:300;background:#C62828;color:#fff;border-radius:var(--rc);padding:11px 13px;
     box-shadow:0 8px 24px rgba(0,0,0,.25);cursor:pointer;display:flex;flex-direction:column;gap:2px}
-  .aviso-erro b{font-size:13.5px;font-weight:700;line-height:1.35}
-  .aviso-erro span{font-size:12px;opacity:.9;line-height:1.35;word-break:break-word}
-  .aviso-erro i{font-size:10.5px;opacity:.75;font-style:normal;margin-top:2px}
+  .aviso-erro b{font-size:15px;font-weight:700;line-height:1.35}
+  .aviso-erro span{font-size:13px;opacity:.9;line-height:1.35;word-break:break-word}
+  .aviso-erro i{font-size:11.5px;opacity:.75;font-style:normal;margin-top:2px}
   .aviso-erro.ok{background:var(--ok)}
-  .confirma-txt{font-size:15px;line-height:1.45;color:var(--ink);margin:0 0 12px}
+  .confirma-txt{font-size:17px;line-height:1.45;color:var(--ink);margin:0 0 12px}
   /* lista em duas colunas, com fio pontilhado: o nome do exercício de um
      lado e o que falta do outro, alinhado. Em bullets corridos a frase
      "Puxada aberta — 2 séries" ficava comprida e o número se perdia no meio
@@ -1202,7 +1202,7 @@
   .confirma-lista{display:flex;flex-direction:column;margin:0 0 16px;
     border-top:.5px solid var(--hair)}
   .confirma-linha{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
-    padding:8px 0;border-bottom:.5px solid var(--hair);font-size:14px;color:var(--ink2)}
+    padding:8px 0;border-bottom:.5px solid var(--hair);font-size:15.5px;color:var(--ink2)}
   .confirma-linha span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere;line-height:1.3}
   .confirma-linha b{flex:0 0 auto;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
   /* os dois botões empilhados: "Finalizar mesmo assim" não cabe lado a lado
@@ -1211,38 +1211,38 @@
   .confirma-bts{display:flex;flex-direction:column;gap:8px}
   .confirma-bts .btn-pill{margin:0;width:100%}
   .btn-pill.perigo{background:var(--nao);color:#fff}
-  .hoje-treino-feito-val{flex:0 0 auto;font-size:12.5px;color:var(--ink3);font-variant-numeric:tabular-nums}
+  .hoje-treino-feito-val{flex:0 0 auto;font-size:13.5px;color:var(--ink3);font-variant-numeric:tabular-nums}
   /* detalhe do treino registrado (abre tocando na linha do treino feito) */
   .reg-treino{display:flex;flex-direction:column;gap:14px}
   .reg-ex{display:flex;flex-direction:column;gap:3px}
-  .reg-nome{font-size:14px;font-weight:700;color:var(--azul);line-height:1.3;margin-bottom:2px}
+  .reg-nome{font-size:15.5px;font-weight:700;color:var(--azul);line-height:1.3;margin-bottom:2px}
   .reg-serie{display:grid;grid-template-columns:36px 1fr 20px;gap:8px;align-items:center;
-    font-size:13.5px;color:var(--ink2);padding:2px 0;border-bottom:.5px dotted var(--hair)}
+    font-size:15px;color:var(--ink2);padding:2px 0;border-bottom:.5px dotted var(--hair)}
   .reg-serie:last-child{border-bottom:0}
   .reg-num{justify-self:start;min-width:32px;height:24px;padding:0 6px;border-radius:8px;
-    background:var(--fill);color:var(--ink);font-size:12.5px;font-weight:700;
+    background:var(--fill);color:var(--ink);font-size:13.5px;font-weight:700;
     display:flex;align-items:center;justify-content:center}
-  .reg-num.preparo{color:var(--ink3);font-size:10.5px}
+  .reg-num.preparo{color:var(--ink3);font-size:11.5px}
   .reg-val{font-variant-numeric:tabular-nums;color:var(--ink)}
-  .reg-ok{color:var(--ok);font-size:13px;text-align:right}
-  .hoje-treino-tag{flex:0 0 auto;font-size:10px;font-weight:700;text-transform:uppercase;
+  .reg-ok{color:var(--ok);font-size:14.5px;text-align:right}
+  .hoje-treino-tag{flex:0 0 auto;font-size:11px;font-weight:700;text-transform:uppercase;
     letter-spacing:.04em;color:var(--ink3);background:var(--fill);border-radius:8px;padding:3px 7px}
   /* em tela estreita a etiqueta sai pra não espremer o nome da atividade -
      o valor do lado já mostra que aquilo veio de fora do app. */
   @media(max-width:359px){ .hoje-treino-tag{display:none} }
   .hoje-treino-apagar{flex:0 0 auto;border:0;background:none;color:var(--nao);
-    font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:4px 6px;border-radius:8px}
+    font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;padding:4px 6px;border-radius:8px}
   .hoje-treino-apagar:disabled{color:var(--ink3)}
   .hoje-cartao-cta{margin-top:12px;width:100%;padding:10px 14px;border-radius:10px;border:0;
-    background:var(--fill2);color:var(--azul);font-size:14px;font-weight:600;cursor:pointer}
-  .hoje-cartao-nota{font-size:13px;color:var(--ink2);margin:0;line-height:1.4}
+    background:var(--fill2);color:var(--azul);font-size:15.5px;font-weight:600;cursor:pointer}
+  .hoje-cartao-nota{font-size:14.5px;color:var(--ink2);margin:0;line-height:1.4}
   /* Orçamento de calorias do dia no card Dieta: medidor em arco no meio
      (quanto ainda cabe), o que já foi comido de um lado, as refeições do
      outro, e os macros com bolinha embaixo. */
   .orc{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin:14px 0 4px}
   .orc-col{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
-  .orc-col-rot{font-size:12.5px;color:var(--ink2);text-align:center}
-  .orc-col-val{font-size:19px;font-weight:700;letter-spacing:-.02em;color:var(--ink);
+  .orc-col-rot{font-size:13.5px;color:var(--ink2);text-align:center}
+  .orc-col-val{font-size:21px;font-weight:700;letter-spacing:-.02em;color:var(--ink);
     font-variant-numeric:tabular-nums}
   .orc-medidor{position:relative;width:124px;height:124px;flex-shrink:0}
   .orc-svg{width:100%;height:100%;display:block}
@@ -1256,7 +1256,7 @@
   .orc-centro-val{font-size:26px;font-weight:700;letter-spacing:-.03em;color:var(--ok);
     line-height:1;font-variant-numeric:tabular-nums}
   .orc.passou .orc-centro-val{color:var(--nao)}
-  .orc-centro-rot{font-size:12.5px;color:var(--ink2)}
+  .orc-centro-rot{font-size:13.5px;color:var(--ink2)}
   .orc-macros{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 14px}
   /* tocar na coluna troca "32 / 49 g" pelo percentual - o número dos dois
      lados ao mesmo tempo não cabia na terça parte do card. */
@@ -1268,8 +1268,8 @@
   .orc-ponto-g{background:#E3B341}
   .orc-ponto-c{background:#5BA8D8}
   .orc-ponto-p{background:#7B5EC7}
-  .orc-macro-rot{font-size:11.5px;color:var(--ink3)}
-  .orc-macro-val{font-size:13px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+  .orc-macro-rot{font-size:12.5px;color:var(--ink3)}
+  .orc-macro-val{font-size:14.5px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
   .cal-palco{overflow:hidden;touch-action:pan-y}
   /* treino do dia na mesma linha do título "Treino", do lado direito -
      clicar abre o modal de troca (trocarTreinoDlg). */
@@ -1277,9 +1277,9 @@
      demais pro tamanho dela, competindo com o título do cartão. */
   .hoje-treino-chave{flex-shrink:0;cursor:pointer;font-family:inherit;
     background:var(--card);color:var(--azul);border:1px solid var(--azul);
-    font-size:13px;font-weight:700;
+    font-size:14.5px;font-weight:700;
     padding:4px 11px;border-radius:10px;display:flex;align-items:center;gap:5px}
-  .hoje-treino-chave::after{content:'›';font-size:15px;line-height:1;opacity:.75}
+  .hoje-treino-chave::after{content:'›';font-size:17px;line-height:1;opacity:.75}
   /* display:flex na classe passa por cima do [hidden] do navegador */
   .hoje-treino-chave[hidden]{display:none}
   .tr-troca-lista{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
@@ -1287,24 +1287,24 @@
     border:1px solid var(--hair);background:var(--card);border-radius:10px;padding:11px 13px;font-family:inherit}
   .tr-troca-item[aria-pressed="true"]{border-color:var(--azul);background:var(--azul-soft)}
   .tr-troca-chave{flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--fill);
-    color:var(--ink);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+    color:var(--ink);font-size:14.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
   .tr-troca-item[aria-pressed="true"] .tr-troca-chave{background:var(--azul);color:#fff}
-  .tr-troca-nome{font-size:14px;color:var(--ink);font-weight:500;line-height:1.3}
-  .tr-troca-hoje{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;
+  .tr-troca-nome{font-size:15.5px;color:var(--ink);font-weight:500;line-height:1.3}
+  .tr-troca-hoje{font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;
     margin-left:auto;flex-shrink:0}
   .hb-bloco{margin-bottom:22px}
   .hb-bloco:last-child{margin-bottom:0}
-  .hb-bloco-tit{font-size:16px;font-weight:600;margin:0 0 2px;letter-spacing:-.01em}
-  .hb-bloco-sub{font-size:12px;color:var(--ink2);margin:0 0 10px}
+  .hb-bloco-tit{font-size:18px;font-weight:600;margin:0 0 2px;letter-spacing:-.01em}
+  .hb-bloco-sub{font-size:13px;color:var(--ink2);margin:0 0 10px}
   .hb-secao{margin-bottom:16px}
   .hb-secao:last-child{margin-bottom:0}
-  .hb-secao-tit{font-size:12px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.04em;margin:0 0 6px}
-  .hb-secao-nota{font-size:13px;color:var(--ink2);margin:0 0 8px;line-height:1.4}
+  .hb-secao-tit{font-size:13px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.04em;margin:0 0 6px}
+  .hb-secao-nota{font-size:14.5px;color:var(--ink2);margin:0 0 8px;line-height:1.4}
   .hb-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:.5px solid var(--hair)}
   .hb-item:last-child{border-bottom:0}
   .hb-item input[type=checkbox]{width:22px;height:22px;flex:0 0 22px;margin-top:1px;accent-color:var(--ok)}
-  .hb-item label{font-size:14px;line-height:1.4;flex:1}
-  .hb-vazio-bloco{font-size:14px;color:var(--ink2);padding:2px 0 10px;margin:0}
+  .hb-item label{font-size:15.5px;line-height:1.4;flex:1}
+  .hb-vazio-bloco{font-size:15.5px;color:var(--ink2);padding:2px 0 10px;margin:0}
   .hb-vazio-bloco .btn-pill{margin-top:8px}
   /* ---------- aba Progresso ---------- */
   .progresso-form-card{background:var(--card);border-radius:var(--r);padding:14px 16px;margin-top:16px;box-shadow:var(--sh)}
@@ -1312,7 +1312,7 @@
   /* o `summary` solto do app tem padding de 15px próprio; somado ao padding do
      cartão, o título de "Novo registro" ficava com quase 30px de ar em cima e
      embaixo e o cartão fechado ficava enorme sem ter nada dentro. */
-  .progresso-form-card summary{font-size:17px;font-weight:700;letter-spacing:-.015em;cursor:pointer;list-style:none;
+  .progresso-form-card summary{font-size:19px;font-weight:700;letter-spacing:-.015em;cursor:pointer;list-style:none;
     display:flex;align-items:center;justify-content:space-between;padding:2px 0;line-height:1.3}
   .progresso-form-card summary::-webkit-details-marker{display:none}
   /* a mesma setinha do resto do app (quadrado girado), apontando pra baixo
@@ -1329,19 +1329,19 @@
   .progresso-form-card input[type="date"]{max-width:190px}
   .progresso-form-card .campo:first-of-type{margin-top:2px}
   .progresso-form-card .campo{margin-bottom:8px}
-  .progresso-form-card .campo label{margin:0 0 4px;font-size:12.5px}
+  .progresso-form-card .campo label{margin:0 0 4px;font-size:13.5px}
   .progresso-form-card .pg-linha3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
   .progresso-form-card .pg-linha3 .campo label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .progresso-historico{margin-top:20px}
   .pg-linha{display:flex;justify-content:space-between;align-items:baseline;background:var(--card);
     border-radius:10px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--sh-min)}
-  .pg-linha .pg-data{font-size:13px;color:var(--ink2)}
-  .pg-linha .pg-vals{font-size:14px;font-weight:600;text-align:right}
+  .pg-linha .pg-data{font-size:14.5px;color:var(--ink2)}
+  .pg-linha .pg-vals{font-size:15.5px;font-weight:600;text-align:right}
   /* painel de enviar plano: escolher PDF e pronto */
   .hidden{display:none !important}
-  .vs-intro{font-size:13.5px;color:var(--ink2);line-height:1.5;margin:0 0 16px}
+  .vs-intro{font-size:15px;color:var(--ink2);line-height:1.5;margin:0 0 16px}
   .vs-status{margin-top:12px;display:flex;flex-direction:column;gap:6px}
-  .vs-item{display:flex;align-items:baseline;gap:8px;font-size:13px;padding:9px 11px;
+  .vs-item{display:flex;align-items:baseline;gap:8px;font-size:14.5px;padding:9px 11px;
     border-radius:10px;background:var(--fill2)}
   .vs-item-nome{flex:1 1 auto;min-width:0;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .vs-item-res{flex:0 0 auto;font-weight:600;color:var(--ink2)}
@@ -1352,11 +1352,11 @@
   /* todas as linhas com a MESMA coluna de rótulo, medida pelo maior texto
      ("Suplementação", 109px): assim o campo de data começa e termina no
      mesmo lugar em todas, em vez de encolher só na linha do nome comprido. */
-  .vs-tipo{flex:0 0 112px;font-size:15px;font-weight:600;color:var(--ink);
+  .vs-tipo{flex:0 0 112px;font-size:17px;font-weight:600;color:var(--ink);
     letter-spacing:-.01em}
   .vs-linha-editavel .vs-vigente-edit{flex:1 1 auto}
   .vs-btn-mini{flex:0 0 auto;border:0;background:var(--fill);color:var(--ink2);font-family:inherit;
-    font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:10px;cursor:pointer}
+    font-size:13.5px;font-weight:600;padding:6px 11px;border-radius:10px;cursor:pointer}
   .vs-btn-mini.perigo{color:var(--nao)}
   /* a linha vira o invólucro do gesto: o "Apagar" fica atrás, escondido,
      e aparece quando se arrasta pra esquerda */
@@ -1364,20 +1364,20 @@
   .vs-linha-wrap:last-child{border-bottom:0}
   .vs-linha-editavel{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;
     background:var(--card);position:relative;z-index:1;touch-action:pan-y}
-  .vs-linha-editavel .vs-vigente-edit{font-size:14px;padding:6px 8px;border-radius:10px;
+  .vs-linha-editavel .vs-vigente-edit{font-size:15.5px;padding:6px 8px;border-radius:10px;
     border:1px solid var(--hair);background:var(--fill2);
     /* pode encolher: antes era flex:0 0 auto e o campo esticava a linha */
     flex:1 1 150px;min-width:0;max-width:100%;box-sizing:border-box}
   .vs-linha-editavel .pg-vals{flex:1 1 100%;min-width:0;text-align:left}
-  .vs-linha-editavel .vs-salvar-vigente{flex:0 0 auto;padding:6px 12px;font-size:13px}
+  .vs-linha-editavel .vs-salvar-vigente{flex:0 0 auto;padding:6px 12px;font-size:14.5px}
   /* recado de "Salvando/Salvo" no lugar do botão que saiu; ocupa espaço só
      quando tem texto, pra linha não ficar com um buraco à toa */
   /* histórico agrupado por pessoa: o nome vira título do bloco e some das
      linhas, que ficam só com tipo, data e apagar */
   .vs-grupo{margin-top:16px}
   .vs-grupo:first-child{margin-top:4px}
-  .vs-grupo-nome{margin:0 0 2px;font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
-  .vs-vigente-status{flex:0 0 auto;font-size:12px;font-weight:600;color:var(--ink3)}
+  .vs-grupo-nome{margin:0 0 2px;font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+  .vs-vigente-status{flex:0 0 auto;font-size:13px;font-weight:600;color:var(--ink3)}
   .vs-vigente-status:empty{display:none}
   .vs-vigente-status.bom{color:var(--ok)}
   .vs-vigente-status.ruim{color:var(--nao)}
@@ -1402,7 +1402,7 @@
   .evo-barra-marcador{position:absolute;top:8px;width:12px;height:12px;margin-left:-6px;margin-top:-6px;
     border-radius:10px;background:var(--azul);border:2px solid var(--card);box-shadow:var(--sh-min)}
   .evo-link{display:block;background:none;border:0;padding:10px 2px;margin:0;color:var(--azul);
-    font-size:13px;font-weight:600;cursor:pointer;text-align:left}
+    font-size:14.5px;font-weight:600;cursor:pointer;text-align:left}
   .evo-secao{margin-top:24px}
   .evo-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:12px}
   .evo-chip{flex:0 0 auto;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:10px;
@@ -1413,8 +1413,8 @@
   .evo-grafico-wrap .pg-vazio{padding:24px 12px;text-align:center}
 
   .tr-secao{margin-top:18px}
-  .tr-secao h2{font-size:20px;font-weight:700;letter-spacing:-.02em;margin:0 0 4px}
-  .tr-secao h3{font-size:13px;font-weight:600;letter-spacing:.01em;margin:0 0 8px;color:var(--ink2);text-transform:uppercase}
+  .tr-secao h2{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0 0 4px}
+  .tr-secao h3{font-size:14.5px;font-weight:600;letter-spacing:.01em;margin:0 0 8px;color:var(--ink2);text-transform:uppercase}
   /* topo da aba Treino: nome da periodização em destaque, centralizado, com
      a vigência logo abaixo. */
   .tr-cabecalho{text-align:center;padding:22px 8px 6px}
@@ -1432,7 +1432,7 @@
   .tr-sessao-sub{font-size:15.5px;font-weight:600;color:var(--ink2);text-align:center;
     margin:0 0 12px;line-height:1.35;letter-spacing:-.01em;text-transform:none;
     padding:0 8px;overflow-wrap:anywhere}
-  .tr-sub{font-size:13px;color:var(--ink2);margin:0;line-height:1.5}
+  .tr-sub{font-size:14.5px;color:var(--ink2);margin:0;line-height:1.5}
   .tr-sub.editavel{cursor:pointer;text-decoration:underline;text-decoration-color:var(--hair);
     text-underline-offset:3px}
   /* prescrição da semana em três células, com a dica do RIR */
@@ -1451,70 +1451,70 @@
   /* as três células têm exatamente o mesmo rótulo: era o botãozinho "?" que
      entrava no flex de "Intensidade" e espremia a palavra, deixando ela menor
      que as vizinhas. Sem ele, some a diferença. */
-  .tr-sem-rot{display:block;font-size:11.5px;font-weight:700;color:var(--ink3);
+  .tr-sem-rot{display:block;font-size:12.5px;font-weight:700;color:var(--ink3);
     text-transform:uppercase;letter-spacing:.03em;text-align:center;line-height:1.2}
-  .tr-sem-val{font-size:15px;font-weight:700;color:var(--ink);text-align:center;line-height:1.25;
+  .tr-sem-val{font-size:17px;font-weight:700;color:var(--ink);text-align:center;line-height:1.25;
     white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
-  @media(max-width:359px){ .tr-sem-val{font-size:13.5px} }
+  @media(max-width:359px){ .tr-sem-val{font-size:15px} }
   .tr-dica-btn{width:15px;height:15px;flex-shrink:0;border:0;border-radius:10px;background:var(--azul-soft);
-    color:var(--azul);font-size:10px;font-weight:800;line-height:1;cursor:pointer;padding:0;
+    color:var(--azul);font-size:11px;font-weight:800;line-height:1;cursor:pointer;padding:0;
     display:flex;align-items:center;justify-content:center;font-family:inherit}
   .dica{position:absolute;z-index:130;width:270px;max-width:calc(100vw - 24px);background:var(--card);
     border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.2);border:1px solid var(--hair);padding:12px 14px}
-  .dica b{display:block;font-size:13px;color:var(--ink);margin-bottom:4px}
-  .dica p{margin:0;font-size:12.5px;color:var(--ink2);line-height:1.5}
+  .dica b{display:block;font-size:14.5px;color:var(--ink);margin-bottom:4px}
+  .dica p{margin:0;font-size:13.5px;color:var(--ink2);line-height:1.5}
   .dica-seta{position:absolute;width:11px;height:11px;background:var(--card);transform:rotate(45deg);
     border:1px solid var(--hair)}
   .dica.abaixo .dica-seta{top:-6px;border-right:0;border-bottom:0}
   .dica.acima .dica-seta{bottom:-6px;border-left:0;border-top:0}
-  .tr-nota{font-size:12.5px;color:var(--ink2);margin:8px 0 0;line-height:1.4}
+  .tr-nota{font-size:13.5px;color:var(--ink2);margin:8px 0 0;line-height:1.4}
   .tr-divisao{display:flex;gap:6px;flex-wrap:wrap}
   #tr-divisao{flex-wrap:nowrap}
   #tr-divisao .tr-chip{flex:1 1 0}
-  .tr-chip{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:10px;background:var(--fill);color:var(--ink2);text-align:center}
+  .tr-chip{font-size:13.5px;font-weight:600;padding:6px 12px;border-radius:10px;background:var(--fill);color:var(--ink2);text-align:center}
   .tr-chip.off{background:transparent;color:var(--ink3);border:1px dashed var(--hair)}
   .tr-treino-card{background:var(--card);border-radius:var(--r);padding:16px;margin-top:12px;box-shadow:var(--sh)}
-  .tr-treino-card h4{font-size:16px;font-weight:700;letter-spacing:-.01em;margin:0 0 12px}
+  .tr-treino-card h4{font-size:18px;font-weight:700;letter-spacing:-.01em;margin:0 0 12px}
   /* cada treino é um card que abre e fecha - fechado por padrão, com a
      setinha à direita. */
   .tr-treino-card > summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none}
   .tr-treino-card > summary::-webkit-details-marker{display:none}
   .tr-treino-nome{flex:1 1 auto;font-size:15.5px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
-  .tr-treino-qtd{flex:0 0 auto;font-size:12px;color:var(--ink3)}
+  .tr-treino-qtd{flex:0 0 auto;font-size:13px;color:var(--ink3)}
   .tr-treino-card > summary::after{content:'';flex:0 0 auto;width:8px;height:8px;margin-left:2px;
     border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);
     transform:rotate(45deg) translate(-2px,-2px);transition:transform .18s ease}
   .tr-treino-card[open] > summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
   .tr-tabela-wrap{overflow-x:auto}
-  .tr-tabela{width:100%;border-collapse:collapse;font-size:12.5px;min-width:460px}
-  .tr-tabela th{text-align:left;font-weight:500;color:var(--ink3);font-size:10.5px;text-transform:uppercase;
+  .tr-tabela{width:100%;border-collapse:collapse;font-size:13.5px;min-width:460px}
+  .tr-tabela th{text-align:left;font-weight:500;color:var(--ink3);font-size:11.5px;text-transform:uppercase;
     letter-spacing:.02em;padding:0 6px 6px;border-bottom:1px solid var(--hair);white-space:nowrap}
   .tr-tabela td{padding:8px 6px;border-bottom:1px solid var(--hair);vertical-align:top}
   .tr-tabela tr:last-child td{border-bottom:0}
   .tr-tabela .tr-ex-nome{font-weight:600;color:var(--ink)}
   .tr-tabela td.tr-num{text-align:center;white-space:nowrap;color:var(--ink2)}
-  .tr-core{margin-top:10px;padding-top:10px;border-top:1px dashed var(--hair);font-size:12.5px;color:var(--ink2);line-height:1.5}
+  .tr-core{margin-top:10px;padding-top:10px;border-top:1px dashed var(--hair);font-size:13.5px;color:var(--ink2);line-height:1.5}
   .tr-core b{color:var(--ink)}
   .tr-aero-linha{background:var(--card);border-radius:10px;padding:12px 14px;margin-top:8px;box-shadow:var(--sh-min)}
-  .tr-aero-linha .tr-aero-mod{font-weight:600;font-size:14px}
-  .tr-aero-linha .tr-aero-det{font-size:12.5px;color:var(--ink2);margin-top:2px}
+  .tr-aero-linha .tr-aero-mod{font-weight:600;font-size:15.5px}
+  .tr-aero-linha .tr-aero-det{font-size:13.5px;color:var(--ink2);margin-top:2px}
   .tr-detalhes{margin-top:20px;background:var(--card);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
-  .tr-detalhes summary{font-size:14px;font-weight:600;cursor:pointer}
-  .tr-detalhes h5{font-size:11.5px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.02em;margin:14px 0 4px}
+  .tr-detalhes summary{font-size:15.5px;font-weight:600;cursor:pointer}
+  .tr-detalhes h5{font-size:12.5px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.02em;margin:14px 0 4px}
   .tr-detalhes h5:first-child{margin-top:10px}
-  .tr-detalhes ul{margin:0 0 0 18px;padding:0;font-size:13px;color:var(--ink2);line-height:1.5}
+  .tr-detalhes ul{margin:0 0 0 18px;padding:0;font-size:14.5px;color:var(--ink2);line-height:1.5}
   /* 14 de margem + 14 de espaço interno davam 32px de vão entre o cartão da
      semana e o primeiro exercício - um buraco no meio da tela de treino, sem
      nada pra separar. Metade disso já separa as duas coisas. */
   .tr-registro{margin-top:0;padding-top:2px}
   .tr-registro-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px}
-  .tr-registro-tit{font-size:11.5px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.02em}
-  .tr-registro-ultima{font-size:12px;color:var(--ink3)}
+  .tr-registro-tit{font-size:12.5px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.02em}
+  .tr-registro-ultima{font-size:13px;color:var(--ink3)}
   .tr-registro-linha{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--fill)}
   .tr-registro-linha:last-of-type{border-bottom:0}
-  .tr-registro-nome{font-size:13px;color:var(--ink);flex:1 1 auto}
+  .tr-registro-nome{font-size:14.5px;color:var(--ink);flex:1 1 auto}
   .tr-carga-input{width:70px;flex:0 0 auto;padding:8px 10px;border-radius:10px;border:1px solid var(--hair);
-    font-size:16px;text-align:center;background:var(--fill2)}
+    font-size:18px;text-align:center;background:var(--fill2)}
   .tr-carga-input:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:transparent}
   .tr-registro .btn-pill{margin-top:10px}
   .tr-registro .erro-auth{margin-top:8px}
@@ -1541,17 +1541,17 @@
      Safari. Agora o botão centraliza de verdade (flex), a letra é menor e o
      espaço extra que sobrava DEPOIS do último ponto é compensado no recuo. */
   .tr-serie-menu-btn{flex-shrink:0;width:28px;height:28px;border-radius:10px;border:none;background:var(--fill);
-    color:var(--azul);font-size:12px;font-weight:800;line-height:1;cursor:pointer;letter-spacing:1.5px;
+    color:var(--azul);font-size:13px;font-weight:800;line-height:1;cursor:pointer;letter-spacing:1.5px;
     display:flex;align-items:center;justify-content:center;padding:0;overflow:hidden;text-indent:1.5px}
   .tr-serie-nota{margin:-2px 0 10px;padding:8px 10px;border-radius:10px;background:#FFF6D8;color:#8A6D1A;
-    font-size:12.5px;line-height:1.4;white-space:pre-wrap}
+    font-size:13.5px;line-height:1.4;white-space:pre-wrap}
   .tr-serie-meta{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 10px}
-  .tr-meta-tag{font-size:10.5px;font-weight:500;padding:4px 9px;border-radius:10px;background:var(--fill);color:var(--ink2);white-space:nowrap}
+  .tr-meta-tag{font-size:11.5px;font-weight:500;padding:4px 9px;border-radius:10px;background:var(--fill);color:var(--ink2);white-space:nowrap}
   .tr-meta-tag b{font-weight:700;color:var(--ink3);margin-right:4px;text-transform:uppercase;font-size:9.5px;letter-spacing:.02em}
 
   .tr-serie-linhas{display:flex;flex-direction:column;gap:5px}
   .tr-serie-header-row{display:grid;grid-template-columns:36px 1fr 58px 58px 32px;gap:5px;padding:0 2px 2px;
-    font-size:11.5px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.02em}
+    font-size:12.5px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.02em}
   .tr-serie-header-row span{text-align:center}
 
   .tr-serie-linha-wrap{position:relative;border-radius:10px;overflow:hidden}
@@ -1566,7 +1566,7 @@
      cresce junto com o arrasto, o "Excluir" não passeia pro meio e depois
      pula de volta pra direita - ele simplesmente não sai do lugar. */
   .tr-serie-excluir{position:absolute;top:0;right:0;bottom:0;width:76px;border:none;background:#FF3B30;color:#fff;
-    font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:flex-end;
+    font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:flex-end;
     padding:0 14px 0 0;white-space:nowrap}
   /* o raio aqui não é enfeite: o invólucro do gesto é arredondado e recorta o
      que está dentro dele, então uma linha de canto vivo deixava aparecer duas
@@ -1578,12 +1578,12 @@
     gap:5px;align-items:center;padding:2px;background:var(--card);border-radius:10px;touch-action:pan-y}
   .tr-serie-linha.feita{background:var(--fill2);border-radius:10px}
   .tr-serie-num{justify-self:center;min-width:34px;height:30px;padding:0 4px;border-radius:10px;background:var(--fill);
-    color:var(--ink);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
+    color:var(--ink);font-size:15.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
   .tr-aquecimento-linha .tr-serie-num{background:transparent;color:var(--ink3);font-size:9px;letter-spacing:.02em}
   .tr-serie-anterior{font-size:13px;color:var(--ink3);white-space:nowrap;overflow:hidden;
     text-overflow:ellipsis;text-align:center}
   .tr-serie-kg,.tr-serie-reps{width:100%;height:30px;padding:0 3px;border-radius:10px;border:none;background:var(--fill);
-    font-size:15px;text-align:center;color:var(--ink)}
+    font-size:17px;text-align:center;color:var(--ink)}
   /* anel de foco POR DENTRO do campo. Por fora ele era cortado em cima e
      embaixo: a linha mora num invólucro com overflow:hidden (o que esconde o
      botão Excluir do arrasto), e o anel, que sobra 3px pra fora, batia nessa
@@ -1597,30 +1597,30 @@
      app usa nos botões de marcar (os de seguiu/adaptou/não fiz do diário),
      pra não ter um raio só dele. Marcado fica verde, igual "seguiu". */
   .tr-serie-check{justify-self:center;width:32px;height:30px;border-radius:var(--rc);border:none;background:var(--fill);
-    color:var(--ink3);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;
+    color:var(--ink3);font-size:14.5px;line-height:1;cursor:pointer;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;padding:0}
   .tr-serie-check[aria-pressed="true"]{background:var(--ok);color:#fff;box-shadow:var(--sh-min)}
   /* célula de segundos das séries por tempo: no lugar do campo, o ▶ que abre
      o cronômetro. Mesmo tamanho e mesmo fundo dos campos vizinhos, pra linha
      não ficar torta. */
   /* seletor do descanso dentro da faixa, no menu "•••" do exercício */
-  .tr-opcoes-sub{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  .tr-opcoes-sub{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
     color:var(--ink3);padding:10px 14px 4px}
   .tr-desc-escolha{display:flex;gap:6px;padding:0 12px 12px}
   .tr-desc-op{flex:1 1 0;height:36px;border-radius:10px;border:1px solid var(--hair);
-    background:var(--card);color:var(--ink2);font-family:inherit;font-size:13px;font-weight:700;
+    background:var(--card);color:var(--ink2);font-family:inherit;font-size:14.5px;font-weight:700;
     cursor:pointer;padding:0}
   .tr-desc-op.sel{background:var(--ink);border-color:var(--ink);color:#fff}
   .tr-serie-crono{width:100%;height:30px;border-radius:10px;border:none;background:var(--fill);
-    color:var(--ink2);font-size:12.5px;font-weight:700;font-family:inherit;display:flex;
+    color:var(--ink2);font-size:13.5px;font-weight:700;font-family:inherit;display:flex;
     align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:0}
   .tr-serie-crono[data-valor]{color:var(--ink);font-size:14px}
-  .tr-crono-meta{font-size:11.5px;color:var(--ink3);margin:2px 0 10px;line-height:1.35}
+  .tr-crono-meta{font-size:12.5px;color:var(--ink3);margin:2px 0 10px;line-height:1.35}
   .tr-crono-meta b{color:var(--ink);font-weight:700}
   .crono-passou .tr-desc-anel-pr{stroke:var(--ok)}
   .crono-passou .tr-desc-tempo{color:var(--ok)}
   .tr-serie-add{margin-top:6px;width:100%;padding:9px;border-radius:10px;border:1px dashed var(--hair);
-    background:none;color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+    background:none;color:var(--ink2);font-size:14.5px;font-weight:600;cursor:pointer;font-family:inherit}
   /* ativação (ex.: Wall Slide) - sem kg/reps/anterior, só um checklist de
      séries com a meta de repetições fixa do plano. */
   /* lista de exercícios da aba Treino: cada um num bloco, nome ocupando a
@@ -1628,12 +1628,12 @@
      antiga espremia o nome em 3-4 linhas e cortava as últimas colunas). */
   .tr-ex-lista{display:flex;flex-direction:column;gap:24px;margin-top:16px}
   .tr-ex-cab{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
-  .tr-ex-titulo{font-size:14.5px;font-weight:700;color:var(--azul);border:0;background:none;padding:0;
+  .tr-ex-titulo{font-size:16px;font-weight:700;color:var(--azul);border:0;background:none;padding:0;
     margin:0;font-family:inherit;text-align:left;cursor:pointer;line-height:1.3}
   .tr-ex-item .tr-serie-meta{margin:0}
   /* tipo do exercício na aba Treino: legenda miúda embaixo do nome, sem
      fundo colorido - só a bolinha separa ativação de isométrico. */
-  .tr-ex-tipo{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  .tr-ex-tipo{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;
     text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin:-3px 0 7px}
   .tr-ex-tipo::before{content:'';width:5px;height:5px;border-radius:10px;flex-shrink:0}
   .tr-ex-tipo-ativacao::before{background:#2E4C6D}
@@ -1642,8 +1642,8 @@
   .tr-ex-grade{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
   .tr-ex-campo{display:flex;align-items:baseline;justify-content:space-between;gap:8px;min-width:0;
     border-bottom:1px dotted var(--hair);padding-bottom:2px}
-  .tr-ex-rot{font-size:12.5px;color:var(--ink3);white-space:nowrap}
-  .tr-ex-val{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap}
+  .tr-ex-rot{font-size:13.5px;color:var(--ink3);white-space:nowrap}
+  .tr-ex-val{font-size:15.5px;font-weight:600;color:var(--ink);white-space:nowrap}
   @media(max-width:359px){ .tr-ex-grade{grid-template-columns:1fr} }
   /* mesma grade dentro da sessão de treino, só com o respiro daquele bloco.
      O espaço embaixo é maior que em cima de propósito: os números do plano
@@ -1665,7 +1665,7 @@
   .tr-along-bloco .tr-ex-rot{white-space:normal;overflow-wrap:anywhere;min-width:0;
     flex:1 1 auto;line-height:1.35}
   .tr-along-bloco .tr-ex-val{flex:0 0 auto}
-  .tr-along-tit{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  .tr-along-tit{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
     color:var(--ink3);margin:0 0 6px}
   .tr-serie-ativacao-label{font-size:14px;color:var(--ink2)}
   .tr-semana-cartao-sessao{margin:4px 0 16px}
@@ -1697,7 +1697,7 @@
   .tr-opcoes-card{position:absolute;background:var(--card);border-radius:12px;overflow:hidden;
     border:1px solid var(--hair);box-shadow:0 10px 30px rgba(0,0,0,.16)}
   .tr-opcoes-item{display:block;width:100%;text-align:left;padding:12px 14px;border:none;
-    border-top:.5px solid var(--hair);background:none;color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
+    border-top:.5px solid var(--hair);background:none;color:var(--ink);font-size:15.5px;font-weight:600;cursor:pointer}
   .tr-opcoes-item:first-child{border-top:none}
   .tr-opcoes-item.perigo{color:var(--nao)}
   .tr-nota-card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
@@ -1706,10 +1706,10 @@
   .tr-exp-card{position:relative;width:100%;max-width:340px;background:var(--card);border-radius:14px;
     padding:22px 20px 18px;box-shadow:0 8px 30px rgba(0,0,0,.32)}
   .tr-exp-fechar{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:10px;border:none;
-    background:var(--fill);color:var(--ink2);font-size:16px;line-height:1;cursor:pointer}
-  .tr-exp-titulo{font-size:16px;font-weight:700;color:var(--ink);text-align:center;margin-bottom:8px}
-  .tr-exp-texto{font-size:13.5px;color:var(--ink2);line-height:1.55;text-align:left}
-  .tr-nota-titulo{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px}
+    background:var(--fill);color:var(--ink2);font-size:18px;line-height:1;cursor:pointer}
+  .tr-exp-titulo{font-size:18px;font-weight:700;color:var(--ink);text-align:center;margin-bottom:8px}
+  .tr-exp-texto{font-size:15px;color:var(--ink2);line-height:1.55;text-align:left}
+  .tr-nota-titulo{font-size:15.5px;font-weight:700;color:var(--ink);margin-bottom:10px}
   .tr-nota-input{width:100%;min-height:90px;border-radius:10px;border:1px solid var(--hair);background:var(--fill2);
     padding:10px;font-size:14px;color:var(--ink);resize:vertical;font-family:inherit}
   .tr-nota-botoes{display:flex;gap:8px;margin-top:12px}
@@ -1739,7 +1739,7 @@
     transition:stroke-dasharray 1s linear}
   .tr-desc-col{flex:1 1 auto;min-width:0}
   .tr-desc-topo{display:flex;align-items:center;justify-content:space-between;gap:8px}
-  .tr-desc-rot{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
+  .tr-desc-rot{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
   /* O nome do exercício saiu do cartão de descanso: quem está descansando
      acabou de fazer a série e sabe de qual exercício se trata. Era uma linha
      inteira de altura pra dizer o óbvio, num cartão que fica por cima do
@@ -1748,24 +1748,24 @@
   /* sem aquela linha, as ações sobem e o cartão encolhe junto */
   .tr-desc-acoes{margin-top:10px}
   .tr-desc-tempo{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    font-size:20px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+    font-size:22px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
   .tr-descanso-toast.acabando .tr-desc-anel-pr{stroke:var(--ad)}
   .tr-descanso-toast.acabando .tr-desc-tempo{color:var(--ad)}
-  .tr-descanso-toast.fim .tr-desc-tempo{color:var(--ok);font-size:17px}
+  .tr-descanso-toast.fim .tr-desc-tempo{color:var(--ok);font-size:19px}
   .tr-desc-acoes{display:flex;gap:8px}
   /* som recusado pelo iPhone: aparece só nesse caso, no lugar de ficar mudo */
   .tr-desc-aviso{display:none;width:100%;margin:6px 0 0;padding:6px 8px;border:0;
-    border-radius:8px;background:#FFF3E0;color:#8A4B00;font-family:inherit;font-size:12px;
+    border-radius:8px;background:#FFF3E0;color:#8A4B00;font-family:inherit;font-size:13px;
     font-weight:700;text-align:left;line-height:1.3;cursor:pointer}
   .som-barrado .tr-desc-aviso{display:block}
   .tr-desc-btn{flex:1 1 0;padding:11px;border-radius:var(--rc);border:1px solid var(--hair);
-    background:var(--card);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
+    background:var(--card);color:var(--ink);font-size:15.5px;font-weight:600;cursor:pointer}
   .tr-desc-btn.forte{background:var(--ink);color:#fff;border-color:var(--ink)}
   .tr-desc-topo-btns{display:flex;align-items:center;gap:6px;flex-shrink:0}
   .tr-descanso-min,.tr-desc-som{width:26px;height:26px;border-radius:10px;border:none;background:var(--fill);
-    color:var(--ink2);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0;
+    color:var(--ink2);font-size:14.5px;line-height:1;cursor:pointer;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;padding:0}
-  .tr-descanso-min{font-size:17px;font-weight:700;padding-bottom:3px}
+  .tr-descanso-min{font-size:19px;font-weight:700;padding-bottom:3px}
   .ico-sino{width:15px;height:15px;display:block}
   /* encolhido: pilulazinha só com o tempo, tocar nela abre de novo. O
      descanso continua correndo - encolher não é cancelar. */
@@ -1779,16 +1779,16 @@
   .tr-descanso-toast.minimizado .tr-desc-anel svg{display:none}
   .tr-descanso-toast.minimizado .tr-desc-corpo{gap:10px;align-items:center}
   .tr-descanso-toast.minimizado .tr-desc-anel{flex:0 0 auto;width:auto;height:auto}
-  .tr-descanso-toast.minimizado .tr-desc-tempo{position:static;font-size:20px}
+  .tr-descanso-toast.minimizado .tr-desc-tempo{position:static;font-size:22px}
   .tr-descanso-toast.minimizado .tr-desc-topo{gap:10px}
   .tr-descanso-toast.minimizado .tr-desc-col{display:flex;align-items:center;gap:10px}
-  .pg-vazio{font-size:14px;color:var(--ink2);padding:8px 0}
+  .pg-vazio{font-size:15.5px;color:var(--ink2);padding:8px 0}
   .tr-hist-linha{background:var(--card);border-radius:var(--rc);padding:10px 12px;margin-top:8px;box-shadow:var(--sh-min)}
   .tr-hist-linha:first-child{margin-top:0}
   .tr-hist-cab{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-  .tr-hist-data{font-size:13px;color:var(--ink2)}
-  .tr-hist-chave{font-size:13px;font-weight:700;color:var(--ink)}
-  .tr-hist-itens{font-size:13px;color:var(--ink2);margin-top:3px;line-height:1.4}
+  .tr-hist-data{font-size:14.5px;color:var(--ink2)}
+  .tr-hist-chave{font-size:14.5px;font-weight:700;color:var(--ink)}
+  .tr-hist-itens{font-size:14.5px;color:var(--ink2);margin-top:3px;line-height:1.4}
 
   /* ---------- layout desktop / iPad horizontal: menu na lateral ---------- */
   @media(min-width:1100px){
@@ -2016,8 +2016,8 @@
       </div>
       <div id="resumo-corpo"></div>
       <div class="acoes">
-        <button id="relatorio-whatsapp">Enviar no WhatsApp</button>
-        <button class="sec" id="relatorio-pdf">Salvar em PDF</button>
+        <button id="relatorio-whatsapp">WhatsApp</button>
+        <button class="sec" id="relatorio-pdf">Salvar PDF</button>
         <button class="link" id="copiar-relatorio">Copiar texto</button>
       </div>
     </section>
@@ -4366,6 +4366,8 @@ function planoAtivoDoCache(){
 async function carregarPlanoAtivo(){
   const vazio = document.getElementById('plano-vazio');
   const vazioTxt = document.getElementById('plano-vazio-texto');
+  // sem banco ainda (app desenhado do guardado): o plano guardado é o plano
+  if(!db && orgAtiva && sessaoAtual && planoAtivoDoCache()) return;
   if(!db || !orgAtiva || !sessaoAtual){
     PLANO = {semana:[], fds:[]};
     if(vazio) vazio.hidden = false;
@@ -7852,7 +7854,7 @@ async function renderTreino(){
   vazio.hidden = false;
   vazioTxt.textContent = 'Carregando...';
 
-  if(!db || !orgAtiva || !sessaoAtual || !p){
+  if(!orgAtiva || !sessaoAtual || !p){
     vazioTxt.textContent = 'Entre na conta pra ver o treino.';
     return;
   }
@@ -7865,8 +7867,9 @@ async function renderTreino(){
   if(linhaCache && linhaCache.conteudo){
     vazio.hidden = true;
     conteudoBox.hidden = false;
-    montarTreino(linhaCache.conteudo, linhaCache.versao_label, linhaCache.vigente_a_partir, []);
+    montarTreino(linhaCache.conteudo, linhaCache.versao_label, linhaCache.vigente_a_partir, cacheLer('registros|' + uid) || []);
   }
+  if(!db){ if(!linhaCache) vazioTxt.textContent = 'Carregando...'; return; }
   try{
     // 2) confirma com o banco: as duas consultas saem juntas
     const [linha, rr] = await Promise.all([
