@@ -10205,19 +10205,13 @@ function comecarAndamento(chave){
 }
 /* Fechou a tela sem ter marcado nada e sem registro no banco: não era treino,
    era uma espiada. Não deixa rastro. */
-/* "Espiada" x treino de verdade. Só é espiada se NADA aconteceu: nenhuma
-   série marcada, nada digitado, nenhum descanso correndo e menos de um
-   minuto e meio de relógio. Antes bastava não ter série marcada - e fechar
-   no × no meio do aquecimento (que não tem ✓) apagava o treino inteiro. */
+/* Fechar no × sem nenhuma série marcada = não treinou: o treino some, sem
+   rastro (é a regra que o Carlos quer - "espiar" ou desistir antes da
+   primeira série não é treino). Com uma série marcada, ou com registro já
+   no banco, fechar só esconde a tela e o relógio segue correndo. */
 function sessaoFoiSoEspiada(box){
   if(sessaoTreinoJaGravou) return false;
-  if(temAlgumaSerieMarcada(box)) return false;
-  if(box && Array.prototype.some.call(box.querySelectorAll('.tr-serie-kg, .tr-serie-reps'),
-    function(i){ return String(i.value || '').trim() !== ''; })) return false;
-  if(box && box.querySelector('.tr-serie-crono[data-valor]')) return false;
-  if(lerDescansoAtivo()) return false;
-  if(segundosDoTreino() >= 90) return false;
-  return true;
+  return !temAlgumaSerieMarcada(box);
 }
 function encerrarAndamentoSeVazio(){
   if(!andamento) return;
