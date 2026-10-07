@@ -2508,9 +2508,12 @@ document.getElementById('ir-login').onclick = function(){ alternarAuth('login');
 var ENTRADA_CHAVE = 'entrada-v1';
 function guardarEntrada(){
   try{
-    if(!sessaoAtual || !sessaoAtual.session || !orgAtiva) return;
+    if(!sessaoAtual || !sessaoAtual.user || !orgAtiva) return;
+    // a sessão chega em dois formatos (getSession: {session:{token},user};
+    // signIn: {token,user}) - o token pode estar em qualquer um dos dois
+    var token = (sessaoAtual.session && sessaoAtual.session.token) || sessaoAtual.token || null;
     localStorage.setItem(ENTRADA_CHAVE, JSON.stringify({
-      sessao: { user: sessaoAtual.user, session: { token: sessaoAtual.session.token } },
+      sessao: { user: sessaoAtual.user, session: { token: token } },
       org: orgAtiva, papel: papelAtual || 'member', em: Date.now()
     }));
   }catch(e){}
