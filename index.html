@@ -451,10 +451,16 @@
     border-top:.5px solid var(--hair);font-size:15px}
   ul.compra li b{font-variant-numeric:tabular-nums;white-space:nowrap;font-size:15px;font-weight:600}
   .det{display:block;font-size:13px;color:var(--ink2);font-weight:400;margin-top:2px;line-height:1.4}
-  .acoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  /* duas colunas iguais: os botões têm sempre a mesma largura, lado a lado.
+     Antes era uma fileira que quebrava quando não cabia e deixava um botão
+     sobrando embaixo, maior que os outros. Uma terceira ação, se existir, é
+     um link discreto embaixo dos dois (.link), não um terceiro botão. */
+  .acoes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}
   .acoes button{font-size:15px;font-weight:500;letter-spacing:-.01em;background:var(--azul);color:#fff;
-    border:0;border-radius:10px;padding:11px 20px;cursor:pointer}
+    border:0;border-radius:10px;padding:12px 10px;cursor:pointer;min-width:0;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
   .acoes button.sec{background:var(--fill);color:var(--ink)}
+  .acoes button.link{grid-column:1/-1;background:none;color:var(--azul);padding:6px 10px 0;font-size:14px}
   .acoes button:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
   .aviso{font-size:13px;color:var(--ink2);margin-top:12px;line-height:1.5}
   .aviso.forte{color:var(--ad)}
@@ -2008,7 +2014,7 @@
       <div class="acoes">
         <button id="relatorio-whatsapp">Enviar no WhatsApp</button>
         <button class="sec" id="relatorio-pdf">Salvar em PDF</button>
-        <button class="sec" id="copiar-relatorio">Copiar texto</button>
+        <button class="link" id="copiar-relatorio">Copiar texto</button>
       </div>
     </section>
   </div>
