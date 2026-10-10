@@ -17,6 +17,34 @@
      rede, sempre frescos.
    ========================================================= */
 var VERSAO = 'dt-v1';
+
+/* Confere se a página mudou no servidor: baixa o index.html de verdade,
+   compara com o guardado e, se for diferente, guarda o novo e avisa as
+   páginas abertas. Roda a cada abertura (pelo fetch da página) e sempre que
+   a página pedir (mensagem "verificar" - ao abrir e ao voltar do segundo
+   plano), porque o aviso disparado só pelo fetch chegava antes de a página
+   estar ouvindo e se perdia. */
+function verificarVersao(){
+  return caches.open(VERSAO).then(function(c){
+    return Promise.all([c.match('/'), fetch(new Request('/', { cache: 'no-cache' })).catch(function(){ return null; })])
+      .then(function(par){
+        var guardada = par[0], daRede = par[1];
+        if(!daRede || !daRede.ok) return false;
+        if(!guardada) return c.put('/', daRede.clone()).then(function(){ return false; });
+        return Promise.all([guardada.clone().text(), daRede.clone().text()]).then(function(ts){
+          if(ts[0] === ts[1]) return false;
+          return c.put('/', daRede.clone()).then(function(){ avisarClientes({ tipo: 'nova-versao' }); return true; });
+        });
+      });
+  }).catch(function(){ return false; });
+}
+self.addEventListener('message', function(ev){
+  if(ev.data && ev.data.tipo === 'verificar'){
+    ev.waitUntil(verificarVersao().then(function(mudou){
+      if(ev.source && ev.source.postMessage) ev.source.postMessage({ tipo: mudou ? 'nova-versao' : 'sem-novidade' });
+    }));
+  }
+});
 var PRE = ['/', '/manifest.json', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png'];
 
 self.addEventListener('install', function(ev){
@@ -63,21 +91,16 @@ self.addEventListener('fetch', function(ev){
   if(ehPagina(url)){
     ev.respondWith(caches.open(VERSAO).then(function(c){
       return c.match('/').then(function(guardada){
-        var daRede = fetch(new Request('/', { cache: 'no-cache' })).then(function(resp){
-          if(!resp || !resp.ok) return resp;
-          var copia = resp.clone();
-          if(guardada){
-            // só avisa a página quando o conteúdo mudou de verdade
-            Promise.all([guardada.clone().text(), resp.clone().text()]).then(function(ts){
-              if(ts[0] !== ts[1]) return c.put('/', copia).then(function(){ avisarClientes({ tipo: 'nova-versao' }); });
-            }).catch(function(){});
-          }else{
-            c.put('/', copia).catch(function(){});
-          }
+        if(guardada){
+          // responde na hora com o guardado; a conferência com o servidor
+          // corre por trás (e a página pede outra ao terminar de abrir)
+          ev.waitUntil(verificarVersao());
+          return guardada;
+        }
+        return fetch(new Request('/', { cache: 'no-cache' })).then(function(resp){
+          if(resp && resp.ok) c.put('/', resp.clone()).catch(function(){});
           return resp;
-        }).catch(function(){ return null; });
-        if(guardada) return guardada;
-        return daRede.then(function(r){ return r || new Response('Sem conexão', { status: 503 }); });
+        }).catch(function(){ return new Response('Sem conexão', { status: 503 }); });
       });
     }));
     return;

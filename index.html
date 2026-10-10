@@ -2351,6 +2351,18 @@ if('serviceWorker' in navigator){
     if(!aberturaFechada){ location.reload(); return; }
     mostrarAtualizacaoPronta();
   });
+  // a página pede a conferência ela mesma: ao abrir (com o app já na tela)
+  // e toda vez que volta do segundo plano. Só depender do aviso do fetch
+  // deixava o aparelho preso na versão antiga.
+  function pedirVerificacao(){
+    try{
+      if(navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage({ tipo: 'verificar' });
+    }catch(e){}
+  }
+  window.addEventListener('load', function(){ setTimeout(pedirVerificacao, 2500); });
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible') pedirVerificacao();
+  });
 }
 function mostrarAtualizacaoPronta(){
   if(document.getElementById('atualizacao-pronta')) return;
