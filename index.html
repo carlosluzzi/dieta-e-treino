@@ -1010,7 +1010,10 @@
     border-radius:11px;background:#2C3037;color:#E6E9EE;font-weight:700;font-size:15px}
   .tr-descanso-toast.na-sessao .tr-desc-btn.forte{background:#fff;color:#111}
   /* o pé da lista só reserva espaço pra faixa enquanto ela existe */
-  body.com-descanso .sessao-treino-corpo{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
+  body.com-descanso .sessao-treino-corpo{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+  /* com o teclado aberto a faixa mora dentro dele (que já ocupa espaço na
+     tela): a reserva no pé da lista sai, senão sobra um vazio pra rolar */
+  body.teclado-aberto .sessao-treino-corpo{padding-bottom:20px}
   .tr-chip-sel{font-size:15px;font-weight:600;padding:8px 16px;border-radius:10px;
     background:var(--fill);color:var(--ink2);border:0;cursor:pointer}
   .tr-chip-sel[aria-pressed="true"]{background:var(--azul);color:#fff}
@@ -10164,6 +10167,7 @@ function medirRodapeSessao(){
     if(toast && toast.parentNode === tec) altura -= toast.offsetHeight;
   }
   document.documentElement.style.setProperty('--tr-rodape-h', altura + 'px');
+  document.body.classList.toggle('teclado-aberto', !!(tec && !tec.hidden && sessaoAberta()));
   // com o teclado fechado a faixa fica um pouco acima da borda (indicador
   // de início do iPhone); aberto, ela cola no teclado
   document.documentElement.style.setProperty('--tr-faixa-pe', aberto ? '0px' : 'max(calc(env(safe-area-inset-bottom,0px) + 8px), 22px)');
