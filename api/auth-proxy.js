@@ -49,9 +49,30 @@ export default async function handler(request) {
     });
   }
 
-  var respHeaders = new Headers(resposta.headers);
-  respHeaders.delete('content-encoding');
-  respHeaders.delete('content-length');
+  // Os cookies de sessao vem em VARIOS cabecalhos Set-Cookie (o servico
+  // de login manda mais de um). Copiando os cabecalhos de uma vez so
+  // (new Headers(resposta.headers)), eles eram emendados num unico
+  // Set-Cookie separado por virgula - e como a data de validade tambem tem
+  // virgula ("Sat, 10 Oct 2026"), o navegador nao entendia e descartava o
+  // cookie: o login "dava certo" e, na chamada seguinte, a pessoa estava
+  // deslogada ("Nao foi possivel entrar agora"). Aqui cada cookie volta no
+  // seu proprio cabecalho.
+  var respHeaders = new Headers();
+  resposta.headers.forEach(function(v, nome){
+    var n = nome.toLowerCase();
+    if (n === 'set-cookie' || n === 'content-encoding' || n === 'content-length') return;
+    respHeaders.set(nome, v);
+  });
+  var cookies = [];
+  if (typeof resposta.headers.getSetCookie === 'function') {
+    cookies = resposta.headers.getSetCookie();
+  } else {
+    var junto = resposta.headers.get('set-cookie');
+    // separa so nas virgulas que comecam um cookie novo (nome=valor), nao
+    // nas virgulas das datas
+    if (junto) cookies = junto.split(/,(?=\s*[A-Za-z0-9_\-\.]+=)/);
+  }
+  cookies.forEach(function(c){ respHeaders.append('set-cookie', c); });
 
   return new Response(resposta.body, {
     status: resposta.status,

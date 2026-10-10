@@ -2599,10 +2599,21 @@ document.getElementById('form-login').onsubmit = async function(ev){
   try{
     while(true){
       try{
-        var r = await comTimeout(neon.signIn.email({ email: email, password: senha }), 6000);
+        // 10 s: no 5G com o servico de login frio, 6 s estourava e a pessoa
+        // via "nao foi possivel entrar" com a senha certa
+        var r = await comTimeout(neon.signIn.email({ email: email, password: senha }), 10000);
         if(r.error){ mostrarErroAuth('erro-login', 'E-mail ou senha incorretos.'); return; }
         sessaoAtual = r.data;
-        await entrarNoApp();
+        if(r.data && r.data.token && window.__semearToken) window.__semearToken(r.data.token);
+        // o login JA deu certo aqui: se o que falhar for o carregamento do
+        // grupo, a mensagem tem que dizer isso (com o erro de verdade), e nao
+        // "nao foi possivel entrar" - e nao faz sentido tentar a senha de novo
+        try{
+          await entrarNoApp();
+        }catch(eOrg){
+          mostrarErroAuth('erro-login', 'Entrou, mas não deu pra carregar o grupo: '
+            + String(eOrg && eOrg.message || eOrg) + '\nTente de novo.');
+        }
         return;
       }catch(e){
         // numa rede instavel (celular, por exemplo) a chamada pode lancar
@@ -2626,7 +2637,10 @@ document.getElementById('form-login').onsubmit = async function(ev){
       }
     }
   }catch(e){
-    mostrarErroAuth('erro-login', 'Não foi possível entrar agora.\nTente de novo em alguns instantes.');
+    // com o motivo de verdade: sem ele nao da pra saber se foi rede, tempo
+    // esgotado ou o servico de login recusando
+    mostrarErroAuth('erro-login', 'Não foi possível entrar agora.\nTente de novo em alguns instantes.\n('
+      + String(e && e.message || e) + ')');
   }finally{ btn.disabled = false; btn.textContent = txtOriginal; }
 };
 
