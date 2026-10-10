@@ -8192,6 +8192,17 @@ function plural(n, um, muitos){ return n + ' ' + (n === 1 ? um : muitos); }
    Antes o botão só salvava e ficava parado na tela - foi isso que pareceu
    "não aconteceu nada" no treino do dia 17. */
 async function finalizarTreino(c, box, btn){
+  // nada marcado e nada gravado no banco: não houve treino. Finalizar só
+  // encerra (sem registro, sem pergunta de "treino incompleto") - é o
+  // jeito de desistir, já que o × não cancela mais.
+  if(!sessaoTreinoJaGravou && !temAlgumaSerieMarcada(box)){
+    andamento = null; gravarAndamento();
+    gravarRascunhoSessao(null);
+    fecharDescanso();
+    fecharSessaoTreino();
+    avisarOk('Treino encerrado sem registro', 'Nenhuma série foi marcada.');
+    return;
+  }
   const faltam = faltandoNaSessao(box);
   if(faltam.length){
     const total = faltam.reduce(function(a, x){ return a + x.faltam; }, 0);
