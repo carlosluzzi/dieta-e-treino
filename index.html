@@ -966,13 +966,17 @@
      quando ele para, passa a morar dentro dele (encaixarToastNoTeclado).
      Como as duas formas são idênticas, a troca não se vê: só o movimento. */
   .tr-descanso-toast.na-sessao{
-    left:0;right:0;width:auto;transform:none;bottom:var(--tr-rodape-h,0px);
+    left:0;right:0;width:auto;transform:none;
+    bottom:calc(var(--tr-rodape-h,0px) + var(--tr-faixa-pe,22px));
     border-radius:0;border:0;background:#1C1E22;color:#fff;
-    box-shadow:0 -8px 24px rgba(0,0,0,.14);
-    padding:10px 14px max(calc(env(safe-area-inset-bottom,0px) + 12px), 24px);
+    /* a mesma altura dentro e fora do teclado (padding igual); o espaço
+       entre a faixa e a borda da tela é pintado de preto pela sombra
+       deslocada pra baixo, sem mudar a altura da faixa */
+    box-shadow:0 40px 0 40px #1C1E22;
+    padding:10px 14px 10px;
     transition:bottom var(--sobe-t) var(--sobe);
     animation:faixaSobe var(--sobe-t) var(--sobe) backwards}
-  @keyframes faixaSobe{from{transform:translateY(100%)}to{transform:none}}
+  @keyframes faixaSobe{from{transform:translateY(120%)}to{transform:none}}
   .tr-descanso-toast.sem-entrada{animation:none}
   /* dentro do teclado: bloco normal no topo dele, anulando o padding do
      teclado com margem negativa pra encostar nas bordas */
@@ -9222,12 +9226,14 @@ function fecharTeclado(){
       // encosta o teclado no topo da barra, exatamente onde ele já está
       // (altura da barra medida ANTES dela voltar ao espaçamento sem teclado),
       // pra ele não dar pulo e sumir atrás dela
-      const hb = (barra && !barra.hidden) ? barra.offsetHeight : 0;
-      // o cartão do descanso sai do teclado agora, ainda na altura dele, e
-      // desce pela transição de `bottom` junto com o teclado descendo
+      // a faixa do descanso sai do teclado agora, ainda na altura dele, e
+      // desce pela transição de `bottom` junto com o teclado descendo.
+      // (o teclado desce a partir de bottom 0: a barra do tempo mora no
+      // cabeçalho, não no pé - somar a altura dela aqui fazia o teclado
+      // pular 40 px pra cima no começo da descida, e abria um vão.)
       tecladoSubindo = false;
       encaixarToastNoTeclado();
-      t.style.bottom = hb + 'px';
+      t.style.bottom = '0px';
       t.classList.add('saindo');
       clearTimeout(tecladoSaindoTimer);
       tecladoSaindoTimer = setTimeout(function(){
@@ -10148,7 +10154,19 @@ function medirRodapeSessao(){
   // entre os dois. Sai de dentro só quando o teclado já sumiu de vez (ver o
   // fim da animação em fecharTeclado).
   encaixarToastNoTeclado();
-  document.documentElement.style.setProperty('--tr-rodape-h', (aberto ? tec.offsetHeight : 0) + 'px');
+  // altura do teclado SEM a faixa do descanso (quando ela está dentro dele):
+  // é onde a faixa precisa estar quando mora fora, pra bater com o topo das
+  // teclas - com a faixa somada ela pulava a própria altura ao sair.
+  const toast = document.getElementById('tr-descanso-toast');
+  let altura = 0;
+  if(aberto){
+    altura = tec.offsetHeight;
+    if(toast && toast.parentNode === tec) altura -= toast.offsetHeight;
+  }
+  document.documentElement.style.setProperty('--tr-rodape-h', altura + 'px');
+  // com o teclado fechado a faixa fica um pouco acima da borda (indicador
+  // de início do iPhone); aberto, ela cola no teclado
+  document.documentElement.style.setProperty('--tr-faixa-pe', aberto ? '0px' : 'max(calc(env(safe-area-inset-bottom,0px) + 8px), 22px)');
 }
 /* O cartão só entra no teclado quando ele já parou de subir, e sai dele
    ANTES de ele começar a descer: nos 200 ms de movimento quem leva o cartão
