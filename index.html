@@ -844,7 +844,7 @@
     overscroll-behavior-y:contain;max-width:720px;margin:0 auto;width:100%;
     /* folga embaixo do tamanho do cartão do descanso, pra última série
        sempre poder rolar pra cima dele */
-    padding:16px 16px calc(150px + env(safe-area-inset-bottom,0px))}
+    padding:16px 16px calc(28px + env(safe-area-inset-bottom,0px))}
   /* ---------- preparo no topo da sessão ---------- */
   .prep-caixa{background:var(--fill2);border-radius:var(--r);margin:0 0 14px;overflow:hidden}
   .prep-resumo{display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -958,40 +958,55 @@
      flutuante arredondado de sempre - só sobe pra ficar acima da barra, em
      vez de nascer atrás dela. Colar os dois numa peça só ficou feio: o
      cartão perde o contorno e vira um bloco quadrado no pé da tela. */
+  /* ---------- faixa do descanso (uma cara só) ----------
+     Dentro da sessão o descanso é SEMPRE a faixa preta encostada na base
+     da tela - a mesma faixa que fica no topo do teclado quando ele está
+     aberto. Com o teclado fechado ela fica presa no pé da tela (bottom 0);
+     abrindo o teclado, ela sobe junto com ele pela transição de bottom e,
+     quando ele para, passa a morar dentro dele (encaixarToastNoTeclado).
+     Como as duas formas são idênticas, a troca não se vê: só o movimento. */
   .tr-descanso-toast.na-sessao{
-    bottom:max(calc(var(--tr-rodape-h,0px) + 12px), calc(env(safe-area-inset-bottom,0px) + 34px));
-    transition:bottom var(--sobe-t) var(--sobe)}
+    left:0;right:0;width:auto;transform:none;bottom:var(--tr-rodape-h,0px);
+    border-radius:0;border:0;background:#1C1E22;color:#fff;
+    box-shadow:0 -8px 24px rgba(0,0,0,.14);
+    padding:10px 14px max(calc(env(safe-area-inset-bottom,0px) + 12px), 24px);
+    transition:bottom var(--sobe-t) var(--sobe);
+    animation:faixaSobe var(--sobe-t) var(--sobe) backwards}
+  @keyframes faixaSobe{from{transform:translateY(100%)}to{transform:none}}
   .tr-descanso-toast.sem-entrada{animation:none}
-  /* Digitando com o descanso correndo: o cartão vira uma faixa fina colada
-     em cima do teclado - tempo, +30 s e Pular numa linha só. Fechou o
-     teclado, volta a ser o cartão. */
-  /* A faixa fica DENTRO do teclado (ver encaixarToastNoTeclado): é um bloco
-     normal no topo dele, que anula o padding do teclado com margem negativa
-     pra encostar nas bordas. Por estar dentro, ela sobe e desce colada no
-     teclado - sem o vão que aparecia quando ela era posicionada por fora. */
+  /* dentro do teclado: bloco normal no topo dele, anulando o padding do
+     teclado com margem negativa pra encostar nas bordas */
   #tr-descanso-toast.sobre-teclado{position:relative;left:auto;right:auto;bottom:auto;
-    width:auto;transform:none;margin:-9px -8px 9px;
-    border-radius:0;border:0;border-bottom:1px solid #2C3037;
-    background:#1C1E22;color:#fff;box-shadow:none;
-    padding:10px 12px 9px 14px;animation:none;cursor:default;transition:none}
-  #tr-descanso-toast.sobre-teclado::before{content:'';position:absolute;left:0;top:0;height:3px;
+    margin:-9px -8px 9px;padding:10px 14px 10px;box-shadow:none;
+    border-bottom:1px solid #2C3037;animation:none;transition:none}
+  /* barrinha de progresso no topo da faixa */
+  .tr-descanso-toast.na-sessao::before{content:'';position:absolute;left:0;top:0;height:3px;
     width:var(--desc-fatia,100%);background:var(--ok);transition:width 1s linear}
-  #tr-descanso-toast.sobre-teclado .tr-desc-corpo{gap:10px;align-items:center}
-  #tr-descanso-toast.sobre-teclado .tr-desc-anel{order:2;flex:0 0 auto;width:auto;height:auto;margin-right:auto}
-  #tr-descanso-toast.sobre-teclado .tr-desc-anel svg,
-  #tr-descanso-toast.sobre-teclado .tr-desc-topo-btns,
-  #tr-descanso-toast.sobre-teclado .tr-desc-aviso,
-  #tr-descanso-toast.sobre-teclado .tr-desc-vol-caixa{display:none}
-  #tr-descanso-toast.sobre-teclado .tr-desc-tempo{position:static;font-size:24px;color:#fff}
-  #tr-descanso-toast.sobre-teclado.acabando .tr-desc-tempo{color:#FF8A80}
-  #tr-descanso-toast.sobre-teclado.fim .tr-desc-tempo{color:#7FD08A;font-size:22px}
-  #tr-descanso-toast.sobre-teclado .tr-desc-col{display:contents}
-  #tr-descanso-toast.sobre-teclado .tr-desc-topo{order:1;flex:0 0 auto}
-  #tr-descanso-toast.sobre-teclado .tr-desc-rot{color:#7FD08A}
-  #tr-descanso-toast.sobre-teclado .tr-desc-acoes{display:flex;order:3;margin:0;gap:6px;flex:0 0 auto}
-  #tr-descanso-toast.sobre-teclado .tr-desc-btn{flex:0 0 auto;height:36px;padding:0 14px;border:0;
-    border-radius:10px;background:#2C3037;color:#E6E9EE;font-weight:700}
-  #tr-descanso-toast.sobre-teclado .tr-desc-btn.forte{background:#fff;color:#111}
+  .tr-descanso-toast.na-sessao .tr-desc-corpo{gap:12px;align-items:center}
+  /* anel menor, com o tempo dentro */
+  .tr-descanso-toast.na-sessao .tr-desc-anel{flex:0 0 56px;width:56px;height:56px}
+  .tr-descanso-toast.na-sessao .tr-desc-anel-tr{stroke:#2C3037;stroke-width:9}
+  .tr-descanso-toast.na-sessao .tr-desc-anel-pr{stroke:var(--ok);stroke-width:9}
+  .tr-descanso-toast.na-sessao .tr-desc-tempo{font-size:15px;color:#fff;letter-spacing:-.01em}
+  .tr-descanso-toast.na-sessao.acabando .tr-desc-tempo{color:#FFB74D}
+  .tr-descanso-toast.na-sessao.acabando .tr-desc-anel-pr{stroke:#FFB74D}
+  .tr-descanso-toast.na-sessao.fim .tr-desc-tempo{color:#7FD08A;font-size:14px}
+  .tr-descanso-toast.na-sessao .tr-desc-col{display:flex;align-items:center;gap:10px;min-width:0}
+  .tr-descanso-toast.na-sessao .tr-desc-topo{flex:1 1 auto;min-width:0;gap:8px}
+  .tr-descanso-toast.na-sessao .tr-desc-rot{color:#7FD08A;font-size:12.5px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .tr-descanso-toast.na-sessao .tr-descanso-min{display:none}
+  .tr-descanso-toast.na-sessao .tr-desc-som{background:#2C3037;color:#D6DAE2;width:32px;height:32px}
+  .tr-descanso-toast.na-sessao .tr-desc-vol-caixa{position:absolute;right:14px;bottom:100%;
+    margin-bottom:8px;background:#2C3037;border-radius:12px;padding:10px 12px;width:200px}
+  .tr-descanso-toast.na-sessao .tr-desc-aviso{position:absolute;left:14px;right:14px;bottom:100%;
+    margin-bottom:6px}
+  .tr-descanso-toast.na-sessao .tr-desc-acoes{display:flex;margin:0;gap:6px;flex:0 0 auto}
+  .tr-descanso-toast.na-sessao .tr-desc-btn{flex:0 0 auto;height:40px;padding:0 14px;border:0;
+    border-radius:11px;background:#2C3037;color:#E6E9EE;font-weight:700;font-size:15px}
+  .tr-descanso-toast.na-sessao .tr-desc-btn.forte{background:#fff;color:#111}
+  /* o pé da lista só reserva espaço pra faixa enquanto ela existe */
+  body.com-descanso .sessao-treino-corpo{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
   .tr-chip-sel{font-size:14.5px;font-weight:600;padding:8px 16px;border-radius:10px;
     background:var(--fill);color:var(--ink2);border:0;cursor:pointer}
   .tr-chip-sel[aria-pressed="true"]{background:var(--azul);color:#fff}
@@ -1584,7 +1599,7 @@
   .tr-serie-anterior{font-size:14.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;
     text-overflow:ellipsis;text-align:center}
   .tr-serie-kg,.tr-serie-reps{width:100%;height:36px;padding:0 3px;border-radius:11px;border:none;background:var(--fill);
-    font-size:17px;font-weight:600;text-align:center;color:var(--ink)}
+    font-size:16px;font-weight:600;text-align:center;color:var(--ink)}
   /* anel de foco POR DENTRO do campo. Por fora ele era cortado em cima e
      embaixo: a linha mora num invólucro com overflow:hidden (o que esconde o
      botão Excluir do arrasto), e o anel, que sobra 3px pra fora, batia nessa
@@ -10178,6 +10193,7 @@ function pintarBarraTreino(){
   if(!barra) return;
   const cab = barra.parentNode;
   pintarMiniTreino();
+  document.body.classList.toggle('com-descanso', !!document.getElementById('tr-descanso-toast') && sessaoAberta());
   // o botão do card também acompanha o relógio (antes ficava congelado no
   // número de quando o card foi desenhado)
   const btnCard = document.getElementById('hoje-ir-iniciar-treino');
@@ -10224,8 +10240,9 @@ function comecarAndamento(chave){
    primeira série não é treino). Com uma série marcada, ou com registro já
    no banco, fechar só esconde a tela e o relógio segue correndo. */
 function sessaoFoiSoEspiada(box){
-  if(sessaoTreinoJaGravou) return false;
-  return !temAlgumaSerieMarcada(box);
+  // (10/10) agora o × NUNCA cancela: abriu a sessão, o treino está em
+  // andamento até o "Finalizar". Fechar só esconde a tela.
+  return false;
 }
 function encerrarAndamentoSeVazio(){
   if(!andamento) return;
@@ -10446,6 +10463,7 @@ function fecharDescanso(){
     }
     el.remove();
   }
+  document.body.classList.remove('com-descanso');
 }
 /* Painel de descanso: aparece sozinho quando a série é marcada. É grande de
    propósito - dá pra ler o tempo de longe, com o celular apoiado no banco,
@@ -10517,6 +10535,7 @@ function iniciarDescanso(txt, nomeExercicio, restaurar){
     + '</div>';
   document.body.appendChild(el);
   medirRodapeSessao();
+  document.body.classList.toggle('com-descanso', sessaoAberta());
   const tempoEl = el.querySelector('.tr-desc-tempo');
   const arco = el.querySelector('#tr-desc-arco');
   const VOLTA = 2 * Math.PI * 46;          // circunferência do anel
