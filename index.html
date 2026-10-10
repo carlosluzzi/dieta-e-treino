@@ -1567,7 +1567,7 @@
 
   .tr-serie-linhas{display:flex;flex-direction:column;gap:5px}
   .tr-serie-header-row{display:grid;grid-template-columns:38px 1fr 64px 64px 36px;gap:6px;padding:0 2px 4px;
-    font-size:12.5px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.02em}
+    font-size:13px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.02em}
   .tr-serie-header-row span{text-align:center}
 
   .tr-serie-linha-wrap{position:relative;border-radius:10px;overflow:hidden}
@@ -1593,13 +1593,13 @@
   .tr-serie-linha,.tr-aquecimento-linha{position:relative;display:grid;grid-template-columns:38px 1fr 64px 64px 36px;
     gap:6px;align-items:center;padding:3px 2px;background:var(--card);border-radius:10px;touch-action:pan-y}
   .tr-serie-linha.feita{background:var(--fill2);border-radius:10px}
-  .tr-serie-num{justify-self:center;min-width:36px;height:36px;padding:0 4px;border-radius:11px;background:var(--fill);
-    color:var(--ink);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center}
-  .tr-aquecimento-linha .tr-serie-num{background:transparent;color:var(--ink3);font-size:14px;letter-spacing:.04em}
-  .tr-serie-anterior{font-size:15px;color:var(--ink3);white-space:nowrap;overflow:hidden;
+  .tr-serie-num{justify-self:center;min-width:36px;height:34px;padding:0 4px;border-radius:11px;background:var(--fill);
+    color:var(--ink);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .tr-aquecimento-linha .tr-serie-num{background:transparent;color:var(--ink3);font-size:13px;letter-spacing:.04em}
+  .tr-serie-anterior{font-size:14px;color:var(--ink3);white-space:nowrap;overflow:hidden;
     text-overflow:ellipsis;text-align:center}
-  .tr-serie-kg,.tr-serie-reps{width:100%;height:36px;padding:0 3px;border-radius:11px;border:none;background:var(--fill);
-    font-size:16px;font-weight:600;text-align:center;color:var(--ink)}
+  .tr-serie-kg,.tr-serie-reps{width:100%;height:34px;padding:0 3px;border-radius:11px;border:none;background:var(--fill);
+    font-size:15px;font-weight:600;text-align:center;color:var(--ink)}
   /* anel de foco POR DENTRO do campo. Por fora ele era cortado em cima e
      embaixo: a linha mora num invólucro com overflow:hidden (o que esconde o
      botão Excluir do arrasto), e o anel, que sobra 3px pra fora, batia nessa
@@ -1612,8 +1612,8 @@
   /* quadradinho, não bolinha - e com o mesmo arredondamento que o resto do
      app usa nos botões de marcar (os de seguiu/adaptou/não fiz do diário),
      pra não ter um raio só dele. Marcado fica verde, igual "seguiu". */
-  .tr-serie-check{justify-self:center;width:36px;height:36px;border-radius:11px;border:none;background:var(--fill);
-    color:var(--ink3);font-size:16px;line-height:1;cursor:pointer;flex-shrink:0;
+  .tr-serie-check{justify-self:center;width:36px;height:34px;border-radius:11px;border:none;background:var(--fill);
+    color:var(--ink3);font-size:15px;line-height:1;cursor:pointer;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;padding:0}
   .tr-serie-check[aria-pressed="true"]{background:var(--ok);color:#fff;box-shadow:var(--sh-min)}
   /* célula de segundos das séries por tempo: no lugar do campo, o ▶ que abre
@@ -1627,16 +1627,16 @@
     background:var(--card);color:var(--ink2);font-family:inherit;font-size:15px;font-weight:700;
     cursor:pointer;padding:0}
   .tr-desc-op.sel{background:var(--ink);border-color:var(--ink);color:#fff}
-  .tr-serie-crono{width:100%;height:36px;border-radius:11px;border:none;background:var(--fill);
-    color:var(--ink2);font-size:15px;font-weight:700;font-family:inherit;display:flex;
+  .tr-serie-crono{width:100%;height:34px;border-radius:11px;border:none;background:var(--fill);
+    color:var(--ink2);font-size:14px;font-weight:700;font-family:inherit;display:flex;
     align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:0}
-  .tr-serie-crono[data-valor]{color:var(--ink);font-size:16px}
+  .tr-serie-crono[data-valor]{color:var(--ink);font-size:15px}
   .tr-crono-meta{font-size:12.5px;color:var(--ink3);margin:2px 0 10px;line-height:1.35}
   .tr-crono-meta b{color:var(--ink);font-weight:700}
   .crono-passou .tr-desc-anel-pr{stroke:var(--ok)}
   .crono-passou .tr-desc-tempo{color:var(--ok)}
-  .tr-serie-add{margin-top:8px;width:100%;padding:11px;border-radius:11px;border:1px dashed var(--hair);
-    background:none;color:var(--ink2);font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
+  .tr-serie-add{margin-top:8px;width:100%;padding:10px;border-radius:11px;border:1px dashed var(--hair);
+    background:none;color:var(--ink2);font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
   /* ativação (ex.: Wall Slide) - sem kg/reps/anterior, só um checklist de
      séries com a meta de repetições fixa do plano. */
   /* lista de exercícios da aba Treino: cada um num bloco, nome ocupando a
@@ -1695,8 +1695,8 @@
     gap:6px;align-items:center;padding:3px 2px;background:var(--card)}
   /* o "AQ" usa o mesmo balãozinho cinza do número da série - só a letra é
      menor, porque são duas letras no lugar de um algarismo. */
-  .tr-serie-num.aq{font-size:14px;font-weight:800;color:var(--ink3);letter-spacing:.04em}
-  .tr-preserie-vazio{font-size:15px;color:var(--ink3);text-align:center}
+  .tr-serie-num.aq{font-size:13px;font-weight:800;color:var(--ink3);letter-spacing:.04em}
+  .tr-preserie-vazio{font-size:14px;color:var(--ink3);text-align:center}
   .tr-preserie-linha.feita{background:var(--fill2);border-radius:10px}
 
   /* nota por exercício - modal central clássico (merece atenção total, por
